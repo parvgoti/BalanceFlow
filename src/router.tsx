@@ -1,0 +1,83 @@
+import { Routes, Route, Navigate } from 'react-router-dom'
+import { AppLayout, AuthLayout } from '@/components/layout/AppLayout'
+import { LoginPage } from '@/pages/auth/LoginPage'
+import { SignupPage } from '@/pages/auth/SignupPage'
+import { AuthCallbackPage, ResetPasswordPage } from '@/pages/auth/AuthCallbackPage'
+import { DashboardPage } from '@/pages/DashboardPage'
+import { GroupsPage } from '@/pages/GroupsPage'
+import { GroupDetailPage } from '@/pages/GroupDetailPage'
+import { ActivityPage } from '@/pages/ActivityPage'
+import { SettingsPage } from '@/pages/SettingsPage'
+import { useAuth } from '@/hooks/useAuth'
+import { useNotificationStore } from '@/store/notificationStore'
+import { useEffect } from 'react'
+
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isInitialized } = useAuth()
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+        <div className="text-center space-y-4">
+          <div className="h-10 w-10 rounded-full border-4 border-brand border-t-transparent animate-spin mx-auto" />
+          <p className="text-sm text-gray-500">Loading BalanceFlow…</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  return <>{children}</>
+}
+
+function AuthRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isInitialized } = useAuth()
+
+  if (!isInitialized) {
+    return null
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  return <>{children}</>
+}
+
+export function AppRouter() {
+  const { user } = useAuth()
+  const { fetchNotifications } = useNotificationStore()
+
+  useEffect(() => {
+    if (user) {
+      fetchNotifications(user.id)
+    }
+  }, [user, fetchNotifications])
+
+  return (
+    <Routes>
+      {/* Auth routes */}
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<AuthRoute><LoginPage /></AuthRoute>} />
+        <Route path="/signup" element={<AuthRoute><SignupPage /></AuthRoute>} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      </Route>
+
+      {/* App routes */}
+      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route index element={<DashboardPage />} />
+        <Route path="/groups" element={<GroupsPage />} />
+        <Route path="/groups/:id" element={<GroupDetailPage />} />
+        <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
+
+      {/* 404 fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  )
+}
