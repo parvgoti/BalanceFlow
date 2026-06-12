@@ -5,8 +5,8 @@
 CREATE TABLE IF NOT EXISTS public.group_requests (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   group_id UUID NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
-  invited_by UUID NOT NULL REFERENCES auth.users(id),
-  user_id UUID NOT NULL REFERENCES auth.users(id),
+  invited_by UUID NOT NULL CONSTRAINT group_requests_invited_by_fkey REFERENCES public.profiles(id),
+  user_id UUID NOT NULL CONSTRAINT group_requests_user_id_fkey REFERENCES public.profiles(id),
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'accepted', 'declined')),
   created_at TIMESTAMPTZ DEFAULT now()
 );

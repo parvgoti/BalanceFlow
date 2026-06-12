@@ -54,7 +54,15 @@ export function NotificationsDropdown() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-900 dark:text-white leading-snug">
-                        <span className="font-medium">{req.invited_by_profile?.full_name}</span> invited you to join <span className="font-medium">{req.groups?.name}</span>
+                        <span className="font-medium">
+                          {Array.isArray(req.invited_by_profile) 
+                            ? req.invited_by_profile[0]?.full_name 
+                            : (req.invited_by_profile as any)?.full_name || 'Someone'}
+                        </span> invited you to join <span className="font-medium">
+                          {Array.isArray(req.groups)
+                            ? req.groups[0]?.name
+                            : (req.groups as any)?.name}
+                        </span>
                       </p>
                       <div className="flex gap-2 mt-3">
                         <button

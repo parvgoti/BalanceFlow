@@ -25,7 +25,7 @@ export function useMyRequests() {
           status,
           created_at,
           groups ( name ),
-          invited_by_profile:invited_by ( full_name )
+          invited_by_profile:profiles!group_requests_invited_by_fkey ( full_name )
         `)
         .eq('user_id', user.id)
         .eq('status', 'pending')
