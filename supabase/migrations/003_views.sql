@@ -3,7 +3,7 @@
 -- ============================================================
 
 -- Net balance per user per group
-CREATE OR REPLACE VIEW public.group_balances AS
+CREATE OR REPLACE VIEW public.group_balances WITH (security_invoker = true) AS
 SELECT
   gm.group_id,
   gm.user_id,
@@ -31,7 +31,7 @@ LEFT JOIN (
 GROUP BY gm.group_id, gm.user_id, p.full_name, p.avatar_url, s_received.total_received, s_paid.total_paid;
 
 -- Recent activity view
-CREATE OR REPLACE VIEW public.activity_feed AS
+CREATE OR REPLACE VIEW public.activity_feed WITH (security_invoker = true) AS
 SELECT
   'expense' AS type,
   e.id,
