@@ -79,7 +79,10 @@ const config: Config = {
         slideIn:  { from: { transform: 'translateX(-100%)' }, to: { transform: 'translateX(0)' } },
         slideUp:  { from: { transform: 'translateY(10px)', opacity: '0' }, to: { transform: 'translateY(0)', opacity: '1' } },
         fadeIn:   { from: { opacity: '0' }, to: { opacity: '1' } },
-        scaleIn:  { from: { transform: 'scale(0.95)', opacity: '0' }, to: { transform: 'scale(1)', opacity: '1' } },
+        scaleIn:  { 
+          from: { transform: 'translate(-50%, -50%) scale(0.95)', opacity: '0' }, 
+          to: { transform: 'translate(-50%, -50%) scale(1)', opacity: '1' } 
+        },
         pulseSubtle: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.7' } },
         shimmer:  { '0%': { backgroundPosition: '-200% 0' }, '100%': { backgroundPosition: '200% 0' } },
       },
