@@ -25,7 +25,7 @@ import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
 import { supabase } from '@/lib/supabase'
 import {
-  simplifyDebts, formatCurrency, formatDateGroup, groupBy,
+  simplifyDebts, formatCurrency, formatDateGroup, groupBy, cn,
   type SimplifiedDebt,
 } from '@/lib/utils'
 import type { ExpenseWithSplits, GroupBalance } from '@/types/database'
