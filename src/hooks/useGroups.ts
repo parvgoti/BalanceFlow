@@ -203,3 +203,27 @@ export function useRemoveMember(groupId: string) {
     },
   })
 }
+
+// ── Reset Group Data mutation ─────────────────────────────────
+export function useResetGroupData(groupId: string) {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('reset_group_data', {
+        group_id_input: groupId,
+      })
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      // Invalidate everything related to the group so it clears instantly
+      qc.invalidateQueries({ queryKey: groupKeys.detail(groupId) })
+      qc.invalidateQueries({ queryKey: groupKeys.balances(groupId) })
+      qc.invalidateQueries({ queryKey: ['expenses', 'group', groupId] })
+      qc.invalidateQueries({ queryKey: ['settlements', 'group', groupId] })
+      qc.invalidateQueries({ queryKey: ['expenses', 'activity'] })
+    },
+  })
+}
+

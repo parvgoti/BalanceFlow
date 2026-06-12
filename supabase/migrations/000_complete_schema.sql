@@ -483,6 +483,25 @@ CREATE POLICY "receipts: owners can delete"
 -- REALTIME
 -- ============================================================
 
+-- ============================================================
+-- RPC: Reset Group Data
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.reset_group_data(group_id_input UUID)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF NOT public.is_group_admin(group_id_input) THEN
+    RAISE EXCEPTION 'Only group admins can reset group data';
+  END IF;
+
+  DELETE FROM public.settlements WHERE group_id = group_id_input;
+  DELETE FROM public.expenses WHERE group_id = group_id_input;
+END;
+$$;
+
 DO $$
 BEGIN
   EXECUTE 'ALTER PUBLICATION supabase_realtime ADD TABLE public.expenses, public.expense_splits, public.settlements, public.notifications';

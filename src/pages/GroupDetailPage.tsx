@@ -8,7 +8,7 @@ import {
   ArrowLeft, Download, Users, DollarSign, BarChart2,
   Search, Filter, Settings, UserMinus, UserPlus, History, Trash2,
 } from 'lucide-react'
-import { useGroup, useGroupBalances, useAddMembers, useRemoveMember, useDeleteGroup } from '@/hooks/useGroups'
+import { useGroup, useGroupBalances, useAddMembers, useRemoveMember, useDeleteGroup, useResetGroupData } from '@/hooks/useGroups'
 import { useExpenses } from '@/hooks/useExpenses'
 import { useSettlements } from '@/hooks/useSettlements'
 import { useRealtimeGroup } from '@/hooks/useRealtime'
@@ -44,11 +44,13 @@ export function GroupDetailPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [inviteEmail, setInviteEmail] = useState('')
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [confirmReset, setConfirmReset] = useState(false)
   const [chartRange, setChartRange] = useState<'week' | 'month' | 'year'>('month')
 
   const addMembers = useAddMembers(groupId)
   const removeMember = useRemoveMember(groupId)
   const deleteGroup = useDeleteGroup()
+  const resetGroupData = useResetGroupData(groupId)
 
   // Subscribe to realtime updates
   useRealtimeGroup(groupId)
@@ -501,6 +503,53 @@ export function GroupDetailPage() {
                         onClick={() => setConfirmDelete(true)}
                       >
                         <Trash2 className="h-4 w-4" /> Delete Group
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20">
+                    <div>
+                      <p className="font-medium text-orange-900 dark:text-orange-400">Reset Group Data</p>
+                      <p className="text-xs text-orange-700/70 dark:text-orange-400/70 mt-1">
+                        Permanently delete all expenses and settlements. Group members will remain.
+                      </p>
+                    </div>
+                    {confirmReset ? (
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setConfirmReset(false)}
+                        >
+                          Cancel
+                        </Button>
+                        <Button 
+                          variant="default"
+                          size="sm"
+                          className="bg-orange-600 hover:bg-orange-700 text-white"
+                          loading={resetGroupData.isPending}
+                          onClick={async () => {
+                            try {
+                              await resetGroupData.mutateAsync()
+                              setConfirmReset(false)
+                              alert('All data has been reset successfully.')
+                            } catch (err: any) {
+                              console.error(err)
+                              alert('Failed to reset data. Are you an admin?')
+                              setConfirmReset(false)
+                            }
+                          }}
+                        >
+                          Yes, Reset Data
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        variant="outline" 
+                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900/40 border-orange-200 dark:border-orange-900/50 shrink-0"
+                        onClick={() => setConfirmReset(true)}
+                      >
+                        <History className="h-4 w-4" /> Reset Data
                       </Button>
                     )}
                   </div>
