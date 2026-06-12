@@ -69,10 +69,10 @@ export function SettingsPage() {
       const ext = file.name.split('.').pop()
       const path = `${profile.id}/avatar.${ext}`
       const { error: uploadError } = await supabase.storage
-        .from('receipts')
+        .from('avatars')
         .upload(path, file, { upsert: true })
       if (!uploadError) {
-        const { data: urlData } = supabase.storage.from('receipts').getPublicUrl(path)
+        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
         await supabase
           .from('profiles')
           .update({ avatar_url: urlData.publicUrl } as any)
