@@ -195,7 +195,7 @@ export function GroupDetailPage() {
         {/* Tabs */}
         <Tabs defaultValue="expenses">
           <TabsList>
-            <TabsTrigger value="expenses"><DollarSign className="h-4 w-4" />Expenses</TabsTrigger>
+            <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="balances"><Users className="h-4 w-4" />Balances</TabsTrigger>
             <TabsTrigger value="charts"><BarChart2 className="h-4 w-4" />Charts</TabsTrigger>
             <TabsTrigger value="settlements"><History className="h-4 w-4" />Settlements</TabsTrigger>
