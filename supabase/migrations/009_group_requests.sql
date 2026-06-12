@@ -2,6 +2,8 @@
 -- TABLE: group_requests
 -- ============================================================
 
+DROP TABLE IF EXISTS public.group_requests CASCADE;
+
 CREATE TABLE IF NOT EXISTS public.group_requests (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
   group_id UUID NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
@@ -24,6 +26,24 @@ CREATE POLICY "Users can insert requests if they are group members" ON public.gr
 
 CREATE POLICY "Users can delete their own requests or the inviter can" ON public.group_requests
   FOR DELETE USING (auth.uid() = user_id OR auth.uid() = invited_by);
+
+-- Allow invited users to read the inviter's profile so they see the real name instead of "Someone"
+CREATE POLICY "profiles_invitees_can_view_inviter" ON public.profiles
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.group_requests
+      WHERE user_id = auth.uid() AND invited_by = profiles.id
+    )
+  );
+
+-- Allow invited users to read the group details so they see the group name
+CREATE POLICY "groups_invitees_can_view" ON public.groups
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.group_requests
+      WHERE group_id = groups.id AND user_id = auth.uid()
+    )
+  );
 
 -- ============================================================
 -- RPC: accept_group_request
