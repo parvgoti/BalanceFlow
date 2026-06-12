@@ -17,13 +17,19 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
 
   const userSplit = expense.expense_splits.find(s => s.user_id === user?.id)
   const isPayer = expense.paid_by === user?.id
-  const isSettled = userSplit?.is_settled ?? false
+  // An expense is "Settled" for the payer if all other members have settled their splits.
+  // For a debtor, it's settled if their own split is marked as settled.
+  const isSettled = isPayer 
+    ? expense.expense_splits.filter(s => s.user_id !== user?.id).every(s => s.is_settled)
+    : (userSplit?.is_settled ?? false)
 
   // Determine what to show in the balance column
   let balanceLabel: React.ReactNode
   let balanceClass = ''
 
-  if (isPayer && !userSplit) {
+  if (isSettled) {
+    balanceLabel = <span className="text-gray-400 font-medium">Settled</span>
+  } else if (isPayer && !userSplit) {
     // Payer, not splitting with themselves
     balanceLabel = (
       <span className="text-emerald-600 font-semibold">
@@ -38,14 +44,12 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
       </span>
     )
     balanceClass = 'text-emerald-600'
-  } else if (userSplit && !isSettled) {
+  } else if (userSplit) {
     balanceLabel = (
       <span className="text-red-500 font-semibold">
         You owe {formatCurrency(userSplit.amount)}
       </span>
     )
-  } else if (isSettled) {
-    balanceLabel = <span className="text-gray-400">Settled</span>
   }
 
   const payerName = expense.paid_by === user?.id
