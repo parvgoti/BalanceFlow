@@ -612,14 +612,26 @@ export function GroupDetailPage() {
           {myBalance < 0 && (
             <p className="text-xs text-gray-500">You owe in total</p>
           )}
+          {myBalance > 0 && (
+            <p className="text-xs text-gray-500">You are owed in total</p>
+          )}
           <div className="space-y-2">
-            {myDebts.map((debt, i) => (
-              <div key={i} className="flex items-center gap-2 text-sm">
-                <UserAvatar name={debt.to_user_name} size="xs" />
-                <span className="flex-1 text-gray-600 dark:text-gray-400">You owe {debt.to_user_name}</span>
-                <span className="font-semibold text-red-500">{formatCurrency(debt.amount)}</span>
-              </div>
-            ))}
+            {myDebts.map((debt, i) => {
+              const iOwe = debt.from_user_id === user?.id
+              const otherName = iOwe ? debt.to_user_name : debt.from_user_name
+              
+              return (
+                <div key={i} className="flex items-center gap-2 text-sm">
+                  <UserAvatar name={otherName} size="xs" />
+                  <span className="flex-1 text-gray-600 dark:text-gray-400">
+                    {iOwe ? `You owe ${otherName}` : `${otherName} owes you`}
+                  </span>
+                  <span className={cn("font-semibold", iOwe ? "text-red-500" : "text-emerald-500")}>
+                    {iOwe ? '-' : '+'}{formatCurrency(debt.amount)}
+                  </span>
+                </div>
+              )
+            })}
           </div>
           {myDebts.length > 0 && (
             <Button
