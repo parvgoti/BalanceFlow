@@ -9,7 +9,7 @@ import {
   Search, Filter, Settings, UserMinus, UserPlus, History, Trash2,
 } from 'lucide-react'
 import { useGroup, useGroupBalances, useAddMembers, useRemoveMember, useDeleteGroup, useResetGroupData } from '@/hooks/useGroups'
-import { useExpenses } from '@/hooks/useExpenses'
+import { useExpenses, useDeleteExpense } from '@/hooks/useExpenses'
 import { useSettlements } from '@/hooks/useSettlements'
 import { useRealtimeGroup } from '@/hooks/useRealtime'
 import { Button } from '@/components/ui/button'
@@ -34,6 +34,10 @@ export function GroupDetailPage() {
   const { id: groupId = '' } = useParams<{ id: string }>()
   const { user } = useAuthStore()
   const { openModal } = useUIStore()
+
+  const deleteExpense = useDeleteExpense(groupId)
+
+  // ── 1. Fetching ────────────────────────────────────────────────
   const navigate = useNavigate()
 
   const { data: group, isLoading: groupLoading } = useGroup(groupId)
@@ -254,6 +258,21 @@ export function GroupDetailPage() {
                             return
                           }
                           openModal('add-expense', { groupId, expenseToEdit: e })
+                        }}
+                        onDelete={async (id) => {
+                          const e = expense as any;
+                          if (e.paid_by !== user?.id && !isAdmin) {
+                            alert("You can only delete expenses you paid for.")
+                            return
+                          }
+                          if (confirm("Are you sure you want to delete this expense? This action cannot be undone.")) {
+                            try {
+                              await deleteExpense.mutateAsync(id)
+                            } catch (err) {
+                              console.error(err)
+                              alert("Failed to delete expense.")
+                            }
+                          }
                         }}
                       />
                     ))}

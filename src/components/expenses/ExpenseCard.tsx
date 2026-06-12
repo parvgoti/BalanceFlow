@@ -4,7 +4,7 @@ import { CategoryIcon } from '@/components/shared/CategoryIcon'
 import { StatusBadge } from '@/components/shared/CategoryIcon'
 import type { ExpenseWithSplits } from '@/types/database'
 import { useAuthStore } from '@/store/authStore'
-import { Pencil } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 
 interface ExpenseCardProps {
   expense: ExpenseWithSplits
@@ -72,6 +72,15 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
                   title="Edit expense"
                 >
                   <Pencil className="h-3 w-3" />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={() => onDelete(expense.id)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded"
+                  title="Delete expense"
+                >
+                  <Trash2 className="h-3 w-3" />
                 </button>
               )}
             </div>
