@@ -623,10 +623,10 @@ export function GroupDetailPage() {
               return (
                 <div key={i} className="flex items-center gap-2 text-sm">
                   <UserAvatar name={otherName} size="xs" />
-                  <span className="flex-1 text-gray-600 dark:text-gray-400">
+                  <span className="flex-1 text-gray-600 dark:text-gray-400 truncate" title={iOwe ? `You owe ${otherName}` : `${otherName} owes you`}>
                     {iOwe ? `You owe ${otherName}` : `${otherName} owes you`}
                   </span>
-                  <span className={cn("font-semibold", iOwe ? "text-red-500" : "text-emerald-500")}>
+                  <span className={cn("font-semibold whitespace-nowrap shrink-0", iOwe ? "text-red-500" : "text-emerald-500")}>
                     {iOwe ? '-' : '+'}{formatCurrency(debt.amount)}
                   </span>
                 </div>
