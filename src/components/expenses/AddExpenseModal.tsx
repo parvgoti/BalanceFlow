@@ -49,6 +49,7 @@ export function AddExpenseModal() {
   const { user } = useAuthStore()
   const params = useParams<{ id?: string }>()
   const initialGroupId = (modalContext?.groupId as string) ?? params.id ?? ''
+  const isOpenedFromGroupPage = !!modalContext?.groupId
 
   const { data: groups } = useGroups()
   const [selectedGroupId, setSelectedGroupId] = useState(initialGroupId)
@@ -232,21 +233,23 @@ export function AddExpenseModal() {
             </div>
 
             {/* Group Selection */}
-            <div className="space-y-1.5 mb-4">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Group
-              </label>
-              <select
-                className="flex h-11 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-colors"
-                value={selectedGroupId}
-                onChange={(e) => setSelectedGroupId(e.target.value)}
-              >
-                {!selectedGroupId && <option value="" disabled>Select a group...</option>}
-                {groups?.map((g: any) => (
-                  <option key={g.id} value={g.id}>{g.name}</option>
-                ))}
-              </select>
-            </div>
+            {!isOpenedFromGroupPage && (
+              <div className="space-y-1.5 mb-4">
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Group
+                </label>
+                <select
+                  className="flex h-11 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-colors"
+                  value={selectedGroupId}
+                  onChange={(e) => setSelectedGroupId(e.target.value)}
+                >
+                  {!selectedGroupId && <option value="" disabled>Select a group...</option>}
+                  {groups?.map((g: any) => (
+                    <option key={g.id} value={g.id}>{g.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Paid by + Date row */}
             <div className="grid grid-cols-2 gap-3">
