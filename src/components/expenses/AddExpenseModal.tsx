@@ -14,7 +14,7 @@ import { UserAvatar } from '@/components/ui/avatar'
 import { useUIStore } from '@/store/uiStore'
 import { useAuthStore } from '@/store/authStore'
 import { useGroup, useGroups } from '@/hooks/useGroups'
-import { useAddExpense } from '@/hooks/useExpenses'
+import { useAddExpense, useUpdateExpense } from '@/hooks/useExpenses'
 import { CATEGORY_CONFIG, cn, formatCurrency } from '@/lib/utils'
 import type { ExpenseCategory, SplitType } from '@/types/database'
 import { format } from 'date-fns'
@@ -49,6 +49,8 @@ export function AddExpenseModal() {
   const { user } = useAuthStore()
   const params = useParams<{ id?: string }>()
   const initialGroupId = (modalContext?.groupId as string) ?? params.id ?? ''
+  const expenseToEdit = modalContext?.expenseToEdit as any
+  const isEditing = !!expenseToEdit
   const isOpenedFromGroupPage = !!modalContext?.groupId
 
   const { data: groups } = useGroups()
@@ -66,17 +68,27 @@ export function AddExpenseModal() {
   const members: any[] = group?.group_members ?? []
 
   const addExpense = useAddExpense(selectedGroupId)
+  const updateExpense = useUpdateExpense(selectedGroupId)
 
-  const [splitType, setSplitType] = useState<SplitType>('equal')
+  const [splitType, setSplitType] = useState<SplitType>(expenseToEdit?.split_type ?? 'equal')
   const [receiptFile, setReceiptFile] = useState<File | undefined>()
-  const [amountStr, setAmountStr] = useState('0.00')
+  const [amountStr, setAmountStr] = useState(expenseToEdit?.amount?.toFixed(2) ?? '0.00')
 
   const {
     register, handleSubmit, control, watch, setValue,
     formState: { errors, isSubmitting },
   } = useForm<AddExpenseFormData>({
     resolver: zodResolver(addExpenseSchema),
-    defaultValues: {
+    defaultValues: isEditing ? {
+      description: expenseToEdit.description,
+      amount: expenseToEdit.amount,
+      category: expenseToEdit.category,
+      date: expenseToEdit.date,
+      paid_by: expenseToEdit.paid_by,
+      split_type: expenseToEdit.split_type,
+      notes: expenseToEdit.notes ?? '',
+      splits: [],
+    } : {
       description: '',
       amount: 0,
       category: 'food',
@@ -89,15 +101,29 @@ export function AddExpenseModal() {
 
   // Populate splits when members load
   useEffect(() => {
-    if (members.length > 0) {
-      setValue('splits', members.map((m: any) => ({
-        user_id: m.user_id,
-        full_name: m.profiles?.full_name ?? '',
-        avatar_url: m.profiles?.avatar_url ?? null,
-        amount: 0,
-        percentage: 0,
-        included: true,
-      })))
+    if (members.length > 0 && !watch('splits')?.length) {
+      if (isEditing && expenseToEdit.expense_splits) {
+        setValue('splits', members.map((m: any) => {
+          const existing = expenseToEdit.expense_splits.find((s: any) => s.user_id === m.user_id)
+          return {
+            user_id: m.user_id,
+            full_name: m.profiles?.full_name ?? '',
+            avatar_url: m.profiles?.avatar_url ?? null,
+            amount: existing ? existing.amount : 0,
+            percentage: existing ? (existing.percentage ?? 0) : 0,
+            included: !!existing,
+          }
+        }))
+      } else {
+        setValue('splits', members.map((m: any) => ({
+          user_id: m.user_id,
+          full_name: m.profiles?.full_name ?? '',
+          avatar_url: m.profiles?.avatar_url ?? null,
+          amount: 0,
+          percentage: 0,
+          included: true,
+        })))
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [group])
@@ -125,10 +151,14 @@ export function AddExpenseModal() {
   const onSubmit = async (data: AddExpenseFormData) => {
     if (!selectedGroupId) return
     try {
-      await addExpense.mutateAsync({ formData: data as any, receiptFile })
+      if (isEditing) {
+        await updateExpense.mutateAsync({ expenseId: expenseToEdit.id, formData: data as any, receiptFile })
+      } else {
+        await addExpense.mutateAsync({ formData: data as any, receiptFile })
+      }
       closeModal()
     } catch (err) {
-      console.error('Failed to add expense:', err)
+      console.error('Failed to save expense:', err)
     }
   }
 
@@ -150,9 +180,9 @@ export function AddExpenseModal() {
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
       <DialogContent className="max-w-md" id="add-expense-modal">
         <DialogHeader>
-          <DialogTitle>Add Expense</DialogTitle>
+          <DialogTitle>{isEditing ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
           <DialogDescription>
-            {group ? `Adding to ${group.name}` : 'Track a shared expense'}
+            {isEditing ? 'Update the details for this expense.' : 'Track a new expense and split it with the group.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -401,11 +431,11 @@ export function AddExpenseModal() {
             <Button
               id="expense-save-btn"
               type="submit"
-              loading={isSubmitting || addExpense.isPending}
+              loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
               disabled={!selectedGroupId}
             >
               <Check className="h-4 w-4" />
-              Save Expense
+              {isEditing ? 'Save Changes' : 'Save Expense'}
             </Button>
           </DialogFooter>
         </form>

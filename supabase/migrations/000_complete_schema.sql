@@ -509,3 +509,74 @@ EXCEPTION WHEN duplicate_object THEN
   -- Ignore error if tables are already in the publication
   NULL;
 END $$;
+- -   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
+ - -   R P C   F u n c t i o n :   u p d a t e _ e x p e n s e  
+ - -   U p d a t e s   a n   e x p e n s e   a n d   p e r f e c t l y   r e p l a c e s   a l l   o f   i t s   s p l i t s  
+ - -   w i t h i n   a   s i n g l e   t r a n s a c t i o n   t o   p r e v e n t   m a t h   b u g s .  
+ - -   = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = = =  
+  
+ C R E A T E   O R   R E P L A C E   F U N C T I O N   p u b l i c . u p d a t e _ e x p e n s e (  
+     p _ e x p e n s e _ i d   U U I D ,  
+     p _ g r o u p _ i d   U U I D ,  
+     p _ p a i d _ b y   U U I D ,  
+     p _ a m o u n t   N U M E R I C ,  
+     p _ d e s c r i p t i o n   T E X T ,  
+     p _ c a t e g o r y   T E X T ,  
+     p _ d a t e   D A T E ,  
+     p _ n o t e s   T E X T ,  
+     p _ s p l i t _ t y p e   T E X T ,  
+     p _ s p l i t s   J S O N B  
+ )  
+ R E T U R N S   v o i d  
+ L A N G U A G E   p l p g s q l  
+ S E C U R I T Y   D E F I N E R   S E T   s e a r c h _ p a t h   =   p u b l i c  
+ A S   $ $  
+ D E C L A R E  
+     v _ s p l i t   J S O N B ;  
+ B E G I N  
+     - -   1 .   V e r i f y   c a l l e r   h a s   p e r m i s s i o n   t o   u p d a t e   t h i s   e x p e n s e  
+     - -   M u s t   b e   g r o u p   m e m b e r  
+     I F   N O T   p u b l i c . i s _ g r o u p _ m e m b e r ( p _ g r o u p _ i d )   T H E N  
+         R A I S E   E X C E P T I O N   ' N o t   a u t h o r i z e d   t o   u p d a t e   e x p e n s e s   i n   t h i s   g r o u p ' ;  
+     E N D   I F ;  
+  
+     - -   E n s u r e   t h e   e x p e n s e   b e l o n g s   t o   t h e   g r o u p  
+     I F   N O T   E X I S T S   ( S E L E C T   1   F R O M   p u b l i c . e x p e n s e s   W H E R E   i d   =   p _ e x p e n s e _ i d   A N D   g r o u p _ i d   =   p _ g r o u p _ i d )   T H E N  
+         R A I S E   E X C E P T I O N   ' E x p e n s e   n o t   f o u n d   i n   t h i s   g r o u p ' ;  
+     E N D   I F ;  
+  
+     - -   2 .   U p d a t e   t h e   m a i n   e x p e n s e   r e c o r d  
+     U P D A T E   p u b l i c . e x p e n s e s  
+     S E T    
+         p a i d _ b y   =   p _ p a i d _ b y ,  
+         a m o u n t   =   p _ a m o u n t ,  
+         d e s c r i p t i o n   =   p _ d e s c r i p t i o n ,  
+         c a t e g o r y   =   p _ c a t e g o r y ,  
+         d a t e   =   p _ d a t e ,  
+         n o t e s   =   p _ n o t e s ,  
+         s p l i t _ t y p e   =   p _ s p l i t _ t y p e ,  
+         u p d a t e d _ a t   =   N O W ( )  
+     W H E R E   i d   =   p _ e x p e n s e _ i d ;  
+  
+     - -   3 .   D e l e t e   e x i s t i n g   s p l i t s  
+     D E L E T E   F R O M   p u b l i c . e x p e n s e _ s p l i t s  
+     W H E R E   e x p e n s e _ i d   =   p _ e x p e n s e _ i d ;  
+  
+     - -   4 .   I n s e r t   n e w   s p l i t s  
+     F O R   v _ s p l i t   I N   S E L E C T   *   F R O M   j s o n b _ a r r a y _ e l e m e n t s ( p _ s p l i t s )  
+     L O O P  
+         I N S E R T   I N T O   p u b l i c . e x p e n s e _ s p l i t s   (  
+             e x p e n s e _ i d ,  
+             u s e r _ i d ,  
+             a m o u n t ,  
+             p e r c e n t a g e  
+         )   V A L U E S   (  
+             p _ e x p e n s e _ i d ,  
+             ( v _ s p l i t - > > ' u s e r _ i d ' ) : : U U I D ,  
+             ( v _ s p l i t - > > ' a m o u n t ' ) : : N U M E R I C ,  
+             C A S E   W H E N   ( v _ s p l i t - > > ' p e r c e n t a g e ' )   I S   N O T   N U L L   T H E N   ( v _ s p l i t - > > ' p e r c e n t a g e ' ) : : N U M E R I C   E L S E   N U L L   E N D  
+         ) ;  
+     E N D   L O O P ;  
+ E N D ;  
+ $ $ ;  
+ 

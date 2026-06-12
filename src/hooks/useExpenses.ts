@@ -171,3 +171,66 @@ export function useDeleteExpense(groupId: string) {
     },
   })
 }
+
+// ── Update expense mutation ───────────────────────────────────
+export function useUpdateExpense(groupId: string) {
+  const qc = useQueryClient()
+  const { user } = useAuthStore()
+
+  return useMutation({
+    mutationFn: async ({
+      expenseId,
+      formData,
+      receiptFile,
+    }: {
+      expenseId: string
+      formData: AddExpenseFormData
+      receiptFile?: File
+    }) => {
+      if (!user) throw new Error('Not authenticated')
+
+      let receiptUrl: string | null = null
+
+      // Upload receipt if provided
+      if (receiptFile) {
+        const ext = receiptFile.name.split('.').pop()
+        const path = `${user.id}/${Date.now()}.${ext}`
+        const { error: uploadError } = await supabase.storage
+          .from('receipts')
+          .upload(path, receiptFile, { upsert: false })
+        if (!uploadError) {
+          const { data: urlData } = supabase.storage
+            .from('receipts')
+            .getPublicUrl(path)
+          receiptUrl = urlData.publicUrl
+        }
+      }
+
+      // Update via RPC
+      const includedSplits = formData.splits.filter(s => s.included)
+      const { error } = await supabase.rpc('update_expense', {
+        p_expense_id: expenseId,
+        p_group_id: groupId,
+        p_paid_by: formData.paid_by,
+        p_amount: formData.amount,
+        p_description: formData.description,
+        p_category: formData.category,
+        p_date: formData.date,
+        p_notes: formData.notes ?? null,
+        p_split_type: formData.split_type,
+        p_splits: includedSplits.map(s => ({
+          user_id: s.user_id,
+          amount: s.amount,
+          percentage: s.percentage ?? null,
+        })) as any
+      })
+
+      if (error) throw error
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: expenseKeys.byGroup(groupId) })
+      qc.invalidateQueries({ queryKey: groupKeys.balances(groupId) })
+      qc.invalidateQueries({ queryKey: expenseKeys.activity() })
+    },
+  })
+}

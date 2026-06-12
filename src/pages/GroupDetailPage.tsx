@@ -248,6 +248,13 @@ export function GroupDetailPage() {
                       <ExpenseCard
                         key={expense.id}
                         expense={expense as ExpenseWithSplits}
+                        onEdit={(e) => {
+                          if (e.paid_by !== user?.id && !isAdmin) {
+                            alert("You can only edit expenses you paid for.")
+                            return
+                          }
+                          openModal('add-expense', { groupId, expenseToEdit: e })
+                        }}
                       />
                     ))}
                   </div>
