@@ -39,38 +39,82 @@ LEFT JOIN (
 ) s_paid ON s_paid.payer_id = gm.user_id AND s_paid.group_id = gm.group_id;
 
 -- ============================================================
--- 2. Trigger to mark expense splits as settled using FIFO
+-- 2. Function to robustly calculate pair-wise net balance and update is_settled
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.recalculate_pairwise_settlements(p_group_id UUID, p_user_a UUID, p_user_b UUID)
+RETURNS void AS $$
+DECLARE
+  v_a_paid_for_b NUMERIC;
+  v_b_paid_for_a NUMERIC;
+  v_a_settled_to_b NUMERIC;
+  v_b_settled_to_a NUMERIC;
+  v_net_a_owes_b NUMERIC;
+  v_remaining NUMERIC;
+  v_split RECORD;
+BEGIN
+  -- Calculate totals
+  SELECT COALESCE(SUM(es.amount), 0) INTO v_a_paid_for_b
+  FROM public.expense_splits es JOIN public.expenses e ON e.id = es.expense_id
+  WHERE e.group_id = p_group_id AND e.paid_by = p_user_a AND es.user_id = p_user_b AND NOT e.is_deleted;
+
+  SELECT COALESCE(SUM(es.amount), 0) INTO v_b_paid_for_a
+  FROM public.expense_splits es JOIN public.expenses e ON e.id = es.expense_id
+  WHERE e.group_id = p_group_id AND e.paid_by = p_user_b AND es.user_id = p_user_a AND NOT e.is_deleted;
+
+  SELECT COALESCE(SUM(amount), 0) INTO v_a_settled_to_b
+  FROM public.settlements WHERE group_id = p_group_id AND payer_id = p_user_a AND payee_id = p_user_b;
+
+  SELECT COALESCE(SUM(amount), 0) INTO v_b_settled_to_a
+  FROM public.settlements WHERE group_id = p_group_id AND payer_id = p_user_b AND payee_id = p_user_a;
+
+  v_net_a_owes_b := v_b_paid_for_a - v_a_paid_for_b - v_a_settled_to_b + v_b_settled_to_a;
+
+  -- Mark ALL splits between A and B as settled initially
+  UPDATE public.expense_splits es
+  SET is_settled = true
+  FROM public.expenses e
+  WHERE e.id = es.expense_id
+    AND e.group_id = p_group_id
+    AND ((e.paid_by = p_user_a AND es.user_id = p_user_b) OR (e.paid_by = p_user_b AND es.user_id = p_user_a));
+
+  -- If someone owes money, un-settle the NEWEST splits up to that exact amount
+  IF v_net_a_owes_b > 0 THEN
+    v_remaining := v_net_a_owes_b;
+    -- Un-settle splits where A owes B (i.e. B paid for A)
+    FOR v_split IN 
+      SELECT es.id, es.amount
+      FROM public.expense_splits es JOIN public.expenses e ON e.id = es.expense_id
+      WHERE e.group_id = p_group_id AND e.paid_by = p_user_b AND es.user_id = p_user_a AND NOT e.is_deleted
+      ORDER BY e.created_at DESC
+    LOOP
+      UPDATE public.expense_splits SET is_settled = false WHERE id = v_split.id;
+      v_remaining := v_remaining - v_split.amount;
+      IF v_remaining <= 0 THEN EXIT; END IF;
+    END LOOP;
+  ELSIF v_net_a_owes_b < 0 THEN
+    v_remaining := -v_net_a_owes_b;
+    -- Un-settle splits where B owes A (i.e. A paid for B)
+    FOR v_split IN 
+      SELECT es.id, es.amount
+      FROM public.expense_splits es JOIN public.expenses e ON e.id = es.expense_id
+      WHERE e.group_id = p_group_id AND e.paid_by = p_user_a AND es.user_id = p_user_b AND NOT e.is_deleted
+      ORDER BY e.created_at DESC
+    LOOP
+      UPDATE public.expense_splits SET is_settled = false WHERE id = v_split.id;
+      v_remaining := v_remaining - v_split.amount;
+      IF v_remaining <= 0 THEN EXIT; END IF;
+    END LOOP;
+  END IF;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ============================================================
+-- 3. Trigger to call recalculate_pairwise_settlements on settlement
 -- ============================================================
 CREATE OR REPLACE FUNCTION public.process_settlement()
 RETURNS TRIGGER AS $$
-DECLARE
-  v_remaining_amount NUMERIC;
-  v_split RECORD;
 BEGIN
-  v_remaining_amount := NEW.amount;
-
-  -- Find all pending splits where the NEW.payer_id owes NEW.payee_id
-  FOR v_split IN 
-    SELECT es.id, es.amount
-    FROM public.expense_splits es
-    JOIN public.expenses e ON e.id = es.expense_id
-    WHERE e.group_id = NEW.group_id
-      AND e.paid_by = NEW.payee_id
-      AND es.user_id = NEW.payer_id
-      AND es.is_settled = false
-      AND NOT e.is_deleted
-    ORDER BY e.created_at ASC
-  LOOP
-    IF v_remaining_amount >= v_split.amount THEN
-      -- Fully settle this split
-      UPDATE public.expense_splits SET is_settled = true WHERE id = v_split.id;
-      v_remaining_amount := v_remaining_amount - v_split.amount;
-    ELSE
-      -- Partial settlement: we don't track partial splits currently, so we just stop
-      EXIT;
-    END IF;
-  END LOOP;
-
+  PERFORM public.recalculate_pairwise_settlements(NEW.group_id, NEW.payer_id, NEW.payee_id);
   RETURN NEW;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
