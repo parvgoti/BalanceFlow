@@ -23,6 +23,7 @@ import { ExpenseListSkeleton } from '@/components/shared/Skeleton'
 import { SpendingTrendChart, BalanceBarChart } from '@/components/charts/Charts'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
+import { supabase } from '@/lib/supabase'
 import {
   simplifyDebts, formatCurrency, formatDateGroup, groupBy,
   type SimplifiedDebt,
@@ -415,9 +416,10 @@ export function GroupDetailPage() {
                           try {
                             await addMembers.mutateAsync([inviteEmail])
                             const inviteLink = `${window.location.origin}/signup?invite=true`
-                            const subject = encodeURIComponent('You are invited to BalanceFlow!')
-                            const body = encodeURIComponent(`Hi!\n\nI've added you to our group "${group?.name}" on BalanceFlow to track our shared expenses.\n\nPlease click the link below to sign up and view our balances:\n${inviteLink}\n\nMake sure to use this email address: ${inviteEmail}`)
-                            window.location.href = `mailto:${inviteEmail}?subject=${subject}&body=${body}`
+                            await supabase.auth.resetPasswordForEmail(inviteEmail, {
+                              redirectTo: inviteLink
+                            })
+                            alert('Invite email sent successfully!')
                             setInviteEmail('')
                           } catch (err) {
                             console.error(err)
