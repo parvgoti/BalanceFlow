@@ -12,8 +12,8 @@ SELECT
   COALESCE(
     SUM(CASE WHEN e.paid_by = gm.user_id THEN e.amount ELSE 0 END)
     - SUM(CASE WHEN es.user_id = gm.user_id AND NOT es.is_settled THEN es.amount ELSE 0 END)
-    + COALESCE(s_received.total_received, 0)
-    - COALESCE(s_paid.total_paid, 0),
+    - COALESCE(s_received.total_received, 0)
+    + COALESCE(s_paid.total_paid, 0),
     0
   ) AS net_balance
 FROM public.group_members gm
