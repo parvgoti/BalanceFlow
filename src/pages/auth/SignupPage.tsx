@@ -17,6 +17,9 @@ export function SignupPage() {
   const [otpToken, setOtpToken] = useState('')
   const [isVerifying, setIsVerifying] = useState(false)
   const [otpError, setOtpError] = useState<string | null>(null)
+  const [isGhostClaim, setIsGhostClaim] = useState(false)
+  const [pendingPassword, setPendingPassword] = useState('')
+  const [pendingName, setPendingName] = useState('')
 
   const {
     register, handleSubmit,
@@ -33,11 +36,24 @@ export function SignupPage() {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
-    if (error) {
+    if (error && error.message.includes('already registered')) {
+      // It might be a ghost account from an invite
+      const { error: reqError } = await supabase.auth.resetPasswordForEmail(data.email)
+      if (!reqError) {
+        setSignupEmail(data.email)
+        setSuccess(true)
+        setIsGhostClaim(true)
+        setPendingPassword(data.password)
+        setPendingName(data.full_name)
+      } else {
+        setAuthError('This email is already registered. Please log in instead.')
+      }
+    } else if (error) {
       setAuthError(error.message)
     } else {
       setSignupEmail(data.email)
       setSuccess(true)
+      setIsGhostClaim(false)
     }
   }
 
@@ -46,10 +62,11 @@ export function SignupPage() {
     setOtpError(null)
     setIsVerifying(true)
     
+    const type = isGhostClaim ? 'recovery' : 'signup'
     const { error } = await supabase.auth.verifyOtp({
       email: signupEmail,
       token: otpToken.trim(),
-      type: 'signup'
+      type
     })
     
     setIsVerifying(false)
@@ -58,6 +75,17 @@ export function SignupPage() {
       setOtpError(error.message)
     } else {
       // Successfully verified and logged in
+      if (isGhostClaim) {
+        // Update the user's password and name
+        await supabase.auth.updateUser({
+          password: pendingPassword,
+          data: { full_name: pendingName }
+        })
+        const { data: userData } = await supabase.auth.getUser()
+        if (userData.user) {
+          await supabase.from('profiles').update({ full_name: pendingName }).eq('id', userData.user.id)
+        }
+      }
       navigate('/')
     }
   }

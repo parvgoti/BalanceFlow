@@ -412,8 +412,17 @@ export function GroupDetailPage() {
                       loading={addMembers.isPending}
                       onClick={async () => {
                         if (inviteEmail) {
-                          await addMembers.mutateAsync([inviteEmail])
-                          setInviteEmail('')
+                          try {
+                            await addMembers.mutateAsync([inviteEmail])
+                            const inviteLink = `${window.location.origin}/signup?invite=true`
+                            const subject = encodeURIComponent('You are invited to BalanceFlow!')
+                            const body = encodeURIComponent(`Hi!\n\nI've added you to our group "${group?.name}" on BalanceFlow to track our shared expenses.\n\nPlease click the link below to sign up and view our balances:\n${inviteLink}\n\nMake sure to use this email address: ${inviteEmail}`)
+                            window.location.href = `mailto:${inviteEmail}?subject=${subject}&body=${body}`
+                            setInviteEmail('')
+                          } catch (err) {
+                            console.error(err)
+                            alert('Failed to invite member.')
+                          }
                         }
                       }}
                     >
