@@ -28,7 +28,7 @@ export function TopBar({ title }: TopBarProps) {
       <div className="flex items-center gap-3">
         <img src="/logo.png" alt="BalanceFlow" className="h-8 w-8 rounded-lg object-cover" />
         <div className="hidden sm:block">
-          <p className="font-bold text-gray-900 dark:text-white text-sm leading-none">BalanceFlow</p>
+          <p className="font-serif font-bold text-gray-900 dark:text-white text-base leading-none tracking-wide">BalanceFlow</p>
           <p className="text-gray-500 text-xs mt-0.5">Financial Zen</p>
         </div>
       </div>

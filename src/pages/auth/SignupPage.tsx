@@ -134,9 +134,9 @@ export function SignupPage() {
     <div className="min-h-screen flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="h-8 w-8 rounded-lg bg-brand flex items-center justify-center text-white font-bold text-sm">🏛️</div>
-            <span className="font-bold text-xl text-brand">BalanceFlow</span>
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <img src="/logo.png" alt="BalanceFlow" className="h-8 w-8 rounded-lg object-cover" />
+            <span className="font-serif font-bold text-xl text-brand tracking-wide">BalanceFlow</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create your account</h1>
           <p className="text-gray-500 mt-1">Start splitting expenses effortlessly</p>

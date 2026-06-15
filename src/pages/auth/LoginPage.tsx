@@ -55,9 +55,9 @@ export function LoginPage() {
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 sm:px-16 xl:px-24 py-12">
         {/* Logo */}
         <div className="mb-10">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="h-8 w-8 rounded-lg bg-brand flex items-center justify-center text-white font-bold text-sm">🏛️</div>
-            <span className="font-bold text-xl text-brand">BalanceFlow</span>
+          <div className="flex items-center gap-3 mb-8">
+            <img src="/logo.png" alt="BalanceFlow" className="h-8 w-8 rounded-lg object-cover" />
+            <span className="font-serif font-bold text-xl text-brand tracking-wide">BalanceFlow</span>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome back</h1>
           <p className="text-gray-500 mt-1">Sign in to your account to continue.</p>
