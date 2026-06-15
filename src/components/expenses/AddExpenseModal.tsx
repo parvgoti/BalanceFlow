@@ -393,23 +393,26 @@ export function AddExpenseModal() {
                         )}
 
                         {splitType !== 'equal' && (
-                          <input
-                            type="number"
-                            min="0"
-                            step={splitType === 'percentage' ? '1' : '0.01'}
-                            value={splitType === 'percentage' ? split.percentage : split.amount}
-                            onChange={(e) => {
-                              const val = parseFloat(e.target.value) || 0
-                              const updated = field.value.map((s: any, j: number) =>
-                                j === i
-                                  ? { ...s, [splitType === 'percentage' ? 'percentage' : 'amount']: val }
-                                  : s
-                              )
-                              field.onChange(updated)
-                            }}
-                            className="w-20 text-right text-sm font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                          />
-                        )}
+                            <input
+                              type="number"
+                              min="0"
+                              step={splitType === 'percentage' ? '1' : '0.01'}
+                              value={splitType === 'percentage' ? split.percentage : split.amount}
+                              onFocus={(e) => e.target.select()}
+                              onChange={(e) => {
+                                // If input is empty, default to 0, otherwise parse it.
+                                const valStr = e.target.value;
+                                const val = valStr === '' ? 0 : parseFloat(valStr) || 0;
+                                const updated = field.value.map((s: any, j: number) =>
+                                  j === i
+                                    ? { ...s, [splitType === 'percentage' ? 'percentage' : 'amount']: val }
+                                    : s
+                                )
+                                field.onChange(updated)
+                              }}
+                              className="w-20 text-right text-sm font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            />
+                          )}
 
                         <button
                           type="button"
