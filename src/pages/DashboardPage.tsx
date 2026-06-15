@@ -10,7 +10,7 @@ import { CategoryIcon } from '@/components/shared/CategoryIcon'
 import { StatusBadge } from '@/components/shared/CategoryIcon'
 import { CardSkeleton } from '@/components/shared/Skeleton'
 import { TopCategoriesList } from '@/components/charts/Charts'
-import { formatRelativeTime, CATEGORY_CONFIG, formatCurrency } from '@/lib/utils'
+import { formatRelativeTime, CATEGORY_CONFIG, formatCurrency, cn } from '@/lib/utils'
 import type { ExpenseCategory, ActivityItem } from '@/types/database'
 
 export function DashboardPage() {
@@ -143,19 +143,25 @@ export function DashboardPage() {
             </div>
           ) : (
             recentActivity.slice(0, 8).map((item: ActivityItem) => (
-              <div key={`${item.type}-${item.id}`} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+              <div key={`${item.type}-${item.id}`} className={cn("flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors", item.type === 'deleted_expense' && "opacity-75 grayscale")}>
                 <CategoryIcon category={item.category as ExpenseCategory} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.title}</p>
+                  <p className={cn("text-sm font-semibold truncate", item.type === 'deleted_expense' ? "text-gray-500 line-through" : "text-gray-900 dark:text-white")}>{item.title}</p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {item.group_name} • {formatRelativeTime(item.created_at)}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">
+                  <p className={cn("text-sm font-bold", item.type === 'deleted_expense' ? "text-gray-400 line-through" : "text-gray-900 dark:text-white")}>
                     {formatCurrency(item.amount)}
                   </p>
-                  <StatusBadge status={item.type === 'settlement' ? 'settled' : 'split'} />
+                  {item.type === 'deleted_expense' ? (
+                    <div className="inline-block px-1.5 py-0.5 mt-1 rounded text-2xs font-semibold bg-red-100 text-red-600 dark:bg-red-500/20 dark:text-red-400 uppercase tracking-wider">
+                      Deleted
+                    </div>
+                  ) : (
+                    <StatusBadge status={item.type === 'settlement' ? 'settled' : 'split'} />
+                  )}
                 </div>
               </div>
             ))

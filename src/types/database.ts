@@ -129,7 +129,7 @@ export interface Database {
       }
       activity_feed: {
         Row: {
-          type: 'expense' | 'settlement'
+          type: 'expense' | 'settlement' | 'deleted_expense'
           id: string
           group_id: string
           group_name: string
