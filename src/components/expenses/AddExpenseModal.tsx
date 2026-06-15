@@ -396,8 +396,9 @@ export function AddExpenseModal() {
                             <input
                               type="number"
                               min="0"
+                              placeholder="0"
                               step={splitType === 'percentage' ? '1' : '0.01'}
-                              value={splitType === 'percentage' ? split.percentage : split.amount}
+                              value={splitType === 'percentage' ? (split.percentage || '') : (split.amount || '')}
                               onFocus={(e) => e.target.select()}
                               onChange={(e) => {
                                 // If input is empty, default to 0, otherwise parse it.
