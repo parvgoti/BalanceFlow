@@ -159,6 +159,21 @@ export function useDeleteExpense(groupId: string) {
 
   return useMutation({
     mutationFn: async (expenseId: string) => {
+      // 1. Check if there is an existing receipt and delete it from storage
+      const { data: expense } = await supabase
+        .from('expenses')
+        .select('receipt_url')
+        .eq('id', expenseId)
+        .single()
+
+      if (expense?.receipt_url) {
+        const parts = expense.receipt_url.split('/receipts/')
+        if (parts.length === 2) {
+          await supabase.storage.from('receipts').remove([parts[1]])
+        }
+      }
+
+      // 2. Mark expense as deleted
       const { error } = await supabase
         .from('expenses')
         .update({ is_deleted: true })
@@ -191,8 +206,23 @@ export function useUpdateExpense(groupId: string) {
 
       let receiptUrl: string | null = null
 
-      // Upload receipt if provided
+      // Upload new receipt if provided
       if (receiptFile) {
+        // 1. Delete old receipt from storage to prevent orphans
+        const { data: oldExpense } = await supabase
+          .from('expenses')
+          .select('receipt_url')
+          .eq('id', expenseId)
+          .single()
+
+        if (oldExpense?.receipt_url) {
+          const parts = oldExpense.receipt_url.split('/receipts/')
+          if (parts.length === 2) {
+            await supabase.storage.from('receipts').remove([parts[1]])
+          }
+        }
+
+        // 2. Upload new receipt
         const ext = receiptFile.name.split('.').pop()
         const path = `${user.id}/${Date.now()}.${ext}`
         const { error: uploadError } = await supabase.storage
@@ -203,6 +233,10 @@ export function useUpdateExpense(groupId: string) {
             .from('receipts')
             .getPublicUrl(path)
           receiptUrl = urlData.publicUrl
+
+          // 3. Update the database explicitly for the new receipt URL
+          // (because the update_expense RPC doesn't accept the receipt_url parameter)
+          await supabase.from('expenses').update({ receipt_url: receiptUrl }).eq('id', expenseId)
         }
       }
 
