@@ -26,7 +26,7 @@ export function TopBar({ title }: TopBarProps) {
 
       {/* App Logo & Name */}
       <div className="flex items-center gap-3">
-        <img src="/logo.png" alt="BalanceFlow" className="h-8 w-8 rounded-lg border border-gray-100 dark:border-gray-800 shadow-sm object-cover" />
+        <img src="/logo.png" alt="BalanceFlow" className="h-8 w-8 object-contain" />
         <div className="hidden sm:block">
           <p className="font-serif font-bold text-gray-900 dark:text-white text-[15px] leading-none tracking-wide">BalanceFlow</p>
           <p className="text-gray-400 dark:text-gray-500 text-[9px] font-semibold tracking-widest uppercase mt-1">Financial Zen</p>
