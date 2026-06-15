@@ -148,8 +148,33 @@ export function AddExpenseModal() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedAmount, splitType])
 
+  const [formError, setFormError] = useState<string | null>(null)
+
   const onSubmit = async (data: AddExpenseFormData) => {
+    setFormError(null)
     if (!selectedGroupId) return
+
+    // Split validation
+    const includedSplits = data.splits.filter((s: any) => s.included)
+    if (includedSplits.length === 0) {
+      setFormError('Please select at least one person to split with.')
+      return
+    }
+
+    if (data.split_type === 'exact') {
+      const sum = includedSplits.reduce((acc, curr: any) => acc + (curr.amount || 0), 0)
+      if (Math.abs(sum - data.amount) > 0.01) {
+        setFormError(`The exact amounts entered (${formatCurrency(sum)}) do not match the total expense amount (${formatCurrency(data.amount)}).`)
+        return
+      }
+    } else if (data.split_type === 'percentage') {
+      const sum = includedSplits.reduce((acc, curr: any) => acc + (curr.percentage || 0), 0)
+      if (Math.abs(sum - 100) > 0.01) {
+        setFormError(`The total percentage must equal exactly 100%. Currently it is ${sum.toFixed(2)}%.`)
+        return
+      }
+    }
+
     try {
       if (isEditing) {
         await updateExpense.mutateAsync({ expenseId: expenseToEdit.id, formData: data as any, receiptFile })
@@ -159,6 +184,7 @@ export function AddExpenseModal() {
       closeModal()
     } catch (err) {
       console.error('Failed to save expense:', err)
+      setFormError('Failed to save expense. Please try again.')
     }
   }
 
@@ -424,19 +450,26 @@ export function AddExpenseModal() {
             </div>
           </DialogBody>
 
-          <DialogFooter>
-            <Button type="button" variant="secondary" onClick={closeModal}>
-              Cancel
-            </Button>
-            <Button
-              id="expense-save-btn"
-              type="submit"
-              loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
-              disabled={!selectedGroupId}
-            >
-              <Check className="h-4 w-4" />
-              {isEditing ? 'Save Changes' : 'Save Expense'}
-            </Button>
+          <DialogFooter className="flex-col items-stretch sm:flex-col sm:space-y-0 gap-3">
+            {formError && (
+              <div className="text-sm font-medium text-red-500 bg-red-50 dark:bg-red-500/10 p-3 rounded-lg border border-red-200 dark:border-red-500/20">
+                {formError}
+              </div>
+            )}
+            <div className="flex justify-end gap-2 w-full">
+              <Button type="button" variant="secondary" onClick={closeModal}>
+                Cancel
+              </Button>
+              <Button
+                id="expense-save-btn"
+                type="submit"
+                loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
+                disabled={!selectedGroupId}
+              >
+                <Check className="h-4 w-4" />
+                {isEditing ? 'Save Changes' : 'Save Expense'}
+              </Button>
+            </div>
           </DialogFooter>
         </form>
       </DialogContent>
