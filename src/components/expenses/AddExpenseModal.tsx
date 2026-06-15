@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useParams } from 'react-router-dom'
-import { Check, ChevronUp, ChevronDown } from 'lucide-react'
+import { Check, ChevronUp, ChevronDown, Receipt } from 'lucide-react'
 import { z } from 'zod'
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -454,6 +454,20 @@ export function AddExpenseModal() {
                 onChange={(e) => setReceiptFile(e.target.files?.[0])}
                 className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand file:text-white hover:file:bg-brand-light"
               />
+              {isEditing && !receiptFile && expenseToEdit?.receipt_url && (
+                <div className="text-xs mt-1.5 flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
+                  <Receipt className="h-3.5 w-3.5 text-gray-400" />
+                  <a 
+                    href={expenseToEdit.receipt_url} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="text-brand hover:underline font-medium"
+                  >
+                    Current receipt attached
+                  </a>
+                  <span className="text-gray-400 text-2xs ml-1">(Upload to replace)</span>
+                </div>
+              )}
             </div>
           </DialogBody>
 
