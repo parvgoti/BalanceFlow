@@ -56,11 +56,7 @@ export function AddExpenseModal() {
   const { data: groups } = useGroups()
   const [selectedGroupId, setSelectedGroupId] = useState(initialGroupId)
 
-  useEffect(() => {
-    if (!selectedGroupId && groups && groups.length > 0) {
-      setSelectedGroupId(groups[0].id)
-    }
-  }, [groups, selectedGroupId])
+  const [prevGroupId, setPrevGroupId] = useState(initialGroupId)
 
   const { data: groupRaw } = useGroup(selectedGroupId)
   const group = groupRaw as any
@@ -98,6 +94,13 @@ export function AddExpenseModal() {
       splits: [],
     },
   })
+
+  useEffect(() => {
+    if (selectedGroupId !== prevGroupId) {
+      setValue('splits', [])
+      setPrevGroupId(selectedGroupId)
+    }
+  }, [selectedGroupId, prevGroupId, setValue])
 
   // Populate splits when members load
   useEffect(() => {
