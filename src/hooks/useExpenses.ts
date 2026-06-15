@@ -169,7 +169,14 @@ export function useDeleteExpense(groupId: string) {
       if (expense?.receipt_url) {
         const parts = expense.receipt_url.split('/receipts/')
         if (parts.length === 2) {
-          await supabase.storage.from('receipts').remove([parts[1]])
+          const path = parts[1].split('?')[0]
+          const { data, error: removeError } = await supabase.storage.from('receipts').remove([path])
+          if (removeError) {
+            throw new Error('Failed to delete receipt from storage: ' + removeError.message)
+          }
+          if (!data || data.length === 0) {
+            throw new Error('Storage file was not found or you lack permission to delete it. Path: ' + path)
+          }
         }
       }
 
@@ -218,7 +225,11 @@ export function useUpdateExpense(groupId: string) {
         if (oldExpense?.receipt_url) {
           const parts = oldExpense.receipt_url.split('/receipts/')
           if (parts.length === 2) {
-            await supabase.storage.from('receipts').remove([parts[1]])
+            const path = parts[1].split('?')[0]
+            const { error: removeError } = await supabase.storage.from('receipts').remove([path])
+            if (removeError) {
+              console.error('Failed to delete old receipt:', removeError.message)
+            }
           }
         }
 
