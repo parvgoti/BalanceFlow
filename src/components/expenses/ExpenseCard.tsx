@@ -4,7 +4,7 @@ import { CategoryIcon } from '@/components/shared/CategoryIcon'
 import { StatusBadge } from '@/components/shared/CategoryIcon'
 import type { ExpenseWithSplits } from '@/types/database'
 import { useAuthStore } from '@/store/authStore'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Receipt } from 'lucide-react'
 
 interface ExpenseCardProps {
   expense: ExpenseWithSplits
@@ -69,6 +69,17 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
               <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">
                 {expense.description}
               </p>
+              {expense.receipt_url && (
+                <a
+                  href={expense.receipt_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-1 text-gray-400 hover:text-brand hover:bg-brand/10 rounded transition-colors"
+                  title="View receipt"
+                >
+                  <Receipt className="h-3.5 w-3.5" />
+                </a>
+              )}
               {onEdit && (
                 <button
                   onClick={() => onEdit(expense)}
