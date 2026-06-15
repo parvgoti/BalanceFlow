@@ -2,7 +2,7 @@
 
 > Smart Expense Sharing & Settlement Platform — built with React, TypeScript, Supabase, and Tailwind CSS.
 
-[![CI/CD](https://github.com/your-org/balanceflow/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/your-org/balanceflow/actions)
+[![CI/CD](https://github.com/parvgoti/BalanceFlow/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/parvgoti/BalanceFlow/actions)
 
 ---
 
