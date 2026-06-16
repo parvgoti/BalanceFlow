@@ -2,14 +2,20 @@ import { useEffect, useState } from 'react'
 
 export function SplashScreen({ isLoading }: { isLoading: boolean }) {
   const [show, setShow] = useState(true)
-  const fadeOut = !isLoading
+  const [minTimeElapsed, setMinTimeElapsed] = useState(false)
+  const fadeOut = !isLoading && minTimeElapsed
 
   useEffect(() => {
-    if (!isLoading) {
+    const timer = setTimeout(() => setMinTimeElapsed(true), 2000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  useEffect(() => {
+    if (!isLoading && minTimeElapsed) {
       const timer = setTimeout(() => setShow(false), 500) // Match the fade-out duration
       return () => clearTimeout(timer)
     }
-  }, [isLoading])
+  }, [isLoading, minTimeElapsed])
 
   if (!show) return null
 
