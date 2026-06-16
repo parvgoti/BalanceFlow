@@ -11,19 +11,13 @@ import { SettingsPage } from '@/pages/SettingsPage'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotificationStore } from '@/store/notificationStore'
 import { useEffect } from 'react'
+import { SplashScreen } from '@/components/ui/SplashScreen'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isInitialized } = useAuth()
 
   if (!isInitialized) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-        <div className="text-center space-y-4">
-          <div className="h-10 w-10 rounded-full border-4 border-brand border-t-transparent animate-spin mx-auto" />
-          <p className="text-sm text-gray-500">Loading BalanceFlow…</p>
-        </div>
-      </div>
-    )
+    return <SplashScreen isLoading={true} />
   }
 
   if (!isAuthenticated) {
@@ -37,7 +31,7 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isInitialized } = useAuth()
 
   if (!isInitialized) {
-    return null
+    return <SplashScreen isLoading={true} />
   }
 
   if (isAuthenticated) {
