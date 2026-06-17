@@ -11,7 +11,6 @@ import { SettingsPage } from '@/pages/SettingsPage'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotificationStore } from '@/store/notificationStore'
 import { useEffect } from 'react'
-import { SplashScreen } from '@/components/ui/SplashScreen'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isInitialized } = useAuth()
@@ -42,7 +41,7 @@ function AuthRoute({ children }: { children: React.ReactNode }) {
 }
 
 export function AppRouter() {
-  const { user, isInitialized } = useAuth()
+  const { user } = useAuth()
   const { fetchNotifications } = useNotificationStore()
 
   useEffect(() => {
@@ -52,29 +51,26 @@ export function AppRouter() {
   }, [user, fetchNotifications])
 
   return (
-    <>
-      <SplashScreen isLoading={!isInitialized} />
-      <Routes>
-        {/* Auth routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/login" element={<AuthRoute><LoginPage /></AuthRoute>} />
-          <Route path="/signup" element={<AuthRoute><SignupPage /></AuthRoute>} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/auth/callback" element={<AuthCallbackPage />} />
-        </Route>
+    <Routes>
+      {/* Auth routes */}
+      <Route element={<AuthLayout />}>
+        <Route path="/login" element={<AuthRoute><LoginPage /></AuthRoute>} />
+        <Route path="/signup" element={<AuthRoute><SignupPage /></AuthRoute>} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
+      </Route>
 
-        {/* App routes */}
-        <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-          <Route index element={<DashboardPage />} />
-          <Route path="/groups" element={<GroupsPage />} />
-          <Route path="/groups/:id" element={<GroupDetailPage />} />
-          <Route path="/activity" element={<ActivityPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Route>
+      {/* App routes */}
+      <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
+        <Route index element={<DashboardPage />} />
+        <Route path="/groups" element={<GroupsPage />} />
+        <Route path="/groups/:id" element={<GroupDetailPage />} />
+        <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+      </Route>
 
-        {/* 404 fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </>
+      {/* 404 fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
