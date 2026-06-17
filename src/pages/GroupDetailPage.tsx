@@ -427,15 +427,16 @@ export function GroupDetailPage() {
 
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Invite Member</h4>
-                  <div className="flex gap-2 max-w-sm">
+                  <div className="flex flex-col sm:flex-row gap-2 w-full max-w-sm">
                     <input
                       type="email"
                       placeholder="Email address"
                       value={inviteEmail}
                       onChange={(e) => setInviteEmail(e.target.value)}
-                      className="flex-1 h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                      className="flex-1 min-w-0 h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
                     />
                     <Button 
+                      className="shrink-0"
                       loading={addMembers.isPending}
                       onClick={async () => {
                         if (inviteEmail) {
@@ -464,7 +465,7 @@ export function GroupDetailPage() {
                   <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Members</h4>
                   <div className="space-y-2">
                     {members.map(m => (
-                      <div key={m.user_id} className="flex items-center justify-between p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
+                      <div key={m.user_id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
                         <div className="flex items-center gap-3">
                           <UserAvatar name={m.profiles?.full_name ?? '?'} avatarUrl={m.profiles?.avatar_url} />
                           <div>
@@ -478,7 +479,7 @@ export function GroupDetailPage() {
                           <Button 
                             variant="outline" 
                             size="sm" 
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-900/50"
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-900/50 shrink-0 self-start sm:self-auto"
                             loading={removeMember.isPending}
                             onClick={() => {
                               if (confirm(`Remove ${m.profiles?.full_name} from the group?`)) {
@@ -498,7 +499,7 @@ export function GroupDetailPage() {
 
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-red-600 uppercase tracking-wider">Danger Zone</h4>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">
                     <div>
                       <p className="font-medium text-red-900 dark:text-red-400">Delete this group</p>
                       <p className="text-xs text-red-700/70 dark:text-red-400/70 mt-1">
@@ -543,7 +544,7 @@ export function GroupDetailPage() {
                     )}
                   </div>
 
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20">
                     <div>
                       <p className="font-medium text-orange-900 dark:text-orange-400">Reset Group Data</p>
                       <p className="text-xs text-orange-700/70 dark:text-orange-400/70 mt-1">
@@ -582,7 +583,7 @@ export function GroupDetailPage() {
                     ) : (
                       <Button 
                         variant="outline" 
-                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900/40 border-orange-200 dark:border-orange-900/50 shrink-0"
+                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900/40 border-orange-200 dark:border-orange-900/50 shrink-0 self-start sm:self-auto"
                         onClick={() => setConfirmReset(true)}
                       >
                         <History className="h-4 w-4" /> Reset Data
