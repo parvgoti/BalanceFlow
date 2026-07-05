@@ -40,7 +40,7 @@ export function Sidebar() {
       <aside
         className={cn(
           'fixed top-0 left-0 h-full z-30 flex flex-col',
-          'bg-white/30 dark:bg-gray-950/30 backdrop-blur-2xl border-r border-gray-200/50 dark:border-gray-800/50',
+          'bg-white/30 dark:bg-black/20 backdrop-blur-[40px] saturate-[1.8] border-r border-white/20 dark:border-white/[0.05]',
           'transition-all duration-300 ease-in-out',
           sidebarOpen ? 'w-[220px]' : 'w-[72px]',
           'lg:relative lg:translate-x-0',
@@ -49,7 +49,7 @@ export function Sidebar() {
       >
         {/* Menu Toggle */}
         <div className={cn(
-          "flex items-center h-16 shrink-0 border-b border-gray-200/50 dark:border-gray-800/50",
+          "flex items-center h-16 shrink-0 border-b border-gray-200/50 dark:border-white/[0.05]",
           sidebarOpen ? "px-4 justify-between" : "justify-center"
         )}>
           <button
@@ -105,7 +105,7 @@ export function Sidebar() {
 
         {/* Bottom section */}
         <div className={cn(
-          "pb-4 space-y-1 shrink-0 border-t border-gray-200/50 dark:border-gray-800/50 pt-3 flex flex-col",
+          "pb-4 space-y-1 shrink-0 border-t border-gray-200/50 dark:border-white/[0.05] pt-3 flex flex-col",
           sidebarOpen ? "px-3" : "items-center"
         )}>
           <button
