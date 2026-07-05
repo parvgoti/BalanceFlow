@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button'
 import { UserAvatar } from '@/components/ui/avatar'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import { useCreateSettlement } from '@/hooks/useSettlements'
+import { useCreateSettlementRequest } from '@/hooks/useSettlementRequests'
+import { useAuthStore } from '@/store/authStore'
 import { settleUpSchema, type SettleUpFormData } from '@/schemas'
 import { PAYMENT_METHODS, cn } from '@/lib/utils'
 import type { SimplifiedDebt } from '@/lib/utils'
@@ -30,7 +32,11 @@ const PAYMENT_ICONS: Record<string, string> = {
 }
 
 export function SettleUpModal({ groupId, debt, onClose }: SettleUpModalProps) {
+  const { user } = useAuthStore()
+  const isDebtor = user?.id === debt.from_user_id
+
   const createSettlement = useCreateSettlement(groupId)
+  const createSettlementRequest = useCreateSettlementRequest(groupId)
   const [selectedMethod, setSelectedMethod] = useState<string>('cash')
 
   const { handleSubmit, setValue, formState: { isSubmitting } } = useForm<SettleUpFormData>({
@@ -46,7 +52,18 @@ export function SettleUpModal({ groupId, debt, onClose }: SettleUpModalProps) {
 
   const onSubmit = async (data: SettleUpFormData) => {
     try {
-      await createSettlement.mutateAsync(data)
+      if (isDebtor) {
+        // Debtor is requesting settlement confirmation
+        await createSettlementRequest.mutateAsync({
+          creditor_id: data.payee_id,
+          amount: data.amount,
+          payment_method: data.payment_method,
+          notes: data.notes,
+        })
+      } else {
+        // Creditor is directly recording settlement
+        await createSettlement.mutateAsync(data)
+      }
       onClose()
     } catch (err) {
       console.error('Settlement failed:', err)
@@ -57,8 +74,10 @@ export function SettleUpModal({ groupId, debt, onClose }: SettleUpModalProps) {
     <Dialog open onOpenChange={(v) => !v && onClose()}>
       <DialogContent id="settle-up-modal" className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Settle Up</DialogTitle>
-          <DialogDescription>Review your balance and confirm payment</DialogDescription>
+          <DialogTitle>{isDebtor ? 'Request Settlement' : 'Settle Up'}</DialogTitle>
+          <DialogDescription>
+            {isDebtor ? 'Send a request to confirm your payment' : 'Review your balance and confirm payment'}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -125,10 +144,10 @@ export function SettleUpModal({ groupId, debt, onClose }: SettleUpModalProps) {
             <Button
               id="confirm-payment-btn"
               type="submit"
-              loading={isSubmitting || createSettlement.isPending}
+              loading={isSubmitting || createSettlement.isPending || createSettlementRequest.isPending}
             >
               <Check className="h-4 w-4" />
-              Confirm Payment
+              {isDebtor ? 'Send Request' : 'Confirm Payment'}
             </Button>
           </DialogFooter>
         </form>

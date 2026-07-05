@@ -331,9 +331,9 @@ export function GroupDetailPage() {
                         <span className="font-medium text-gray-900 dark:text-white">{debt.to_user_name}</span>
                       </div>
                       <span className="font-bold text-brand">{formatCurrency(debt.amount)}</span>
-                      {(debt.from_user_id === user?.id || isAdmin) && (
+                      {(debt.from_user_id === user?.id || debt.to_user_id === user?.id || isAdmin) && (
                         <Button size="sm" onClick={() => setSettleDebt(debt)}>
-                          Pay
+                          {debt.from_user_id === user?.id ? 'Pay' : 'Mark Paid'}
                         </Button>
                       )}
                     </div>

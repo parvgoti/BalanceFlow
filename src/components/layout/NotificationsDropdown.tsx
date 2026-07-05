@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { Bell, Check, X, Clock } from 'lucide-react'
 import { useMyRequests, useAcceptRequest, useDeclineRequest } from '@/hooks/useGroupRequests'
-import { cn } from '@/lib/utils'
+import { usePendingSettlementRequests, useApproveSettlementRequest, useDeclineSettlementRequest } from '@/hooks/useSettlementRequests'
+import { cn, formatCurrency } from '@/lib/utils'
 
 export function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false)
@@ -10,6 +11,12 @@ export function NotificationsDropdown() {
   const { data: requests = [] } = useMyRequests()
   const acceptRequest = useAcceptRequest()
   const declineRequest = useDeclineRequest()
+
+  const { data: settlementRequests = [] } = usePendingSettlementRequests()
+  const approveSettlement = useApproveSettlementRequest()
+  const declineSettlement = useDeclineSettlementRequest()
+
+  const totalCount = requests.length + settlementRequests.length
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -29,7 +36,7 @@ export function NotificationsDropdown() {
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
-        {requests.length > 0 && (
+        {totalCount > 0 && (
           <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-brand ring-2 ring-white dark:ring-gray-950" />
         )}
       </button>
@@ -41,7 +48,7 @@ export function NotificationsDropdown() {
           </div>
           
           <div className="max-h-[60vh] overflow-y-auto p-2 space-y-1">
-            {requests.length === 0 ? (
+            {totalCount === 0 ? (
               <div className="p-4 text-center text-sm text-gray-500">
                 No new notifications
               </div>
@@ -87,6 +94,42 @@ export function NotificationsDropdown() {
                 </div>
               ))
             )}
+            {settlementRequests.map((req) => (
+                <div key={req.id} className="p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="h-8 w-8 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-gray-900 dark:text-white leading-snug">
+                        <span className="font-medium">
+                          {req.requester?.full_name || 'Someone'}
+                        </span> has requested confirmation for a settlement of <span className="font-medium">
+                          {formatCurrency(req.amount)}
+                        </span> via {req.payment_method}.
+                      </p>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => approveSettlement.mutate(req)}
+                          disabled={approveSettlement.isPending}
+                          className="flex-1 inline-flex justify-center items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-brand text-white hover:bg-brand-light transition-colors"
+                        >
+                          <Check className="h-3 w-3" />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => declineSettlement.mutate(req.id)}
+                          disabled={declineSettlement.isPending}
+                          className="flex-1 inline-flex justify-center items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                          Reject
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
         </div>
       )}
