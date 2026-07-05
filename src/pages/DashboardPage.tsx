@@ -69,15 +69,19 @@ export function DashboardPage() {
                 showColor
                 size="2xl"
               />
-              {(summary?.netBalance ?? 0) >= 0 ? (
-                <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-100 px-2.5 py-1 rounded-full">
+              {(summary?.netBalance ?? 0) === 0 ? (
+                <span className="flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full">
+                  All settled up
+                </span>
+              ) : (summary?.netBalance ?? 0) > 0 ? (
+                <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full">
                   <TrendingUp className="h-3 w-3" />
-                  +12% this month
+                  You are owed
                 </span>
               ) : (
-                <span className="flex items-center gap-1 text-xs font-semibold text-red-500 bg-red-100 px-2.5 py-1 rounded-full">
+                <span className="flex items-center gap-1 text-xs font-semibold text-red-500 bg-red-100 dark:bg-red-900/30 px-2.5 py-1 rounded-full">
                   <TrendingDown className="h-3 w-3" />
-                  Settle up
+                  You owe money
                 </span>
               )}
             </div>
