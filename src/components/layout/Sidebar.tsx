@@ -40,7 +40,10 @@ export function Sidebar() {
       <aside
         className={cn(
           'fixed top-0 left-0 h-full z-30 flex flex-col',
-          'bg-white/20 dark:bg-white/[0.03] backdrop-blur-[64px] saturate-[2.2] border-r border-white/30 dark:border-white/[0.08]',
+          'bg-white/10 dark:bg-white/[0.02] backdrop-blur-[30px] saturate-[1.5]',
+          'shadow-[inset_1px_1px_2px_rgba(255,255,255,0.4),_0_8px_32px_rgba(0,0,0,0.1)]',
+          'dark:shadow-[inset_1px_1px_2px_rgba(255,255,255,0.1),_0_8px_32px_rgba(0,0,0,0.4)]',
+          'border-r border-white/20 dark:border-white/[0.05]',
           'transition-all duration-300 ease-in-out',
           sidebarOpen ? 'w-[220px]' : 'w-[72px]',
           'lg:relative lg:translate-x-0',
