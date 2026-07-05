@@ -40,7 +40,7 @@ export function Sidebar() {
       <aside
         className={cn(
           'fixed top-0 left-0 h-full z-30 flex flex-col',
-          'bg-brand/80 backdrop-blur-xl border-r border-white/10 text-white',
+          'bg-white/30 dark:bg-gray-950/30 backdrop-blur-2xl border-r border-gray-200/50 dark:border-gray-800/50',
           'transition-all duration-300 ease-in-out',
           sidebarOpen ? 'w-[220px]' : 'w-[72px]',
           'lg:relative lg:translate-x-0',
@@ -49,12 +49,12 @@ export function Sidebar() {
       >
         {/* Menu Toggle */}
         <div className={cn(
-          "flex items-center h-16 shrink-0 border-b border-white/10",
+          "flex items-center h-16 shrink-0 border-b border-gray-200/50 dark:border-gray-800/50",
           sidebarOpen ? "px-4 justify-between" : "justify-center"
         )}>
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-white hover:bg-white/10 transition-colors p-2 rounded-xl flex items-center justify-center shrink-0"
+            className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors p-2 rounded-xl flex items-center justify-center shrink-0"
             aria-label="Toggle sidebar"
           >
             <Menu className="h-5 w-5" />
@@ -67,7 +67,7 @@ export function Sidebar() {
             id="sidebar-add-expense-btn"
             onClick={() => openModal('add-expense')}
             className={cn(
-              'bg-brand-light hover:bg-white hover:text-brand text-white font-semibold',
+              'bg-brand hover:bg-brand-light text-white font-semibold',
               'shadow-glow transition-all duration-200',
               sidebarOpen ? "w-full" : "w-10 h-10 rounded-xl p-0"
             )}
@@ -105,7 +105,7 @@ export function Sidebar() {
 
         {/* Bottom section */}
         <div className={cn(
-          "pb-4 space-y-1 shrink-0 border-t border-white/10 pt-3 flex flex-col",
+          "pb-4 space-y-1 shrink-0 border-t border-gray-200/50 dark:border-gray-800/50 pt-3 flex flex-col",
           sidebarOpen ? "px-3" : "items-center"
         )}>
           <button
@@ -120,7 +120,7 @@ export function Sidebar() {
           {profile && (
             <div className={cn(
               'flex items-center gap-3 py-2 rounded-xl',
-              'hover:bg-white/10 cursor-pointer transition-colors',
+              'hover:bg-gray-100/50 dark:hover:bg-gray-800/50 cursor-pointer transition-colors',
               sidebarOpen ? 'px-2' : 'justify-center w-10 h-10 p-0 mt-1'
             )}>
               <UserAvatar
@@ -132,12 +132,12 @@ export function Sidebar() {
               {sidebarOpen && (
                 <>
                   <div className="flex-1 overflow-hidden">
-                    <p className="text-white text-sm font-medium truncate">{profile.full_name}</p>
-                    <p className="text-white/50 text-xs truncate">{profile.email}</p>
+                    <p className="text-gray-900 dark:text-white text-sm font-medium truncate">{profile.full_name}</p>
+                    <p className="text-gray-500 dark:text-gray-400 text-xs truncate">{profile.email}</p>
                   </div>
                   <button
                     onClick={handleSignOut}
-                    className="text-white/50 hover:text-white transition-colors"
+                    className="text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                     title="Sign out"
                   >
                     <LogOut className="h-4 w-4" />

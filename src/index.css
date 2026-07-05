@@ -132,11 +132,11 @@
   /* Sidebar nav item */
   .nav-item {
     @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium
-           text-sidebar-text/70 hover:text-sidebar-text hover:bg-sidebar-hover
+           text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100/50 dark:hover:bg-gray-800/50
            transition-all duration-150 cursor-pointer select-none;
   }
   .nav-item.active {
-    @apply bg-sidebar-active text-white font-semibold shadow-glow;
+    @apply bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand-light font-semibold;
   }
 
   /* Status badge */
