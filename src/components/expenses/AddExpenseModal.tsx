@@ -133,8 +133,9 @@ export function AddExpenseModal() {
 
   const watchedAmount = watch('amount')
   const watchedSplits = watch('splits')
+  const includedPattern = watchedSplits?.map((s: any) => s.included).join(',')
 
-  // Recalculate splits when amount or split type changes
+  // Recalculate splits when amount, split type, or inclusion changes
   useEffect(() => {
     if (!watchedSplits?.length) return
     const included = watchedSplits.filter((s: any) => s.included)
@@ -142,14 +143,41 @@ export function AddExpenseModal() {
 
     if (splitType === 'equal') {
       const perPerson = watchedAmount / included.length
-      setValue('splits', watchedSplits.map((s: any) => ({
-        ...s,
-        amount: s.included ? Math.round(perPerson * 100) / 100 : 0,
-        percentage: s.included ? Math.round((100 / included.length) * 100) / 100 : 0,
-      })))
+      
+      let needsUpdate = false
+      const newSplits = watchedSplits.map((s: any) => {
+        const expectedAmount = s.included ? Math.round(perPerson * 100) / 100 : 0
+        const expectedPct = s.included ? Math.round((100 / included.length) * 100) / 100 : 0
+        if (s.amount !== expectedAmount || s.percentage !== expectedPct) {
+          needsUpdate = true
+        }
+        return {
+          ...s,
+          amount: expectedAmount,
+          percentage: expectedPct,
+        }
+      })
+
+      if (needsUpdate) {
+        setValue('splits', newSplits)
+      }
+    } else {
+      // For exact/percentage, ensure unchecked users are zeroed out
+      let needsUpdate = false
+      const newSplits = watchedSplits.map((s: any) => {
+        if (!s.included && (s.amount !== 0 || s.percentage !== 0)) {
+          needsUpdate = true
+          return { ...s, amount: 0, percentage: 0 }
+        }
+        return s
+      })
+      
+      if (needsUpdate) {
+        setValue('splits', newSplits)
+      }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [watchedAmount, splitType])
+  }, [watchedAmount, splitType, includedPattern])
 
   const [formError, setFormError] = useState<string | null>(null)
 
