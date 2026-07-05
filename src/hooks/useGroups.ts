@@ -21,6 +21,7 @@ export function useGroups() {
   return useQuery({
     queryKey: groupKeys.lists(),
     enabled: !!user,
+    refetchInterval: 20_000,   // Poll every 20s as fallback
     queryFn: async () => {
       const { data, error } = await supabase
         .from('group_members')

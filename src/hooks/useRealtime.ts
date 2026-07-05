@@ -31,7 +31,7 @@ export function useRealtimeGroup(groupId: string) {
           qc.invalidateQueries({ queryKey: expenseKeys.byGroup(groupId) })
           qc.invalidateQueries({ queryKey: groupKeys.balances(groupId) })
           qc.invalidateQueries({ queryKey: expenseKeys.activity() })
-          qc.invalidateQueries({ queryKey: ['dashboard-summary'] })
+          qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
         }
       )
       // Settlements recorded inside the group
@@ -42,7 +42,7 @@ export function useRealtimeGroup(groupId: string) {
           qc.invalidateQueries({ queryKey: settlementKeys.byGroup(groupId) })
           qc.invalidateQueries({ queryKey: groupKeys.balances(groupId) })
           qc.invalidateQueries({ queryKey: expenseKeys.activity() })
-          qc.invalidateQueries({ queryKey: ['dashboard-summary'] })
+          qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
         }
       )
       // Members added or removed from the group
@@ -120,7 +120,7 @@ export function useRealtimeApp() {
         { event: '*', schema: 'public', table: 'expenses' },
         () => {
           qc.invalidateQueries({ queryKey: expenseKeys.activity() })
-          qc.invalidateQueries({ queryKey: ['dashboard-summary'] })
+          qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
         }
       )
       // Dashboard refresh when any settlement happens
@@ -128,7 +128,7 @@ export function useRealtimeApp() {
         'postgres_changes',
         { event: '*', schema: 'public', table: 'settlements' },
         () => {
-          qc.invalidateQueries({ queryKey: ['dashboard-summary'] })
+          qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
           qc.invalidateQueries({ queryKey: expenseKeys.activity() })
         }
       )

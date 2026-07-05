@@ -74,6 +74,8 @@ export function useDashboardSummary() {
   return useQuery({
     queryKey: ['dashboard', 'summary', user?.id],
     enabled: !!user,
+    // Poll every 30s as a reliable fallback in case WebSocket event is missed
+    refetchInterval: 30_000,
     queryFn: async () => {
       // Use supabaseView for the group_balances view (not in generated types)
       const { data: balances, error } = await supabaseView
