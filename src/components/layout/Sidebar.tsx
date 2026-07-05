@@ -40,7 +40,7 @@ export function Sidebar() {
       <aside
         className={cn(
           'fixed top-0 left-0 h-full z-30 flex flex-col',
-          'bg-brand text-white',
+          'bg-brand/80 backdrop-blur-xl border-r border-white/10 text-white',
           'transition-all duration-300 ease-in-out',
           sidebarOpen ? 'w-[220px]' : 'w-[72px]',
           'lg:relative lg:translate-x-0',

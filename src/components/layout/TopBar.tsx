@@ -14,7 +14,7 @@ export function TopBar({ title }: TopBarProps) {
   }
 
   return (
-    <header className="h-16 flex items-center gap-4 px-4 sm:px-6 bg-white dark:bg-gray-950 border-b border-gray-100 dark:border-gray-800 shrink-0">
+    <header className="h-16 flex items-center gap-4 px-4 sm:px-6 bg-white/70 dark:bg-gray-950/70 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-800/50 shrink-0">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(true)}
