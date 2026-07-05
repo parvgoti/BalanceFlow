@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, X, AlertCircle } from 'lucide-react'
+import { X, AlertCircle } from 'lucide-react'
 import { useState } from 'react'
 import { z } from 'zod'
 import {
@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { UserSearchInput } from '@/components/ui/UserSearchInput'
 import { useUIStore } from '@/store/uiStore'
 import { useAuthStore } from '@/store/authStore'
 import { useCreateGroup } from '@/hooks/useGroups'
@@ -21,14 +22,18 @@ const createGroupSchema = z.object({
   currency: z.string().min(1, 'Select a currency'),
   member_emails: z.array(z.string().email()).max(20),
 })
+
+/** Maps email → display name for the chip labels */
+type MemberMeta = Record<string, string>
 type CreateGroupFormData = z.infer<typeof createGroupSchema>
 
 export function CreateGroupModal() {
   const { closeModal } = useUIStore()
   const { user } = useAuthStore()
   const createGroup = useCreateGroup()
-  const [emailInput, setEmailInput] = useState('')
   const [submitError, setSubmitError] = useState<string | null>(null)
+  // Stores display name for each added email so chips look nicer
+  const [memberMeta, setMemberMeta] = useState<MemberMeta>({})
 
   const {
     register, handleSubmit, watch, setValue,
@@ -40,16 +45,18 @@ export function CreateGroupModal() {
 
   const memberEmails = watch('member_emails')
 
-  const addEmail = () => {
-    const email = emailInput.trim().toLowerCase()
-    if (email && !memberEmails.includes(email)) {
-      setValue('member_emails', [...memberEmails, email])
-      setEmailInput('')
+  const addMember = (email: string, displayName?: string) => {
+    const normalised = email.trim().toLowerCase()
+    if (!normalised || memberEmails.includes(normalised)) return
+    setValue('member_emails', [...memberEmails, normalised])
+    if (displayName) {
+      setMemberMeta(prev => ({ ...prev, [normalised]: displayName }))
     }
   }
 
-  const removeEmail = (email: string) => {
+  const removeMember = (email: string) => {
     setValue('member_emails', memberEmails.filter(e => e !== email))
+    setMemberMeta(prev => { const n = { ...prev }; delete n[email]; return n })
   }
 
   const onSubmit = async (data: CreateGroupFormData) => {
@@ -120,24 +127,15 @@ export function CreateGroupModal() {
               </select>
             </div>
 
-            {/* Member emails */}
+            {/* Member search */}
             <div className="space-y-2">
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 Invite Members (optional)
               </label>
-              <div className="flex gap-2">
-                <Input
-                  id="group-member-email-input"
-                  type="email"
-                  placeholder="friend@example.com"
-                  value={emailInput}
-                  onChange={e => setEmailInput(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addEmail())}
-                />
-                <Button type="button" variant="outline" size="icon" onClick={addEmail}>
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
+              <UserSearchInput
+                onAdd={addMember}
+                selectedEmails={memberEmails}
+              />
               {memberEmails.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {memberEmails.map(email => (
@@ -145,8 +143,9 @@ export function CreateGroupModal() {
                       key={email}
                       className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-subtle dark:bg-brand-dark/20 text-brand text-sm font-medium"
                     >
-                      {email}
-                      <button type="button" onClick={() => removeEmail(email)}>
+                      {/* Show name if we have it, otherwise show email */}
+                      {memberMeta[email] ?? email}
+                      <button type="button" onClick={() => removeMember(email)}>
                         <X className="h-3 w-3" />
                       </button>
                     </span>
