@@ -161,8 +161,25 @@ export function AddExpenseModal() {
       if (needsUpdate) {
         setValue('splits', newSplits)
       }
-    } else {
-      // For exact/percentage, ensure unchecked users are zeroed out
+    } else if (splitType === 'percentage') {
+      let needsUpdate = false
+      const newSplits = watchedSplits.map((s: any) => {
+        if (!s.included && (s.percentage !== 0 || s.amount !== 0)) {
+          needsUpdate = true
+          return { ...s, amount: 0, percentage: 0 }
+        } else if (s.included) {
+          const expectedAmount = Math.round((s.percentage / 100) * watchedAmount * 100) / 100
+          if (s.amount !== expectedAmount) {
+            needsUpdate = true
+            return { ...s, amount: expectedAmount }
+          }
+        }
+        return s
+      })
+      if (needsUpdate) {
+        setValue('splits', newSplits)
+      }
+    } else if (splitType === 'exact') {
       let needsUpdate = false
       const newSplits = watchedSplits.map((s: any) => {
         if (!s.included && (s.amount !== 0 || s.percentage !== 0)) {
@@ -171,7 +188,6 @@ export function AddExpenseModal() {
         }
         return s
       })
-      
       if (needsUpdate) {
         setValue('splits', newSplits)
       }
@@ -435,11 +451,20 @@ export function AddExpenseModal() {
                                 // If input is empty, default to 0, otherwise parse it.
                                 const valStr = e.target.value;
                                 const val = valStr === '' ? 0 : parseFloat(valStr) || 0;
-                                const updated = field.value.map((s: any, j: number) =>
-                                  j === i
-                                    ? { ...s, [splitType === 'percentage' ? 'percentage' : 'amount']: val }
-                                    : s
-                                )
+                                const updated = field.value.map((s: any, j: number) => {
+                                  if (j === i) {
+                                    if (splitType === 'percentage') {
+                                      return {
+                                        ...s,
+                                        percentage: val,
+                                        amount: Math.round((val / 100) * watchedAmount * 100) / 100
+                                      }
+                                    } else {
+                                      return { ...s, amount: val }
+                                    }
+                                  }
+                                  return s
+                                })
                                 field.onChange(updated)
                               }}
                               className="w-20 text-right text-sm font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
