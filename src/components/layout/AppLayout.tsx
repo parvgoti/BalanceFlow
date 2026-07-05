@@ -4,13 +4,14 @@ import { TopBar } from './TopBar'
 import { AddExpenseModal } from '@/components/expenses/AddExpenseModal'
 import { CreateGroupModal } from '@/components/groups/CreateGroupModal'
 import { useUIStore } from '@/store/uiStore'
-import { useRealtimeNotifications } from '@/hooks/useRealtime'
+import { useRealtimeNotifications, useRealtimeApp } from '@/hooks/useRealtime'
 
 export function AppLayout() {
   const { activeModal } = useUIStore()
 
-  // Subscribe to realtime notifications globally
+  // Subscribe to realtime notifications + global app updates
   useRealtimeNotifications()
+  useRealtimeApp()
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
