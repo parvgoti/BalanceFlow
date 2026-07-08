@@ -47,6 +47,7 @@ export function SettingsPage() {
   const onSubmit = async (data: UpdateProfileFormData) => {
     if (!profile) return
     try {
+      // 1. Update the profiles table
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data: updated, error } = await supabase
         .from('profiles')
@@ -67,6 +68,11 @@ export function SettingsPage() {
         setTimeout(() => setSaveError(null), 5000)
         return
       }
+
+      // 2. Also update auth.users metadata so Supabase dashboard stays in sync
+      await supabase.auth.updateUser({
+        data: { full_name: data.full_name },
+      })
 
       if (updated) {
         setProfile(updated as any)
