@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Switch } from '@/components/ui/switch'
 import { UserAvatar } from '@/components/ui/avatar'
 import { updateProfileSchema, type UpdateProfileFormData } from '@/schemas'
+import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from '@/lib/pushNotifications'
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'JPY', 'AUD', 'CAD', 'SGD']
 const THEMES = [
@@ -74,8 +75,21 @@ export function SettingsPage() {
         data: { full_name: data.full_name },
       })
 
+      // 3. Handle push notification subscriptions
+      if (data.push_notifications && !profile.push_notifications) {
+        const subscribed = await subscribeToPushNotifications(profile.id)
+        if (!subscribed) {
+          // Revert toggle if subscription failed
+          data.push_notifications = false
+          await supabase.from('profiles').update({ push_notifications: false } as any).eq('id', profile.id)
+          setSaveError('Failed to enable push notifications. Check browser permissions.')
+        }
+      } else if (!data.push_notifications && profile.push_notifications) {
+        await unsubscribeFromPushNotifications(profile.id)
+      }
+
       if (updated) {
-        setProfile(updated as any)
+        setProfile({ ...updated, push_notifications: data.push_notifications } as any)
         setSaveSuccess(true)
         setSaveError(null)
         setTimeout(() => setSaveSuccess(false), 3000)

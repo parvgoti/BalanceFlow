@@ -2,6 +2,7 @@
 // Deploy: supabase functions deploy send-notification
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import webpush from 'npm:web-push@3.6.7'
 
 interface NotificationPayload {
   user_id: string
@@ -71,6 +72,68 @@ serve(async (req) => {
             `,
           }),
         })
+      }
+    }
+
+    // Web Push Notifications
+    const { data: profileForPush } = await supabase
+      .from('profiles')
+      .select('push_notifications')
+      .eq('id', payload.user_id)
+      .single()
+
+    if (profileForPush?.push_notifications) {
+      const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY')
+      const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY')
+
+      if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+        webpush.setVapidDetails(
+          'mailto:support@balanceflow.app',
+          VAPID_PUBLIC_KEY,
+          VAPID_PRIVATE_KEY
+        )
+
+        // Fetch all active push subscriptions for the user
+        const { data: subscriptions } = await supabase
+          .from('push_subscriptions')
+          .select('*')
+          .eq('user_id', payload.user_id)
+
+        if (subscriptions && subscriptions.length > 0) {
+          const pushPayload = JSON.stringify({
+            title: payload.title,
+            body: payload.body,
+            url: Deno.env.get('APP_URL') ?? '/',
+          })
+
+          // Send push to all registered devices for this user
+          await Promise.all(
+            subscriptions.map(async (sub) => {
+              const pushSubscription = {
+                endpoint: sub.endpoint,
+                keys: {
+                  p256dh: sub.p256dh,
+                  auth: sub.auth,
+                },
+              }
+              try {
+                await webpush.sendNotification(pushSubscription, pushPayload)
+              } catch (pushErr: any) {
+                // If subscription expired or was revoked, delete it
+                if (pushErr?.statusCode === 410 || pushErr?.statusCode === 404) {
+                  await supabase
+                    .from('push_subscriptions')
+                    .delete()
+                    .eq('id', sub.id)
+                } else {
+                  console.error('Web push error:', pushErr)
+                }
+              }
+            })
+          )
+        }
+      } else {
+        console.warn('VAPID keys not configured in Edge Function environment')
       }
     }
 
