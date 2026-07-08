@@ -79,15 +79,15 @@ export function useCreateSettlementRequest(groupId: string) {
       const { data: profile } = await supabase.from('profiles').select('full_name').eq('id', user.id).single()
       const fullName = profile?.full_name || 'Someone'
 
-      const { error: notifError } = await supabase
-        .from('notifications')
-        .insert({
+      const { error: notifError } = await supabase.functions.invoke('send-notification', {
+        body: {
           user_id: formData.creditor_id,
           type: 'settlement',
           title: 'Settlement Request',
-          message: `${fullName} has paid ${formData.amount} and is requesting confirmation.`,
-          reference_id: data.id,
-        })
+          body: `${fullName} has paid ${formData.amount} and is requesting confirmation.`,
+          related_id: data.id,
+        }
+      })
       if (notifError) console.error('Failed to create notification:', notifError)
 
       return data
