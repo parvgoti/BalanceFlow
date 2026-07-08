@@ -2,7 +2,7 @@
 // Deploy: supabase functions deploy send-notification
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import webpush from 'npm:web-push@3.6.7'
+import webpush from 'https://esm.sh/web-push@3.6.7'
 
 interface NotificationPayload {
   user_id: string
@@ -13,7 +13,7 @@ interface NotificationPayload {
   group_id?: string
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
       headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type' },
