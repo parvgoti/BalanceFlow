@@ -19,9 +19,20 @@ export function DashboardPage() {
   const { data: groupsData } = useGroups()
   const { data: activityData, isLoading: activityLoading } = useActivityFeed()
 
-  const recentActivity = (activityData?.pages.flatMap(p => p.data) ?? []) as ActivityItem[]
+  // Get active group IDs to filter out archived group data
+  const activeGroupIds = useMemo(
+    () => new Set((groupsData ?? []).map((g: any) => g.id)),
+    [groupsData]
+  )
 
-  // Compute category totals from activity
+  const recentActivity = useMemo(() => {
+    const allActivity = (activityData?.pages.flatMap(p => p.data) ?? []) as ActivityItem[]
+    // Only show activity from active groups
+    if (activeGroupIds.size === 0) return allActivity
+    return allActivity.filter(a => activeGroupIds.has(a.group_id))
+  }, [activityData, activeGroupIds])
+
+  // Compute category totals from activity (already filtered to active groups)
   const categoryTotals = useMemo(() => {
     const map: Record<string, number> = {}
     recentActivity
