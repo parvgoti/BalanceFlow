@@ -27,8 +27,7 @@ export function DashboardPage() {
 
   const recentActivity = useMemo(() => {
     const allActivity = (activityData?.pages.flatMap(p => p.data) ?? []) as ActivityItem[]
-    // Only show activity from active groups
-    if (activeGroupIds.size === 0) return allActivity
+    // Only show activity from active (non-archived) groups
     return allActivity.filter(a => activeGroupIds.has(a.group_id))
   }, [activityData, activeGroupIds])
 
