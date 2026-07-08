@@ -24,6 +24,7 @@ export function SettingsPage() {
   const { profile, setProfile, signOut } = useAuthStore()
   const { theme, setTheme } = useUIStore()
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
   const [avatarLoading, setAvatarLoading] = useState(false)
 
   const {
@@ -45,19 +46,38 @@ export function SettingsPage() {
 
   const onSubmit = async (data: UpdateProfileFormData) => {
     if (!profile) return
-    // Cast to any to work around Supabase generated type strictness on Update
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: updated, error } = await supabase
-      .from('profiles')
-      .update(data as any)
-      .eq('id', profile.id)
-      .select()
-      .single()
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: updated, error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: data.full_name,
+          currency: data.currency,
+          timezone: data.timezone,
+          email_notifications: data.email_notifications,
+          push_notifications: data.push_notifications,
+        } as any)
+        .eq('id', profile.id)
+        .select()
+        .single()
 
-    if (!error && updated) {
-      setProfile(updated as any)
-      setSaveSuccess(true)
-      setTimeout(() => setSaveSuccess(false), 3000)
+      if (error) {
+        console.error('Profile update error:', error)
+        setSaveError(error.message)
+        setTimeout(() => setSaveError(null), 5000)
+        return
+      }
+
+      if (updated) {
+        setProfile(updated as any)
+        setSaveSuccess(true)
+        setSaveError(null)
+        setTimeout(() => setSaveSuccess(false), 3000)
+      }
+    } catch (err) {
+      console.error('Unexpected error:', err)
+      setSaveError('An unexpected error occurred')
+      setTimeout(() => setSaveError(null), 5000)
     }
   }
 
@@ -194,6 +214,12 @@ export function SettingsPage() {
             {saveSuccess && (
               <div className="px-4 py-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-sm border border-emerald-200 dark:border-emerald-800">
                 ✓ Settings saved successfully
+              </div>
+            )}
+
+            {saveError && (
+              <div className="px-4 py-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm border border-red-200 dark:border-red-800">
+                ✗ {saveError}
               </div>
             )}
 
