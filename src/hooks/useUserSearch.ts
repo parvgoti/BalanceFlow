@@ -21,7 +21,7 @@ export function useUserSearch(query: string) {
       const { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, email, avatar_url')
-        .ilike('full_name', `%${trimmed}%`)
+        .or(`full_name.ilike.%${trimmed}%,email.ilike.%${trimmed}%`)
         .neq('id', user!.id)        // exclude yourself
         .limit(6)
 
