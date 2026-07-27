@@ -115,7 +115,9 @@ export function GroupDetailPage() {
     const shouldOpenSettle = state?.openSettleModal || queryParams.get('settle') === 'true'
 
     if (shouldOpenSettle && myDebts.length > 0 && !settleDebt) {
-      setSettleDebt(myDebts[0])
+      const timer = setTimeout(() => {
+        setSettleDebt(myDebts[0])
+      }, 0)
       // Clean up URL/state so refresh doesn't reopen modal
       if (queryParams.get('settle') === 'true') {
         queryParams.delete('settle')
@@ -124,6 +126,7 @@ export function GroupDetailPage() {
       } else if (state?.openSettleModal) {
         navigate(`/groups/${groupId}`, { replace: true, state: {} })
       }
+      return () => clearTimeout(timer)
     }
   }, [location.state, location.search, myDebts, settleDebt, groupId, navigate])
 
