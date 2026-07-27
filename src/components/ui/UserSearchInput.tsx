@@ -5,7 +5,7 @@ import type { UserSearchResult } from '@/hooks/useUserSearch'
 
 interface UserSearchInputProps {
   /** Called when a user is selected or a raw email is confirmed */
-  onAdd: (email: string, displayName?: string) => void
+  onAdd: (email: string, displayName?: string, userId?: string) => void
   /** Emails already added — used to grey-out already-selected users */
   selectedEmails: string[]
   placeholder?: string
@@ -37,7 +37,7 @@ export function UserSearchInput({
   const handleSelect = useCallback(
     (user: UserSearchResult) => {
       if (selectedEmails.includes(user.email)) return
-      onAdd(user.email, user.full_name)
+      onAdd(user.email, user.full_name, user.id)
       setInputValue('')
       setOpen(false)
     },
@@ -92,27 +92,28 @@ export function UserSearchInput({
         <div className="absolute z-50 mt-1 w-full rounded-xl border border-gray-200 dark:border-gray-700
           bg-white dark:bg-gray-900 shadow-lg overflow-hidden animate-fade-in">
           {results.length === 0 && !isFetching && (
-            <div className="px-4 py-3 text-sm text-gray-500 flex items-center gap-2">
-              <UserPlus className="h-4 w-4" />
-              <span>
-                No user found.{' '}
-                {inputValue.includes('@') && (
-                  <button
-                    type="button"
-                    className="text-brand font-medium underline"
-                    onClick={() => {
-                      const raw = inputValue.trim().toLowerCase()
-                      if (raw && !selectedEmails.includes(raw)) {
-                        onAdd(raw)
-                        setInputValue('')
-                        setOpen(false)
-                      }
-                    }}
-                  >
-                    Add "{inputValue}" anyway
-                  </button>
-                )}
-              </span>
+            <div className="px-4 py-3 text-sm text-gray-500 flex flex-col gap-2.5">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-gray-400" />
+                <span className="font-medium text-gray-700 dark:text-gray-300">No user found.</span>
+              </div>
+              {inputValue.trim() && (
+                <button
+                  type="button"
+                  className="w-full text-left px-3 py-2 rounded-lg bg-brand/10 dark:bg-brand/20 text-brand font-medium text-xs hover:bg-brand/20 transition-colors flex items-center justify-between"
+                  onClick={() => {
+                    const raw = inputValue.trim().toLowerCase()
+                    if (raw && !selectedEmails.includes(raw)) {
+                      onAdd(raw)
+                      setInputValue('')
+                      setOpen(false)
+                    }
+                  }}
+                >
+                  <span>Invite user via mailto ({inputValue.trim()})</span>
+                  <span className="underline font-semibold">Select</span>
+                </button>
+              )}
             </div>
           )}
 

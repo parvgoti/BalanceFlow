@@ -6,8 +6,9 @@ import {
 } from 'date-fns'
 import {
   ArrowLeft, Download, Users, DollarSign, BarChart2,
-  Search, Filter, Settings, UserMinus, UserPlus, History, Trash2,
+  Search, Filter, Settings, UserMinus, UserPlus, History, Trash2, X
 } from 'lucide-react'
+import { UserSearchInput } from '@/components/ui/UserSearchInput'
 import { useGroup, useGroupBalances, useAddMembers, useRemoveMember, useDeleteGroup, useResetGroupData } from '@/hooks/useGroups'
 import { useExpenses, useDeleteExpense } from '@/hooks/useExpenses'
 import { useSettlements } from '@/hooks/useSettlements'
@@ -47,13 +48,33 @@ export function GroupDetailPage() {
 
   const [settleDebt, setSettleDebt] = useState<SimplifiedDebt | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [inviteEmail, setInviteEmail] = useState('')
+  const [selectedEmails, setSelectedEmails] = useState<string[]>([])
+  const [memberMeta, setMemberMeta] = useState<Record<string, string>>({})
+  const [memberIdMeta, setMemberIdMeta] = useState<Record<string, string>>({})
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [chartRange, setChartRange] = useState<'week' | 'month' | 'year'>('month')
 
   const addMembers = useAddMembers(groupId)
   const removeMember = useRemoveMember(groupId)
+
+  const handleAddInvite = (email: string, displayName?: string, userId?: string) => {
+    const normalised = email.trim().toLowerCase()
+    if (!normalised || selectedEmails.includes(normalised)) return
+    setSelectedEmails(prev => [...prev, normalised])
+    if (displayName) {
+      setMemberMeta(prev => ({ ...prev, [normalised]: displayName }))
+    }
+    if (userId) {
+      setMemberIdMeta(prev => ({ ...prev, [normalised]: userId }))
+    }
+  }
+
+  const handleRemoveInvite = (email: string) => {
+    setSelectedEmails(prev => prev.filter(e => e !== email))
+    setMemberMeta(prev => { const n = { ...prev }; delete n[email]; return n })
+    setMemberIdMeta(prev => { const n = { ...prev }; delete n[email]; return n })
+  }
   const deleteGroup = useDeleteGroup()
   const resetGroupData = useResetGroupData(groupId)
 
@@ -426,35 +447,78 @@ export function GroupDetailPage() {
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Invite Member</h4>
-                  <div className="flex flex-col sm:flex-row gap-2 w-full max-w-sm">
-                    <input
-                      type="email"
-                      placeholder="Email address"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                      className="flex-1 min-w-0 h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white uppercase tracking-wider">Invite Members</h4>
+                  <div className="w-full max-w-sm space-y-3">
+                    <UserSearchInput
+                      onAdd={handleAddInvite}
+                      selectedEmails={selectedEmails}
+                      placeholder="Search name or email"
                     />
+                    
+                    {selectedEmails.length > 0 && (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedEmails.map(email => (
+                          <span
+                            key={email}
+                            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-brand-subtle dark:bg-brand-dark/20 text-brand text-sm font-medium"
+                          >
+                            {memberMeta[email] ?? email}
+                            <button type="button" onClick={() => handleRemoveInvite(email)}>
+                              <X className="h-3 w-3" />
+                            </button>
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     <Button 
-                      className="shrink-0"
+                      className="w-full"
                       loading={addMembers.isPending}
+                      disabled={selectedEmails.length === 0}
                       onClick={async () => {
-                        if (inviteEmail) {
+                        if (selectedEmails.length > 0) {
                           try {
-                            await addMembers.mutateAsync([inviteEmail])
-                            const inviteLink = `${window.location.origin}/signup?invite=true`
-                            const subject = encodeURIComponent('You are invited to BalanceFlow!')
-                            const body = encodeURIComponent(`Hi!\n\nI've added you to our group "${group?.name}" on BalanceFlow to track our shared expenses.\n\nPlease click the link below to sign up and view our balances:\n${inviteLink}\n\nMake sure to use this email address: ${inviteEmail}`)
-                            window.location.href = `mailto:${inviteEmail}?subject=${subject}&body=${body}`
-                            setInviteEmail('')
+                            await addMembers.mutateAsync(selectedEmails)
+                            
+                            const existingUsers = selectedEmails.filter(email => !!memberIdMeta[email])
+                            const nonExistingEmails = selectedEmails.filter(email => !memberIdMeta[email])
+                            
+                            // Send native push notifications for users who already exist
+                            for (const email of existingUsers) {
+                              const uid = memberIdMeta[email]
+                              if (uid) {
+                                await supabase.functions.invoke('send-notification', {
+                                  body: {
+                                    user_id: uid,
+                                    type: 'group_invite',
+                                    title: 'Group Invitation',
+                                    body: `${user?.user_metadata?.full_name || 'Someone'} invited you to join "${group?.name}".`,
+                                    group_id: groupId
+                                  }
+                                }).catch(console.error)
+                              }
+                            }
+                            
+                            // Send emails for users who don't exist
+                            if (nonExistingEmails.length > 0) {
+                              const inviteLink = `${window.location.origin}/signup?invite=true`
+                              const subject = encodeURIComponent(`You are invited to ${group?.name} on BalanceFlow!`)
+                              const emailBody = encodeURIComponent(`Hi!\n\nI've added you to our group "${group?.name}" on BalanceFlow to track our shared expenses.\n\nPlease click the link below to sign up and view our balances:\n${inviteLink}\n\nMake sure to use the email address we sent this to!`)
+                              const bccList = nonExistingEmails.join(',')
+                              window.location.href = `mailto:?bcc=${bccList}&subject=${subject}&body=${emailBody}`
+                            }
+                            
+                            setSelectedEmails([])
+                            setMemberMeta({})
+                            setMemberIdMeta({})
                           } catch (err) {
                             console.error(err)
-                            alert('Failed to invite member.')
+                            alert('Failed to invite members.')
                           }
                         }
                       }}
                     >
-                      <UserPlus className="h-4 w-4" /> Invite
+                      <UserPlus className="h-4 w-4" /> Invite Selected
                     </Button>
                   </div>
                 </div>
