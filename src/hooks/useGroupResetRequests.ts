@@ -48,7 +48,7 @@ export function useGroupResetRequests(groupId: string) {
 
 export function useCreateResetRequest(groupId: string) {
   const qc = useQueryClient()
-  const { user } = useAuthStore()
+  const { user, profile } = useAuthStore()
 
   return useMutation({
     mutationFn: async (memberIds: string[]) => {
@@ -75,13 +75,14 @@ export function useCreateResetRequest(groupId: string) {
       if (error) throw error
 
       // 3. Notify all other members
+      const requesterName = profile?.full_name || user.user_metadata?.full_name || user.email || 'An admin'
       const notifications = memberIds
         .filter(uid => uid !== user.id)
         .map(uid => ({
           user_id: uid,
           type: 'reminder' as const,
           title: 'Group Data Reset Requested',
-          body: `${user.full_name} requested to reset all expense and settlement data in this group. Please accept or deny.`,
+          body: `${requesterName} requested to reset all expense and settlement data in this group. Please accept or deny.`,
           group_id: groupId,
         }))
 
