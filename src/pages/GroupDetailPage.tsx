@@ -99,6 +99,7 @@ export function GroupDetailPage() {
 
   // Settlement progress
   const totalUnsettled = typedBalances.reduce((s, b) => s + Math.abs(b.net_balance), 0)
+  const isGroupSettled = totalUnsettled < 0.01
   const totalSettled = settlements?.reduce((s, st) => s + st.amount, 0) ?? 0
   const settledPct = totalUnsettled === 0 ? 100 : Math.min(100, (totalSettled / (totalSettled + totalUnsettled)) * 100)
 
@@ -592,14 +593,24 @@ export function GroupDetailPage() {
                 <div className="space-y-4">
                   <h4 className="text-sm font-semibold text-red-600 uppercase tracking-wider">Danger Zone</h4>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-red-50 dark:bg-red-900/10 border border-red-100 dark:border-red-900/20">
-                    <div>
-                      <p className="font-medium text-red-900 dark:text-red-400">Delete this group</p>
-                      <p className="text-xs text-red-700/70 dark:text-red-400/70 mt-1">
-                        Once you delete a group, it cannot be undone. All expenses and settlements will be archived.
-                      </p>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="font-medium text-red-900 dark:text-red-400">Delete this group</p>
+                        <p className="text-xs text-red-700/70 dark:text-red-400/70 mt-1">
+                          Once you delete a group, it cannot be undone. All expenses and settlements will be archived.
+                        </p>
+                      </div>
+                      {!isGroupSettled && (
+                        <div className="text-xs font-semibold text-amber-800 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/80 p-2.5 rounded-lg flex items-center gap-2">
+                          <span>⚠️</span>
+                          <span>
+                            Cannot delete group: All group splits must be settled up first ({formatCurrency(totalUnsettled / 2)} remaining to settle).
+                          </span>
+                        </div>
+                      )}
                     </div>
                     {confirmDelete ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 shrink-0">
                         <Button 
                           variant="ghost" 
                           size="sm"
@@ -613,11 +624,16 @@ export function GroupDetailPage() {
                           className="bg-red-600 hover:bg-red-700 text-white"
                           loading={deleteGroup.isPending}
                           onClick={async () => {
+                            if (!isGroupSettled) {
+                              alert('Cannot delete group: All group splits must be settled up first.')
+                              return
+                            }
                             try {
                               await deleteGroup.mutateAsync(groupId)
                               navigate('/groups')
                             } catch (err: any) {
                               console.error(err)
+                              alert(err.message || 'Failed to delete group')
                               setConfirmDelete(false)
                             }
                           }}
@@ -628,8 +644,18 @@ export function GroupDetailPage() {
                     ) : (
                       <Button 
                         variant="outline" 
-                        className="text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-200 dark:border-red-900/50 shrink-0"
-                        onClick={() => setConfirmDelete(true)}
+                        disabled={!isGroupSettled}
+                        className={cn(
+                          "text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-200 dark:border-red-900/50 shrink-0",
+                          !isGroupSettled && "opacity-50 cursor-not-allowed"
+                        )}
+                        onClick={() => {
+                          if (!isGroupSettled) {
+                            alert('Cannot delete group: All group splits must be settled up first.')
+                            return
+                          }
+                          setConfirmDelete(true)
+                        }}
                       >
                         <Trash2 className="h-4 w-4" /> Delete Group
                       </Button>

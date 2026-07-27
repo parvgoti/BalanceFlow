@@ -149,6 +149,20 @@ export function useDeleteGroup() {
 
   return useMutation({
     mutationFn: async (groupId: string) => {
+      // 1. Verify that all member balances in the group are settled up
+      const { data: balances, error: balError } = await supabaseView
+        .from('group_balances')
+        .select('net_balance')
+        .eq('group_id', groupId)
+
+      if (balError) throw balError
+
+      const totalUnsettled = (balances ?? []).reduce((s, b) => s + Math.abs((b as any).net_balance || 0), 0)
+      if (totalUnsettled > 0.01) {
+        throw new Error('All group splits and balances must be settled up before deleting the group.')
+      }
+
+      // 2. Archive group
       const { error } = await supabase
         .from('groups')
         .update({ is_archived: true })
