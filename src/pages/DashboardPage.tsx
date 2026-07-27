@@ -141,7 +141,7 @@ export function DashboardPage() {
         <Button
           variant="outline"
           className="h-12 rounded-xl text-sm font-semibold border-gray-200 dark:border-gray-700"
-          onClick={() => {}}
+          onClick={() => openModal('settle-up')}
         >
           <Wallet className="h-4 w-4 mr-1.5" />
           Settle Up
