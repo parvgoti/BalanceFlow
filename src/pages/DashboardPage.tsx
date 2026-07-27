@@ -71,28 +71,28 @@ export function DashboardPage() {
       {summaryLoading ? (
         <CardSkeleton />
       ) : (
-        <div className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-5 sm:p-6 text-white shadow-glow">
-          <p className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">Total Net Balance</p>
+        <div className="card p-5 sm:p-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-1">Total Net Balance</p>
           <p className={cn(
-            "text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow",
+            "text-3xl sm:text-4xl font-extrabold tracking-tight",
             netBalance < 0
-              ? "text-red-400 dark:text-red-400"
-              : "text-emerald-300 dark:text-emerald-300"
+              ? "text-red-500 dark:text-red-400"
+              : "text-emerald-600 dark:text-emerald-400"
           )}>
             {netBalance >= 0 ? '' : '-'}
             {formatCurrency(Math.abs(netBalance))}
           </p>
           <div className="flex items-center gap-1.5 mt-2">
             {netBalance > 0 ? (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full">
                 <TrendingUp className="h-3 w-3" /> Net Positive
               </span>
             ) : netBalance < 0 ? (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-red-500/20 text-red-300 border border-red-500/30 px-2.5 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 px-2.5 py-0.5 rounded-full">
                 <TrendingDown className="h-3 w-3" /> Net Negative
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full">
                 All settled up ✓
               </span>
             )}
