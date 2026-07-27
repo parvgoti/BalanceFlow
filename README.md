@@ -1,85 +1,125 @@
 # BalanceFlow 💰
 
-> Smart Expense Sharing & Settlement Platform — built with React, TypeScript, Supabase, and Tailwind CSS.
+> **Smart Expense Sharing, Debt Simplification & Real-Time Settlement Platform** — built with React 18, TypeScript, Supabase, Tailwind CSS, and Recharts.
 
 [![CI/CD](https://github.com/parvgoti/BalanceFlow/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/parvgoti/BalanceFlow/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Realtime%20%26%20RLS-3ECF8E.svg)](https://supabase.com)
+
+BalanceFlow is a modern, full-stack web application designed to take the friction out of shared expenses. Whether splitting bills with roommates, tracking trip costs with friends, or managing team budgets, BalanceFlow combines intelligent debt simplification algorithms, real-time balance synchronization, and hybrid push/email notifications into a beautiful, responsive interface.
 
 ---
 
-## ✨ Features
+## ✨ Comprehensive Feature Showcase
 
-- **Expense Splitting** — Equal, percentage, or exact splits with flexible participant control
-- **Debt Simplification** — Greedy algorithm minimizes the number of transactions needed
-- **Real-time Updates** — Supabase Realtime broadcasts balance changes to all group members instantly
-- **Multi-currency** — USD, EUR, GBP, INR, JPY, and more
-- **Receipt Storage** — Upload and store expense receipts in Supabase Storage
-- **Dark Mode** — Full dark/light/system theme support
-- **Google OAuth** — One-click sign in with Google
-- **Role-based Access** — Group admins and members with separate permissions
-- **Charts & Analytics** — Category breakdowns, spending trends, balance charts
+### 1. 🧾 Intelligent Expense Splitting & Validation
+- **Equal Splitting (`= Equal`)**: Automatically calculates and distributes costs evenly across all included group members.
+- **Percentage Splitting (`% Pct`)**: Custom percentage allocations per member, with strict validation ensuring totals equal exactly `100%`.
+- **Exact Currency Splitting (`$ Exact`)**:
+  - Assign explicit currency amounts to each participant.
+  - **Live Matching Validation Banner**: Displays a real-time summary indicator below the split options and above the receipt uploader (`e.g., 50.00 out of 100.00`).
+  - **Color-Coded Status**: Automatically highlights in **Green** when the sum of entered splits matches the total expense amount, and in **Red** when unmatched, preventing calculation errors before submission.
+- **Member Toggle**: Seamlessly include or exclude specific participants from any expense split with a single click.
+
+### 2. 🧮 Automated Debt Simplification
+- **Greedy Simplification Algorithm**: Evaluates all debts across the group and minimizes the total number of peer-to-peer transactions required to settle up.
+- **Visual Debt Matrix**: Easily inspect "Who owes Whom" with clear, simplified payment cards and one-click settlement triggers.
+
+### 3. 👥 Smart Group & Member Invitations
+- **Intelligent Search Autocomplete (`UserSearchInput`)**: Look up existing BalanceFlow users by name or email with instant avatar and profile preview in both the **Create Group Modal** and **Group Settings**.
+- **Hybrid Invitation Routing**:
+  - **In-App & Push Notifications (Registered Users)**: Inviting an existing BalanceFlow user instantly triggers the Supabase `send-notification` Edge Function, delivering real-time in-app alerts and browser Web Push notifications.
+  - **Grouped `mailto:` Email Fallback (Unregistered Users)**: When inviting email addresses not yet registered on BalanceFlow, the platform opens your default email client with a pre-populated invitation link and groups multiple recipients via `BCC`—sending one consolidated invite rather than cluttering your screen with individual email windows.
+
+### 4. ⚡ Real-Time Synchronization & Web Push
+- **Supabase Realtime Channels**: Live synchronization across all active sessions. Expense additions, edits, deletions, group balance changes, and settlements update instantly without refreshing the page.
+- **Web Push Notifications**: Edge Function powered Web Push notifications (`web-push`) alert users when:
+  - They are invited to join a group (`group_invite`).
+  - A settlement payment request is sent or completed (`settleup_request`).
+  - Important expense updates occur.
+- **Interactive Notification Dropdown**: Read, dismiss, and accept group invitations directly from the navigation bar.
+
+### 5. 📊 Visual Analytics & Spending Insights
+- **Spending Trend Charts**: Interactive line charts tracking expense patterns over configurable intervals (`Weekly`, `Monthly`, `Yearly`).
+- **Member Balance Bar Charts**: Recharts-powered comparative charts visualizing individual total spending versus net balance.
+- **Category Breakdowns**: Categorize expenses (Food, Travel, Entertainment, Rent, Utilities, etc.) with dedicated iconography and curated color schemes.
+
+### 6. 📎 Receipt Storage & Management
+- **Supabase Storage Integration**: Attach receipt images (`JPG`, `PNG`, `WEBP`) or `PDF` invoices to any expense.
+- **Private RLS Storage Policies**: Cryptographic Row-Level Security ensures receipts are accessible only by authenticated members of that specific group.
+- **Inline Receipt Preview**: Inspect or download attached receipts directly from expense cards or the editing modal.
+
+### 7. 🛡️ Enterprise-Grade Security & Authentication
+- **Multi-Modal Authentication**: Supports standard Email/Password sign-up/login and **Google OAuth 2.0** single sign-on.
+- **Row-Level Security (RLS)**: Every database table (`profiles`, `groups`, `group_members`, `expenses`, `expense_splits`, `settlements`, `notifications`) is protected by strict RLS policies scoped to `auth.uid()` and verified group membership.
+- **Role-Based Group Access**: Group creators/admins have administrative permissions (managing members, resetting group test data, deleting groups) while standard members can add and settle expenses.
+
+### 8. 🎨 Premium Design & UI/UX
+- **Full Dark/Light/System Theme Mode**: Sleek dark mode with glassmorphic accents and high-contrast typography.
+- **Responsive Mobile-First Architecture**: Seamless experience across mobile phones, tablets, and desktop viewports.
 
 ---
 
-## 🗂 Project Structure
+## 🗂 Project Architecture & Structure
 
 ```
 src/
 ├── components/
-│   ├── ui/           # ShadCN-style primitives (Button, Input, Dialog, Card…)
-│   ├── layout/       # Sidebar, TopBar, AppLayout, AuthLayout
-│   ├── auth/         # Auth form components
-│   ├── expenses/     # AddExpenseModal, ExpenseCard
-│   ├── groups/       # GroupCard, CreateGroupModal
+│   ├── ui/           # ShadCN-style reusable primitives (Button, Input, Dialog, UserSearchInput…)
+│   ├── layout/       # AppLayout, TopBar, Sidebar, NotificationsDropdown, AuthLayout
+│   ├── auth/         # Login, Signup, and OAuth form components
+│   ├── expenses/     # AddExpenseModal (with exact split validation), ExpenseCard
+│   ├── groups/       # CreateGroupModal, GroupCard
 │   ├── settlements/  # SettleUpModal
-│   ├── charts/       # Recharts wrappers
-│   └── shared/       # CurrencyDisplay, CategoryIcon, Skeleton, EmptyState
-├── hooks/            # useAuth, useGroups, useExpenses, useSettlements, useRealtime
-├── lib/              # supabase.ts, queryClient.ts, utils.ts
-├── pages/            # Route-level page components
-├── store/            # Zustand: authStore, uiStore, notificationStore
-├── schemas/          # Zod validation schemas
-└── types/            # TypeScript types matching DB schema
-
+│   ├── charts/       # Recharts wrappers (SpendingTrendChart, BalanceBarChart)
+│   └── shared/       # CurrencyDisplay, CategoryIcon, Skeleton loaders, EmptyState
+├── hooks/            # useAuth, useGroups, useExpenses, useSettlements, useRealtime, useUserSearch
+├── lib/              # supabase.ts, queryClient.ts, utils.ts (formatCurrency, cn)
+├── pages/            # Route pages (Dashboard, GroupDetailPage, ActivityPage, SettingsPage)
+├── store/            # Zustand global stores: authStore, uiStore, notificationStore
+├── schemas/          # Zod validation schemas for strict type safety
+└── types/            # TypeScript database schema interfaces
 supabase/
-├── migrations/       # SQL schema, storage policies, views
-└── functions/        # Edge functions: simplify-debts, send-notification
+├── migrations/       # SQL schema, RLS policies, views, triggers, and RPC functions
+└── functions/        # Deno Edge Functions:
+    ├── simplify-debts/      # Server-side debt simplification logic
+    └── send-notification/   # Web Push & in-app notification dispatcher
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start & Local Development
 
 ### 1. Prerequisites
+- **Node.js** 18.x or later
+- **npm** / **yarn** / **pnpm**
+- A **Supabase** Project ([https://supabase.com](https://supabase.com))
 
-- Node.js 18+
-- A Supabase project ([supabase.com](https://supabase.com))
-
-### 2. Clone & Install
-
+### 2. Clone Repository & Install Dependencies
 ```bash
-git clone https://github.com/your-org/balanceflow.git
-cd balanceflow
+git clone https://github.com/parvgoti/BalanceFlow.git
+cd BalanceFlow
 npm install
 ```
 
-### 3. Configure Environment
-
+### 3. Environment Variables Configuration
+Copy the sample environment file:
 ```bash
 cp .env.example .env.local
 ```
 
-Edit `.env.local`:
+Edit `.env.local` with your Supabase Project credentials:
 ```env
 VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_ANON_KEY
+VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 VITE_APP_URL=http://localhost:5173
 ```
+*(You can locate these under **Supabase Dashboard → Project Settings → API**).*
 
-Find these in your [Supabase Dashboard](https://app.supabase.com) → Project Settings → API.
+### 4. Database Setup & Migrations
 
-### 4. Set Up Database
-
-**Option A: Supabase CLI (recommended)**
+#### Option A: Using Supabase CLI (Recommended)
 ```bash
 npm install -g supabase
 supabase login
@@ -87,116 +127,94 @@ supabase link --project-ref YOUR_PROJECT_REF
 supabase db push
 ```
 
-**Option B: Manual**
-Copy and run `supabase/migrations/001_initial_schema.sql`, then `002_storage_policies.sql`, then `003_views.sql` in your Supabase SQL Editor.
+#### Option B: Manual SQL Execution
+In your **Supabase SQL Editor**, execute the migration files from `supabase/migrations/` in chronological order:
+1. `001_initial_schema.sql` (Creates core tables, enums, triggers, and RLS rules)
+2. `002_storage_policies.sql` (Configures the `receipts` storage bucket and policies)
+3. `003_views.sql` (Creates analytical views and helper RPC functions like `invite_users_to_group`)
 
-### 5. Configure Storage
+### 5. Configure Storage Bucket
+In the **Supabase Dashboard → Storage**, create a bucket named **`receipts`** with:
+- **Public**: `No` (Private bucket protected by RLS)
+- **Allowed MIME types**: `image/jpeg, image/png, image/webp, application/pdf`
+- **Max Upload Size**: `10 MB`
 
-In Supabase Dashboard → Storage, create a bucket named **`receipts`** with:
-- Public: **No** (private)
-- Allowed MIME types: `image/jpeg, image/png, image/webp, application/pdf`
-- Max upload size: 10 MB
-
-### 6. Enable Google OAuth
-
-In Supabase Dashboard → Auth → Providers → Google:
-- Enable Google
-- Add your Google Client ID and Secret
-- Set Redirect URL to: `https://YOUR_PROJECT_REF.supabase.co/auth/v1/callback`
-
-### 7. Run Development Server
-
+### 6. Start Development Server
 ```bash
 npm run dev
 ```
-
-Open [http://localhost:5173](http://localhost:5173)
-
----
-
-## 🗄 Database Schema
-
-| Table | Description |
-|-------|-------------|
-| `profiles` | Extended user data (linked to `auth.users`) |
-| `groups` | Expense-sharing groups |
-| `group_members` | Users in groups with roles (admin/member) |
-| `expenses` | Individual expenses with category, split type |
-| `expense_splits` | Per-user share of each expense |
-| `settlements` | Payment records between users |
-| `notifications` | In-app notifications |
-
-All tables have **Row-Level Security** enabled. Users can only access data from groups they belong to.
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
 ---
 
-## ⚡ Edge Functions
+## 🗄️ Database Schema & Security Overview
 
-Deploy with:
+| Table | Primary Purpose | Security Policy / RLS |
+| :--- | :--- | :--- |
+| `profiles` | User profile details (full name, avatar, push tokens) | Readable by authenticated users; writable by owner (`id = auth.uid()`) |
+| `groups` | Expense groups (name, currency, description, created_by) | Accessible only by users in `group_members` for that group |
+| `group_members` | Membership mappings and roles (`admin`, `member`) | Accessible only by members of the same group |
+| `expenses` | Individual expenses (amount, category, date, receipt_url) | Accessible and writable only by members of the target group |
+| `expense_splits` | Per-member expense breakdown (amount, percentage, included) | Scoped to parent group membership |
+| `settlements` | Recorded payments settling balances between two members | Scoped to parent group membership |
+| `notifications` | In-app alerts (`group_invite`, `settleup_request`, etc.) | Writable via Edge Functions/RPC; readable only by target `user_id` |
+
+---
+
+## ⚡ Supabase Edge Functions
+
+BalanceFlow leverages Deno-powered Supabase Edge Functions for asynchronous server-side tasks:
+
+### Deploying Edge Functions
 ```bash
 supabase functions deploy simplify-debts
 supabase functions deploy send-notification
 ```
 
-Set secrets:
+### Setting Edge Function Secrets
 ```bash
-supabase secrets set RESEND_API_KEY=re_...
-supabase secrets set APP_URL=https://your-app.vercel.app
+supabase secrets set APP_URL=https://your-production-domain.com
+supabase secrets set VAPID_PUBLIC_KEY=your_vapid_public_key
+supabase secrets set VAPID_PRIVATE_KEY=your_vapid_private_key
 ```
 
 ---
 
-## 🧪 Testing
+## 🧪 Testing & Verification
 
 ```bash
-# Unit tests (Vitest + React Testing Library)
+# Run unit tests (Vitest + React Testing Library)
 npm test
 
-# Type checking
+# Run TypeScript type validation across the entire project
 npx tsc --noEmit
 
-# E2E tests (Playwright)
-npx playwright test
-
-# DB tests (pgTAP via Supabase CLI)
-supabase test db
+# Build production bundle
+npm run build
 ```
 
 ---
 
-## 📦 Deployment
+## 📦 Deployment Guide
 
-### Vercel (Frontend)
+### Frontend Deployment (Vercel)
+1. Push your changes to your GitHub repository.
+2. Import the repository into [Vercel](https://vercel.com).
+3. Set the production environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_URL`).
+4. Deploy — Vercel will automatically build and publish whenever commits are pushed to `main`.
 
-1. Push to GitHub
-2. Import repo in [vercel.com](https://vercel.com)
-3. Set environment variables:
-   - `VITE_SUPABASE_URL`
-   - `VITE_SUPABASE_ANON_KEY`
-   - `VITE_APP_URL`
-4. Deploy — Vercel auto-builds on every push to `main`
-
-### Supabase (Backend)
-
+### Backend & Database Maintenance
+Run migrations via CLI whenever schema changes occur:
 ```bash
-supabase db push          # Apply schema migrations
-supabase functions deploy # Deploy Edge Functions
+supabase db push
 ```
-
----
-
-## 🔐 Security Checklist
-
-- [x] Row-Level Security on all tables
-- [x] RLS policies scoped to `auth.uid()` and group membership
-- [x] Storage RLS — only owners and group members can access receipts
-- [x] Zod validation on all form inputs
-- [x] No secrets in client-side code (anon key is safe, service role is Edge Function only)
-- [x] CSRF protection via Supabase Auth cookies
-- [ ] Rate limiting via Upstash Redis in Edge Functions (recommended for production)
 
 ---
 
 ## 📜 License
 
-MIT © BalanceFlow
+Distributed under the **MIT License**. See `LICENSE` for more information.
+
+---
+
+*Built with passion by the BalanceFlow Team.*
