@@ -249,6 +249,12 @@ export function AddExpenseModal() {
     setValue('amount', next, { shouldValidate: true })
   }
 
+  const exactSplitSum = (watchedSplits || [])
+    .filter((s: any) => s.included)
+    .reduce((acc: number, curr: any) => acc + (Number(curr.amount) || 0), 0)
+  const totalExpenseAmount = Number(watchedAmount) || 0
+  const isExactMatching = Math.abs(exactSplitSum - totalExpenseAmount) <= 0.01 && totalExpenseAmount > 0
+
   return (
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
       <DialogContent className="max-w-md" id="add-expense-modal">
@@ -494,6 +500,23 @@ export function AddExpenseModal() {
                 )}
               />
             </div>
+
+            {/* Exact Split Total Summary */}
+            {splitType === 'exact' && (
+              <div
+                className={cn(
+                  'flex items-center justify-between px-4 py-2.5 rounded-xl border text-sm font-semibold transition-colors',
+                  isExactMatching
+                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                    : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400'
+                )}
+              >
+                <span>Split Total</span>
+                <span>
+                  {exactSplitSum.toFixed(2)} out of {totalExpenseAmount.toFixed(2)}
+                </span>
+              </div>
+            )}
 
             {/* Receipt upload */}
             <div className="space-y-1.5">
