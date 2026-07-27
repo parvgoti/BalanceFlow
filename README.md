@@ -89,42 +89,6 @@ supabase/
 
 ---
 
-## 🚀 Quick Start & Local Development
-
-### 1. Prerequisites
-- **Node.js** 18.x or later
-- **npm** / **yarn** / **pnpm**
-- A **Supabase** Project ([https://supabase.com](https://supabase.com))
-
-### 2. Clone Repository & Install Dependencies
-```bash
-git clone https://github.com/parvgoti/BalanceFlow.git
-cd BalanceFlow
-npm install
-```
-
-### 3. Environment Variables Configuration
-Copy the sample environment file:
-```bash
-cp .env.example .env.local
-```
-
-Edit `.env.local` with your Supabase Project credentials:
-```env
-VITE_SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-VITE_APP_URL=http://localhost:5173
-```
-*(You can locate these under **Supabase Dashboard → Project Settings → API**).*
-
-### 4. Start Development Server
-```bash
-npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
----
-
 ## 🗄️ Database Schema & Security Overview
 
 | Table | Primary Purpose | Security Policy / RLS |
