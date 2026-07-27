@@ -117,29 +117,7 @@ VITE_APP_URL=http://localhost:5173
 ```
 *(You can locate these under **Supabase Dashboard → Project Settings → API**).*
 
-### 4. Database Setup & Migrations
-
-#### Option A: Using Supabase CLI (Recommended)
-```bash
-npm install -g supabase
-supabase login
-supabase link --project-ref YOUR_PROJECT_REF
-supabase db push
-```
-
-#### Option B: Manual SQL Execution
-In your **Supabase SQL Editor**, execute the migration files from `supabase/migrations/` in chronological order:
-1. `001_initial_schema.sql` (Creates core tables, enums, triggers, and RLS rules)
-2. `002_storage_policies.sql` (Configures the `receipts` storage bucket and policies)
-3. `003_views.sql` (Creates analytical views and helper RPC functions like `invite_users_to_group`)
-
-### 5. Configure Storage Bucket
-In the **Supabase Dashboard → Storage**, create a bucket named **`receipts`** with:
-- **Public**: `No` (Private bucket protected by RLS)
-- **Allowed MIME types**: `image/jpeg, image/png, image/webp, application/pdf`
-- **Max Upload Size**: `10 MB`
-
-### 6. Start Development Server
+### 4. Start Development Server
 ```bash
 npm run dev
 ```
@@ -164,19 +142,8 @@ Open [http://localhost:5173](http://localhost:5173) in your browser.
 ## ⚡ Supabase Edge Functions
 
 BalanceFlow leverages Deno-powered Supabase Edge Functions for asynchronous server-side tasks:
-
-### Deploying Edge Functions
-```bash
-supabase functions deploy simplify-debts
-supabase functions deploy send-notification
-```
-
-### Setting Edge Function Secrets
-```bash
-supabase secrets set APP_URL=https://your-production-domain.com
-supabase secrets set VAPID_PUBLIC_KEY=your_vapid_public_key
-supabase secrets set VAPID_PRIVATE_KEY=your_vapid_private_key
-```
+- **`simplify-debts`**: Server-side greedy debt simplification calculation.
+- **`send-notification`**: Web Push and in-app alert dispatcher for group invitations and settlement requests.
 
 ---
 
@@ -202,12 +169,6 @@ npm run build
 2. Import the repository into [Vercel](https://vercel.com).
 3. Set the production environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_URL`).
 4. Deploy — Vercel will automatically build and publish whenever commits are pushed to `main`.
-
-### Backend & Database Maintenance
-Run migrations via CLI whenever schema changes occur:
-```bash
-supabase db push
-```
 
 ---
 
