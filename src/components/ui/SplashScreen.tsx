@@ -6,13 +6,13 @@ export function SplashScreen({ isLoading }: { isLoading: boolean }) {
   const fadeOut = !isLoading && minTimeElapsed
 
   useEffect(() => {
-    const timer = setTimeout(() => setMinTimeElapsed(true), 2000)
+    const timer = setTimeout(() => setMinTimeElapsed(true), 300)
     return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
-    if (!isLoading && minTimeElapsed) {
-      const timer = setTimeout(() => setShow(false), 500) // Match the fade-out duration
+    if (!isLoading && minTimeElapsed) { 
+      const timer = setTimeout(() => setShow(false), 300) // Match the fade-out duration
       return () => clearTimeout(timer)
     }
   }, [isLoading, minTimeElapsed])
@@ -21,7 +21,7 @@ export function SplashScreen({ isLoading }: { isLoading: boolean }) {
 
   return (
     <div 
-      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950 transition-opacity duration-500 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
+      className={`fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950 transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}
     >
       <div className="relative flex flex-col items-center">
         {/* Glowing background effect */}

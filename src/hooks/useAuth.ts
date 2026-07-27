@@ -5,20 +5,47 @@ import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
 import { useNotificationStore } from '@/store/notificationStore'
 
+let isAuthInitializing = false
+let globalAuthSubscription: any = null
+
 export function useAuth() {
   const { user, session, profile, isLoading, isInitialized, setUser, setSession, setInitialized, setLoading, fetchProfile, signOut } = useAuthStore()
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id)
+    if (isAuthInitializing || globalAuthSubscription) return
+    isAuthInitializing = true
+
+    // Safety fallback: ensure app unlocks even if auth hangs or locks time out
+    const fallbackTimer = setTimeout(() => {
+      const state = useAuthStore.getState()
+      if (!state.isInitialized) {
+        console.warn('Auth initialization timed out; releasing app lock.')
+        state.setInitialized(true)
+        state.setLoading(false)
       }
-      setLoading(false)
-      setInitialized(true)
-    })
+    }, 2500)
+
+    // Get initial session with robust error handling
+    const initSession = async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession()
+        if (error) throw error
+        const session = data?.session ?? null
+        setSession(session)
+        setUser(session?.user ?? null)
+        if (session?.user) {
+          await fetchProfile(session.user.id)
+        }
+      } catch (err) {
+        console.error('Failed to get auth session:', err)
+      } finally {
+        clearTimeout(fallbackTimer)
+        setLoading(false)
+        setInitialized(true)
+      }
+    }
+
+    initSession()
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -32,8 +59,11 @@ export function useAuth() {
         setInitialized(true)
       }
     )
+    globalAuthSubscription = subscription
 
-    return () => subscription.unsubscribe()
+    return () => {
+      clearTimeout(fallbackTimer)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
