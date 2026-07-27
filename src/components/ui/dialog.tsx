@@ -36,11 +36,11 @@ const DialogContent = React.forwardRef<
       ref={ref}
       className={cn(
         'fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2',
-        'w-full max-w-lg',
-        'bg-white dark:bg-gray-900 rounded-2xl shadow-modal',
-        'border border-gray-100 dark:border-gray-800',
+        'w-[92vw] sm:w-full max-w-lg',
+        'bg-white dark:bg-slate-900 rounded-2xl shadow-2xl',
+        'border border-gray-200/80 dark:border-slate-800/80',
         'data-[state=open]:animate-scale-in',
-        'max-h-[90vh] overflow-y-auto',
+        'max-h-[90vh] overflow-hidden flex flex-col',
         className
       )}
       {...props}
@@ -58,17 +58,17 @@ const DialogContent = React.forwardRef<
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('px-6 pt-6 pb-4 border-b border-gray-100 dark:border-gray-800', className)} {...props} />
+  <div className={cn('px-6 pt-6 pb-4 border-b border-gray-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 shrink-0', className)} {...props} />
 )
 DialogHeader.displayName = 'DialogHeader'
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex gap-3 justify-end', className)} {...props} />
+  <div className={cn('px-6 py-4 border-t border-gray-100 dark:border-slate-800/80 bg-gray-50/80 dark:bg-slate-900/80 flex gap-3 justify-end shrink-0', className)} {...props} />
 )
 DialogFooter.displayName = 'DialogFooter'
 
 const DialogBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('px-6 py-4', className)} {...props} />
+  <div className={cn('px-6 py-4 overflow-y-auto', className)} {...props} />
 )
 
 const DialogTitle = React.forwardRef<
