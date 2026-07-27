@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { TopBar } from './TopBar'
+import { BottomNav } from './BottomNav'
 import { AddExpenseModal } from '@/components/expenses/AddExpenseModal'
 import { CreateGroupModal } from '@/components/groups/CreateGroupModal'
 import { useUIStore } from '@/store/uiStore'
@@ -15,7 +16,7 @@ export function AppLayout() {
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
-      {/* Sidebar */}
+      {/* Sidebar — desktop only */}
       <Sidebar />
 
       {/* Main content */}
@@ -23,10 +24,13 @@ export function AppLayout() {
         <div className="absolute top-0 inset-x-0 z-20">
           <TopBar />
         </div>
-        <main className="flex-1 overflow-y-auto pt-16">
+        <main className="flex-1 overflow-y-auto pt-16 pb-20 lg:pb-0">
           <Outlet />
         </main>
       </div>
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNav />
 
       {/* Global Modals */}
       {activeModal === 'add-expense' && <AddExpenseModal />}

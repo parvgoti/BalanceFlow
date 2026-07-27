@@ -6,7 +6,7 @@ import {
 } from 'date-fns'
 import {
   ArrowLeft, Download, Users, DollarSign, BarChart2,
-  Search, Filter, Settings, UserMinus, UserPlus, History, Trash2, X
+  Search, Filter, Settings, UserMinus, UserPlus, History, Trash2, X, Plus
 } from 'lucide-react'
 import { UserSearchInput } from '@/components/ui/UserSearchInput'
 import { useGroup, useGroupBalances, useAddMembers, useRemoveMember, useDeleteGroup, useResetGroupData } from '@/hooks/useGroups'
@@ -174,57 +174,93 @@ export function GroupDetailPage() {
   return (
     <div className="flex flex-col lg:flex-row h-full">
       {/* Main content */}
-      <div className="flex-1 p-6 space-y-6 overflow-y-auto">
-        {/* Breadcrumb + header */}
+      <div className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto pb-24 lg:pb-6">
+        {/* Back + Group Name Header */}
         <div>
-          <Link to="/groups" className="flex items-center gap-1 text-sm text-gray-500 hover:text-brand mb-4 transition-colors">
+          <Link to="/groups" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-brand mb-3 transition-colors">
             <ArrowLeft className="h-4 w-4" />
-            Groups
+            <span className="hidden sm:inline">Groups</span>
           </Link>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">{groupName}</h1>
-              <div className="flex items-center gap-4 mt-2">
-                <AvatarGroup
-                  users={members.map(m => ({
-                    id: m.user_id,
-                    full_name: m.profiles?.full_name ?? '?',
-                    avatar_url: m.profiles?.avatar_url,
-                  }))}
-                  max={4}
-                />
-                <div className="text-sm text-gray-500">
-                  <span className="font-semibold text-gray-900 dark:text-white uppercase text-xs tracking-wide">Total Group Spend</span>
-                  <p className="font-bold text-gray-900 dark:text-white text-lg">
-                    {formatCurrency(allExpenses.reduce((s, e) => s + ((e as any).amount ?? 0), 0))}
-                  </p>
-                </div>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">{groupName}</h1>
+              <div className="flex items-center gap-2 mt-1.5">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  {(group as any)?.currency ?? 'INR'} {new Intl.NumberFormat('en-US', { style: 'currency', currency: (group as any)?.currency || 'INR' }).formatToParts(0).find(x => x.type === 'currency')?.value || '₹'}
+                </span>
               </div>
-            </div>
-            <div className="flex gap-2 shrink-0">
-              <Button variant="outline" size="sm" id={`group-export-btn-${groupId}`}>
-                <Download className="h-4 w-4" />
-                Export Report
-              </Button>
-              <Button
-                size="sm"
-                id={`group-settle-btn-${groupId}`}
-                onClick={() => myDebts.length > 0 && setSettleDebt(myDebts[0])}
-                disabled={myDebts.length === 0}
-              >
-                💸 Settle Up
-              </Button>
             </div>
           </div>
         </div>
+
+        {/* Member Avatars + Invite */}
+        <div className="flex items-center gap-3">
+          <AvatarGroup
+            users={members.map(m => ({
+              id: m.user_id,
+              full_name: m.profiles?.full_name ?? '?',
+              avatar_url: m.profiles?.avatar_url,
+            }))}
+            max={3}
+          />
+          {members.length > 3 && (
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">+{members.length - 3}</span>
+          )}
+          {isAdmin && (
+            <button
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:border-brand hover:text-brand transition-colors"
+              onClick={() => {
+                const tabsTrigger = document.querySelector('[data-value="settings"]') as HTMLButtonElement
+                tabsTrigger?.click()
+              }}
+            >
+              <UserPlus className="h-3.5 w-3.5" />
+              Invite
+            </button>
+          )}
+        </div>
+
+        {/* Total Group Spend + You Owe Cards */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="card p-4">
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Group Spend</p>
+            <p className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white mt-1">
+              {formatCurrency(allExpenses.reduce((s, e) => s + ((e as any).amount ?? 0), 0))}
+            </p>
+          </div>
+          <div className={cn(
+            "card p-4 border-l-2",
+            myBalance < 0 ? "border-l-red-400" : myBalance > 0 ? "border-l-emerald-400" : "border-l-gray-200"
+          )}>
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+              {myBalance >= 0 ? 'You are owed' : 'You Owe'}
+            </p>
+            <p className={cn(
+              "text-xl sm:text-2xl font-extrabold mt-1",
+              myBalance < 0 ? "text-red-500 dark:text-red-400" : myBalance > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-gray-400"
+            )}>
+              {formatCurrency(Math.abs(myBalance))}
+            </p>
+          </div>
+        </div>
+
+        {/* Full-width Add Expense CTA */}
+        <Button
+          className="w-full bg-brand hover:bg-brand-light text-white font-semibold shadow-glow h-12 rounded-xl text-sm"
+          id={`group-add-expense-cta-${groupId}`}
+          onClick={() => openModal('add-expense', { groupId })}
+        >
+          <Plus className="h-5 w-5 mr-1.5" />
+          Add Expense
+        </Button>
 
         {/* Tabs */}
         <Tabs defaultValue="expenses">
           <TabsList>
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
-            <TabsTrigger value="balances"><Users className="h-4 w-4" />Balances</TabsTrigger>
-            <TabsTrigger value="charts"><BarChart2 className="h-4 w-4" />Charts</TabsTrigger>
+            <TabsTrigger value="balances"><Users className="h-4 w-4" />Members</TabsTrigger>
             <TabsTrigger value="settlements"><History className="h-4 w-4" />Settlements</TabsTrigger>
+            <TabsTrigger value="charts"><BarChart2 className="h-4 w-4" />Analytics</TabsTrigger>
             {isAdmin && <TabsTrigger value="settings"><Settings className="h-4 w-4" />Settings</TabsTrigger>}
           </TabsList>
 
@@ -244,15 +280,7 @@ export function GroupDetailPage() {
               </div>
               <Button variant="secondary" size="sm" id="expense-filter-btn">
                 <Filter className="h-4 w-4" />
-                Filter
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                id="add-expense-from-group-btn"
-                onClick={() => openModal('add-expense', { groupId })}
-              >
-                + Add
+                <span className="hidden sm:inline">Filter</span>
               </Button>
             </div>
 

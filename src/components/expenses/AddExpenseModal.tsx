@@ -259,7 +259,7 @@ export function AddExpenseModal() {
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
       <DialogContent className="max-w-md" id="add-expense-modal">
         <DialogHeader>
-          <DialogTitle>{isEditing ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
+          <DialogTitle className="text-xl">{isEditing ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
           <DialogDescription>
             {isEditing ? 'Update the details for this expense.' : 'Track a new expense and split it with the group.'}
           </DialogDescription>
@@ -267,10 +267,11 @@ export function AddExpenseModal() {
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogBody className="space-y-5">
-            {/* Amount input */}
-            <div className="flex flex-col items-center py-4">
-              <div className="flex items-center gap-2">
-                <span className="text-4xl font-bold text-brand">
+            {/* Hero Amount Section — Green Card */}
+            <div className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-5 text-white">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/60 text-center mb-2">Total Amount</p>
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-3xl font-bold text-white/80">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: group?.currency || 'INR' })
                     .formatToParts(0).find(x => x.type === 'currency')?.value || '₹'}
                 </span>
@@ -286,19 +287,19 @@ export function AddExpenseModal() {
                   onBlur={() => {
                     if (!amountStr) setAmountStr('0.00')
                   }}
-                  className="text-4xl font-bold w-36 text-center bg-transparent border-none outline-none text-gray-400 focus:text-gray-900 dark:focus:text-white transition-colors"
+                  className="text-3xl sm:text-4xl font-extrabold w-32 sm:w-36 text-center bg-transparent border-none outline-none text-white placeholder-white/40 focus:outline-none"
                   placeholder="0.00"
                 />
                 <div className="flex flex-col gap-0.5">
-                  <button type="button" onClick={() => adjustAmount(1)} className="text-gray-400 hover:text-brand">
+                  <button type="button" onClick={() => adjustAmount(1)} className="text-white/50 hover:text-white">
                     <ChevronUp className="h-4 w-4" />
                   </button>
-                  <button type="button" onClick={() => adjustAmount(-1)} className="text-gray-400 hover:text-brand">
+                  <button type="button" onClick={() => adjustAmount(-1)} className="text-white/50 hover:text-white">
                     <ChevronDown className="h-4 w-4" />
                   </button>
                 </div>
               </div>
-              {errors.amount && <p className="text-xs text-red-500 mt-1">{errors.amount.message}</p>}
+              {errors.amount && <p className="text-xs text-red-200 mt-2 text-center">{errors.amount.message}</p>}
             </div>
 
             {/* Description */}
@@ -390,30 +391,28 @@ export function AddExpenseModal() {
             {/* Divider */}
             <div className="border-t border-gray-100 dark:border-gray-800" />
 
-            {/* Split options */}
+            {/* Split Method */}
             <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">Split options</span>
-                <div className="flex rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden text-xs font-medium">
-                  {(['equal', 'percentage', 'exact'] as SplitType[]).map((type) => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => {
-                        setSplitType(type)
-                        setValue('split_type', type)
-                      }}
-                      className={cn(
-                        'px-3 py-1.5 transition-colors',
-                        splitType === type
-                          ? 'bg-brand text-white'
-                          : 'bg-white dark:bg-gray-900 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'
-                      )}
-                    >
-                      {type === 'equal' ? '= Equal' : type === 'percentage' ? '% Pct' : '$ Exact'}
-                    </button>
-                  ))}
-                </div>
+              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Split Method</p>
+              <div className="flex rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden text-sm font-medium">
+                {(['equal', 'percentage', 'exact'] as SplitType[]).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => {
+                      setSplitType(type)
+                      setValue('split_type', type)
+                    }}
+                    className={cn(
+                      'flex-1 px-3 py-2.5 transition-all text-center',
+                      splitType === type
+                        ? 'bg-brand text-white font-semibold'
+                        : 'bg-white dark:bg-gray-900 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'
+                    )}
+                  >
+                    {type === 'equal' ? '= Equal' : type === 'percentage' ? '% Pct' : '$ Exact'}
+                  </button>
+                ))}
               </div>
 
               {/* Split rows */}
@@ -501,20 +500,32 @@ export function AddExpenseModal() {
               />
             </div>
 
-            {/* Exact Split Total Summary */}
+            {/* Exact Split Total Validation Banner */}
             {splitType === 'exact' && (
               <div
                 className={cn(
-                  'flex items-center justify-between px-4 py-2.5 rounded-xl border text-sm font-semibold transition-colors',
+                  'flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold transition-all',
                   isExactMatching
-                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
-                    : 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-600 dark:text-red-400'
+                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                    : 'bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400'
                 )}
               >
-                <span>Split Total</span>
-                <span>
-                  {exactSplitSum.toFixed(2)} out of {totalExpenseAmount.toFixed(2)}
+                <span className={cn(
+                  'flex items-center justify-center h-7 w-7 rounded-full shrink-0',
+                  isExactMatching
+                    ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600'
+                    : 'bg-red-100 dark:bg-red-900/50 text-red-500'
+                )}>
+                  {isExactMatching ? '✓' : '⚠'}
                 </span>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">
+                    {isExactMatching ? 'Matched' : 'Unmatched'}
+                  </p>
+                  <p className="text-sm">
+                    SPLIT TOTAL <strong>{exactSplitSum.toFixed(2)}</strong> OUT OF {totalExpenseAmount.toFixed(2)}
+                  </p>
+                </div>
               </div>
             )}
 
@@ -553,8 +564,13 @@ export function AddExpenseModal() {
                 {formError}
               </div>
             )}
-            <div className="flex justify-end gap-2 w-full">
-              <Button type="button" variant="secondary" onClick={closeModal}>
+            <div className="flex gap-3 w-full">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeModal}
+                className="flex-1 h-12 rounded-xl text-sm font-bold uppercase tracking-wider"
+              >
                 Cancel
               </Button>
               <Button
@@ -562,8 +578,8 @@ export function AddExpenseModal() {
                 type="submit"
                 loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
                 disabled={!selectedGroupId}
+                className="flex-1 h-12 rounded-xl bg-brand hover:bg-brand-light text-white text-sm font-bold uppercase tracking-wider shadow-glow"
               >
-                <Check className="h-4 w-4" />
                 {isEditing ? 'Save Changes' : 'Save Expense'}
               </Button>
             </div>

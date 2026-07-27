@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { TrendingUp, TrendingDown, ArrowUpRight } from 'lucide-react'
+import { TrendingUp, TrendingDown, ArrowUpRight, Plus, Wallet } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { useGroups } from '@/hooks/useGroups'
 import { useActivityFeed } from '@/hooks/useExpenses'
@@ -10,6 +10,8 @@ import { CategoryIcon } from '@/components/shared/CategoryIcon'
 import { StatusBadge } from '@/components/shared/CategoryIcon'
 import { CardSkeleton } from '@/components/shared/Skeleton'
 import { TopCategoriesList } from '@/components/charts/Charts'
+import { Button } from '@/components/ui/button'
+import { useUIStore } from '@/store/uiStore'
 import { formatRelativeTime, CATEGORY_CONFIG, formatCurrency, cn } from '@/lib/utils'
 import type { ExpenseCategory, ActivityItem } from '@/types/database'
 
@@ -18,6 +20,7 @@ export function DashboardPage() {
   const { data: summary, isLoading: summaryLoading } = useDashboardSummary()
   const { data: groupsData } = useGroups()
   const { data: activityData, isLoading: activityLoading } = useActivityFeed()
+  const { openModal } = useUIStore()
 
   // Get active group IDs to filter out archived group data
   const activeGroupIds = useMemo(
@@ -50,99 +53,112 @@ export function DashboardPage() {
   const firstName = profile?.full_name?.split(' ')[0] ?? 'there'
   const now = new Date()
   const hour = now.getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const greeting = hour < 12 ? 'GOOD MORNING' : hour < 17 ? 'GOOD AFTERNOON' : 'GOOD EVENING'
+
+  const netBalance = summary?.netBalance ?? 0
+  const totalOweMe = summary?.totalOweMe ?? 0
+  const totalIOwe = summary?.totalIOwe ?? 0
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
-      {/* Header */}
+    <div className="p-4 sm:p-6 space-y-5 max-w-6xl mx-auto">
+      {/* Greeting header */}
       <div>
-        <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Overview</h1>
-        <p className="text-gray-500 dark:text-gray-400 mt-1">
-          {greeting}, {firstName}! Here&apos;s your financial status across all groups.
-        </p>
+        <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 tracking-widest">{greeting}</p>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white mt-0.5">{profile?.full_name ?? firstName}</h1>
       </div>
 
-      {/* Balance summary */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Net balance (large) */}
-        {summaryLoading ? (
-          <div className="lg:col-span-2"><CardSkeleton /></div>
-        ) : (
-          <div className="lg:col-span-2 card p-6 bg-gradient-to-br from-brand-subtle to-primary-50 dark:from-brand-dark/20 dark:to-gray-900">
-            <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
-              Total Net Balance
-            </p>
-            <div className="flex items-center gap-3 mb-4">
-              <CurrencyDisplay
-                amount={summary?.netBalance ?? 0}
-                signed
-                showColor
-                size="2xl"
-              />
-              {(summary?.netBalance ?? 0) === 0 ? (
-                <span className="flex items-center gap-1 text-xs font-semibold text-gray-500 bg-gray-100 dark:bg-gray-800 px-2.5 py-1 rounded-full">
-                  All settled up
-                </span>
-              ) : (summary?.netBalance ?? 0) > 0 ? (
-                <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 px-2.5 py-1 rounded-full">
-                  <TrendingUp className="h-3 w-3" />
-                  You are owed
-                </span>
-              ) : (
-                <span className="flex items-center gap-1 text-xs font-semibold text-red-500 bg-red-100 dark:bg-red-900/30 px-2.5 py-1 rounded-full">
-                  <TrendingDown className="h-3 w-3" />
-                  You owe money
-                </span>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                  <TrendingDown className="h-3 w-3 text-emerald-500" />
-                  YOU ARE OWED
-                </div>
-                <CurrencyDisplay amount={summary?.totalOweMe ?? 0} size="lg" className="text-gray-900 dark:text-white" />
-              </div>
-              <div className="bg-white/60 dark:bg-gray-800/60 rounded-xl p-4">
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
-                  <TrendingUp className="h-3 w-3 text-red-500" />
-                  YOU OWE
-                </div>
-                <CurrencyDisplay amount={summary?.totalIOwe ?? 0} size="lg" className="text-gray-900 dark:text-white" />
-              </div>
+      {/* ── Hero Net Balance Card ───────────────────────────────────── */}
+      {summaryLoading ? (
+        <CardSkeleton />
+      ) : (
+        <div className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-5 sm:p-6 text-white shadow-glow">
+          <p className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">Total Net Balance</p>
+          <p className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+            {netBalance >= 0 ? '' : '-'}
+            {formatCurrency(Math.abs(netBalance))}
+          </p>
+          <div className="flex items-center gap-1.5 mt-2">
+            {netBalance > 0 ? (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-white/20 text-white px-2.5 py-0.5 rounded-full">
+                <TrendingUp className="h-3 w-3" /> Net Positive
+              </span>
+            ) : netBalance < 0 ? (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-white/20 text-white px-2.5 py-0.5 rounded-full">
+                <TrendingDown className="h-3 w-3" /> Net Negative
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-white/20 text-white px-2.5 py-0.5 rounded-full">
+                All settled up ✓
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── You are Owed / You Owe ─────────────────────────────────── */}
+      {!summaryLoading && (
+        <div className="grid grid-cols-2 gap-3">
+          <div className="card p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                <TrendingDown className="h-3.5 w-3.5 text-emerald-500" />
+                You are owed
+              </p>
+              <p className="text-xl sm:text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">
+                {formatCurrency(totalOweMe)}
+              </p>
             </div>
           </div>
-        )}
-
-        {/* Top categories */}
-        <div className="card p-6">
-          <h3 className="font-bold text-gray-900 dark:text-white mb-4">Top Categories</h3>
-          {categoryTotals.length > 0 ? (
-            <TopCategoriesList data={categoryTotals} />
-          ) : (
-            <div className="text-center py-8 text-gray-400 text-sm">
-              No expenses yet
+          <div className="card p-4 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                <TrendingUp className="h-3.5 w-3.5 text-red-500" />
+                You owe
+              </p>
+              <p className="text-xl sm:text-2xl font-extrabold text-red-500 dark:text-red-400 mt-1">
+                {formatCurrency(totalIOwe)}
+              </p>
             </div>
-          )}
+          </div>
         </div>
+      )}
+
+      {/* ── Quick Action Buttons ───────────────────────────────────── */}
+      <div className="grid grid-cols-2 gap-3">
+        <Button
+          id="dashboard-add-expense-btn"
+          onClick={() => openModal('add-expense')}
+          className="bg-brand hover:bg-brand-light text-white font-semibold shadow-glow h-12 rounded-xl text-sm"
+        >
+          <Plus className="h-4 w-4 mr-1.5" />
+          Add Expense
+        </Button>
+        <Button
+          variant="outline"
+          className="h-12 rounded-xl text-sm font-semibold border-gray-200 dark:border-gray-700"
+          onClick={() => {}}
+        >
+          <Wallet className="h-4 w-4 mr-1.5" />
+          Settle Up
+        </Button>
       </div>
 
-      {/* Recent activity */}
+      {/* ── Recent Activity ────────────────────────────────────────── */}
       <div className="card">
-        <div className="flex items-center justify-between px-6 pt-6 pb-4">
+        <div className="flex items-center justify-between px-4 sm:px-6 pt-5 pb-3">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white">Recent Activity</h2>
           <Link
             to="/activity"
             className="text-sm text-brand font-medium hover:underline flex items-center gap-1"
           >
-            View All <ArrowUpRight className="h-3.5 w-3.5" />
+            See All <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
         <div className="divide-y divide-gray-50 dark:divide-gray-800">
           {activityLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 px-6 py-4">
-                <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-800 animate-pulse" />
+              <div key={i} className="flex items-center gap-4 px-4 sm:px-6 py-4">
+                <div className="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-800 animate-pulse" />
                 <div className="flex-1 space-y-1.5">
                   <div className="h-4 w-40 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
                   <div className="h-3 w-24 bg-gray-100 dark:bg-gray-800 rounded animate-pulse" />
@@ -156,12 +172,12 @@ export function DashboardPage() {
               No recent activity. Add your first expense!
             </div>
           ) : (
-            recentActivity.slice(0, 8).map((item: ActivityItem) => (
-              <div key={`${item.type}-${item.id}`} className={cn("flex items-center gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors", item.type === 'deleted_expense' && "opacity-75 grayscale")}>
+            recentActivity.slice(0, 6).map((item: ActivityItem) => (
+              <div key={`${item.type}-${item.id}`} className={cn("flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3.5 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors", item.type === 'deleted_expense' && "opacity-75 grayscale")}>
                 <CategoryIcon category={item.category as ExpenseCategory} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className={cn("text-sm font-semibold truncate", item.type === 'deleted_expense' ? "text-gray-500 line-through" : "text-gray-900 dark:text-white")}>{item.title}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                     {item.group_name} • {formatRelativeTime(item.created_at)}
                   </p>
                 </div>
@@ -183,7 +199,7 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Groups quick access */}
+      {/* ── Your Groups (Quick Access) ─────────────────────────────── */}
       {(groupsData?.length ?? 0) > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
@@ -208,6 +224,14 @@ export function DashboardPage() {
               </Link>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* ── Top Categories (hidden on mobile to keep it clean, shown on md+) ── */}
+      {categoryTotals.length > 0 && (
+        <div className="card p-5 hidden md:block">
+          <h3 className="font-bold text-gray-900 dark:text-white mb-4">Top Categories</h3>
+          <TopCategoriesList data={categoryTotals} />
         </div>
       )}
     </div>
