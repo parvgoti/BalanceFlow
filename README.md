@@ -111,31 +111,6 @@ BalanceFlow leverages Deno-powered Supabase Edge Functions for asynchronous serv
 
 ---
 
-## 🧪 Testing & Verification
-
-```bash
-# Run unit tests (Vitest + React Testing Library)
-npm test
-
-# Run TypeScript type validation across the entire project
-npx tsc --noEmit
-
-# Build production bundle
-npm run build
-```
-
----
-
-## 📦 Deployment Guide
-
-### Frontend Deployment (Vercel)
-1. Push your changes to your GitHub repository.
-2. Import the repository into [Vercel](https://vercel.com).
-3. Set the production environment variables (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_APP_URL`).
-4. Deploy — Vercel will automatically build and publish whenever commits are pushed to `main`.
-
----
-
 ## 📜 License
 
 Distributed under the **MIT License**. See `LICENSE` for more information.
