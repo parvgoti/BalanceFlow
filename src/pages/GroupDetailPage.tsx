@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear,
   eachDayOfInterval, eachMonthOfInterval, format, isWithinInterval, parseISO
@@ -106,6 +106,26 @@ export function GroupDetailPage() {
   // Simplified debts
   const simplifiedDebts = typedBalances.length ? simplifyDebts(typedBalances) : []
   const myDebts = simplifiedDebts.filter(d => d.from_user_id === user?.id || d.to_user_id === user?.id)
+
+  // Automatically open settle up modal if navigated from dashboard with autoSettle
+  const location = useLocation()
+  useEffect(() => {
+    const state = location.state as { openSettleModal?: boolean } | null
+    const queryParams = new URLSearchParams(location.search)
+    const shouldOpenSettle = state?.openSettleModal || queryParams.get('settle') === 'true'
+
+    if (shouldOpenSettle && myDebts.length > 0 && !settleDebt) {
+      setSettleDebt(myDebts[0])
+      // Clean up URL/state so refresh doesn't reopen modal
+      if (queryParams.get('settle') === 'true') {
+        queryParams.delete('settle')
+        const newSearch = queryParams.toString()
+        navigate(`/groups/${groupId}${newSearch ? '?' + newSearch : ''}`, { replace: true, state: {} })
+      } else if (state?.openSettleModal) {
+        navigate(`/groups/${groupId}`, { replace: true, state: {} })
+      }
+    }
+  }, [location.state, location.search, myDebts, settleDebt, groupId, navigate])
 
   // Settlement progress
   const totalUnsettled = typedBalances.reduce((s, b) => s + Math.abs(b.net_balance), 0)

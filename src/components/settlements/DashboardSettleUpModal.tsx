@@ -17,7 +17,7 @@ function GroupSettleRow({
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   group: any
-  onSelect: (groupId: string) => void
+  onSelect: (groupId: string, autoSettle: boolean) => void
 }) {
   const { user } = useAuthStore()
   const { data: balancesRaw, isLoading } = useGroupBalances(group.id)
@@ -44,7 +44,7 @@ function GroupSettleRow({
 
   return (
     <div
-      onClick={() => onSelect(group.id)}
+      onClick={() => onSelect(group.id, myBalance !== 0)}
       className={cn(
         "group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md",
         myBalance < 0
@@ -96,7 +96,7 @@ function GroupSettleRow({
           )}
           onClick={(e) => {
             e.stopPropagation()
-            onSelect(group.id)
+            onSelect(group.id, myBalance !== 0)
           }}
         >
           <span>{myBalance === 0 ? 'View' : 'Settle'}</span>
@@ -108,16 +108,15 @@ function GroupSettleRow({
 }
 
 export function DashboardSettleUpModal() {
-  const { closeModal, openModal } = useUIStore()
+  const { closeModal } = useUIStore()
   const { data: groups, isLoading } = useGroups()
   const navigate = useNavigate()
 
-  const handleSelectGroup = (groupId: string) => {
+  const handleSelectGroup = (groupId: string, autoSettle = true) => {
     closeModal()
-    navigate(`/groups/${groupId}`)
-    setTimeout(() => {
-      openModal('settle-up', { groupId })
-    }, 150)
+    navigate(`/groups/${groupId}${autoSettle ? '?settle=true' : ''}`, {
+      state: { openSettleModal: autoSettle }
+    })
   }
 
   return (
