@@ -13,6 +13,12 @@ import { useGroup, useGroupBalances, useAddMembers, useRemoveMember, useDeleteGr
 import { useExpenses, useDeleteExpense } from '@/hooks/useExpenses'
 import { useSettlements } from '@/hooks/useSettlements'
 import { useRealtimeGroup } from '@/hooks/useRealtime'
+import {
+  useGroupResetRequests,
+  useCreateResetRequest,
+  useRespondResetRequest,
+  useCancelResetRequest,
+} from '@/hooks/useGroupResetRequests'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { AvatarGroup, UserAvatar } from '@/components/ui/avatar'
@@ -77,6 +83,10 @@ export function GroupDetailPage() {
   }
   const deleteGroup = useDeleteGroup()
   const resetGroupData = useResetGroupData(groupId)
+  const { data: resetRequests = [] } = useGroupResetRequests(groupId)
+  const createResetRequest = useCreateResetRequest(groupId)
+  const respondResetRequest = useRespondResetRequest(groupId)
+  const cancelResetRequest = useCancelResetRequest(groupId)
 
   // Subscribe to realtime updates
   useRealtimeGroup(groupId)
@@ -106,6 +116,12 @@ export function GroupDetailPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const members: any[] = (group as any)?.group_members ?? []
   const isAdmin = members.find(m => m.user_id === user?.id)?.role === 'admin'
+
+  const hasPendingReset = resetRequests.length > 0
+  const hasDeniedReset = resetRequests.some(r => r.status === 'denied')
+  const allAcceptedReset = resetRequests.length > 0 && resetRequests.every(r => r.status === 'accepted') && resetRequests.length === members.length
+  const myResetStatus = resetRequests.find(r => r.user_id === user?.id)?.status
+  const resetRequester = resetRequests[0]?.profile?.full_name || 'An admin'
 
   // Chart data
   const trendData = useMemo(() => {
@@ -220,6 +236,95 @@ export function GroupDetailPage() {
             </button>
           )}
         </div>
+
+        {/* Reset Request Banner */}
+        {hasPendingReset && (
+          <div className={cn(
+            "p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4",
+            hasDeniedReset
+              ? "bg-red-50/80 dark:bg-red-950/40 border-red-200 dark:border-red-900"
+              : allAcceptedReset
+                ? "bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900"
+                : "bg-amber-50/80 dark:bg-amber-950/40 border-amber-200 dark:border-amber-900"
+          )}>
+            <div className="flex items-start gap-3">
+              <span className="text-2xl shrink-0">
+                {hasDeniedReset ? '❌' : allAcceptedReset ? '✅' : '⚠️'}
+              </span>
+              <div>
+                <h4 className={cn(
+                  "text-sm font-bold",
+                  hasDeniedReset ? "text-red-900 dark:text-red-300"
+                  : allAcceptedReset ? "text-emerald-900 dark:text-emerald-300"
+                  : "text-amber-900 dark:text-amber-300"
+                )}>
+                  {hasDeniedReset && "Group Data Reset Denied"}
+                  {allAcceptedReset && "Group Data Reset Approved"}
+                  {!hasDeniedReset && !allAcceptedReset && `Group Data Reset Requested (${resetRequests.filter(r => r.status === 'accepted').length}/${members.length} Accepted)`}
+                </h4>
+                <p className={cn(
+                  "text-xs mt-0.5",
+                  hasDeniedReset ? "text-red-700 dark:text-red-400"
+                  : allAcceptedReset ? "text-emerald-700 dark:text-emerald-400"
+                  : "text-amber-700 dark:text-amber-400"
+                )}>
+                  {hasDeniedReset && "A group member denied the request to reset group data. The admin cannot reset the data."}
+                  {allAcceptedReset && "All members accepted! The admin can now reset the group data."}
+                  {!hasDeniedReset && !allAcceptedReset && `${resetRequester} has requested to reset all expense and settlement data. Every member must accept.`}
+                </p>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {resetRequests.map(r => (
+                    <span
+                      key={r.id}
+                      className={cn(
+                        "inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full border",
+                        r.status === 'accepted' && "bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950 dark:text-emerald-300 dark:border-emerald-800",
+                        r.status === 'pending' && "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950 dark:text-amber-300 dark:border-amber-800",
+                        r.status === 'denied' && "bg-red-100 text-red-800 border-red-300 dark:bg-red-950 dark:text-red-300 dark:border-red-800"
+                      )}
+                    >
+                      {r.profile?.full_name || 'Member'}: {r.status}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              {myResetStatus === 'pending' && (
+                <>
+                  <Button
+                    size="sm"
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold"
+                    loading={respondResetRequest.isPending}
+                    onClick={() => respondResetRequest.mutate({ status: 'accepted' })}
+                  >
+                    Accept ✓
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-red-600 border-red-300 hover:bg-red-100 dark:hover:bg-red-950 text-xs font-semibold"
+                    loading={respondResetRequest.isPending}
+                    onClick={() => respondResetRequest.mutate({ status: 'denied' })}
+                  >
+                    Deny ✕
+                  </Button>
+                </>
+              )}
+              {isAdmin && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                  onClick={() => cancelResetRequest.mutate()}
+                >
+                  Cancel Request
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Total Group Spend + You Owe Cards */}
         <div className="grid grid-cols-2 gap-3">
@@ -663,48 +768,131 @@ export function GroupDetailPage() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-900/20">
-                    <div>
+                    <div className="space-y-1.5">
                       <p className="font-medium text-orange-900 dark:text-orange-400">Reset Group Data</p>
-                      <p className="text-xs text-orange-700/70 dark:text-orange-400/70 mt-1">
+                      <p className="text-xs text-orange-700/70 dark:text-orange-400/70">
                         Permanently delete all expenses and settlements. Group members will remain.
                       </p>
+                      {members.length > 1 && hasDeniedReset && (
+                        <p className="text-xs font-semibold text-red-700 dark:text-red-400">
+                          ❌ Request denied by a group member.
+                        </p>
+                      )}
+                      {members.length > 1 && hasPendingReset && !hasDeniedReset && !allAcceptedReset && (
+                        <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                          ⏳ Waiting for all group members to accept ({resetRequests.filter(r => r.status === 'accepted').length}/{members.length} accepted).
+                        </p>
+                      )}
                     </div>
-                    {confirmReset ? (
-                      <div className="flex items-center gap-2">
+
+                    {members.length <= 1 ? (
+                      confirmReset ? (
+                        <div className="flex items-center gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => setConfirmReset(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button 
+                            variant="default"
+                            size="sm"
+                            className="bg-orange-600 hover:bg-orange-700 text-white"
+                            loading={resetGroupData.isPending}
+                            onClick={async () => {
+                              try {
+                                await resetGroupData.mutateAsync()
+                                setConfirmReset(false)
+                                alert('All data has been reset successfully.')
+                              } catch (err: any) {
+                                console.error(err)
+                                alert(err.message || 'Failed to reset data. Are you an admin?')
+                                setConfirmReset(false)
+                              }
+                            }}
+                          >
+                            Yes, Reset Data
+                          </Button>
+                        </div>
+                      ) : (
                         <Button 
-                          variant="ghost" 
+                          variant="outline" 
+                          className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900/40 border-orange-200 dark:border-orange-900/50 shrink-0"
+                          onClick={() => setConfirmReset(true)}
+                        >
+                          <History className="h-4 w-4" /> Reset Data
+                        </Button>
+                      )
+                    ) : hasDeniedReset ? (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
                           size="sm"
-                          onClick={() => setConfirmReset(false)}
+                          disabled
+                          className="text-red-600 border-red-300 opacity-60 cursor-not-allowed"
+                        >
+                          Request Denied
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => cancelResetRequest.mutate()}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    ) : allAcceptedReset ? (
+                      <Button
+                        variant="default"
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white shrink-0"
+                        loading={resetGroupData.isPending}
+                        onClick={async () => {
+                          try {
+                            await resetGroupData.mutateAsync()
+                            await cancelResetRequest.mutateAsync()
+                            alert('All group data has been reset successfully.')
+                          } catch (err: any) {
+                            console.error(err)
+                            alert(err.message || 'Failed to reset group data')
+                          }
+                        }}
+                      >
+                        Yes, Reset Data Now
+                      </Button>
+                    ) : hasPendingReset ? (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          disabled
+                          className="text-amber-700 border-amber-300 opacity-70 cursor-not-allowed shrink-0"
+                        >
+                          Waiting for Approvals ({resetRequests.filter(r => r.status === 'accepted').length}/{members.length})
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => cancelResetRequest.mutate()}
                         >
                           Cancel
                         </Button>
-                        <Button 
-                          variant="default"
-                          size="sm"
-                          className="bg-orange-600 hover:bg-orange-700 text-white"
-                          loading={resetGroupData.isPending}
-                          onClick={async () => {
-                            try {
-                              await resetGroupData.mutateAsync()
-                              setConfirmReset(false)
-                              alert('All data has been reset successfully.')
-                            } catch (err: any) {
-                              console.error(err)
-                              alert('Failed to reset data. Are you an admin?')
-                              setConfirmReset(false)
-                            }
-                          }}
-                        >
-                          Yes, Reset Data
-                        </Button>
                       </div>
                     ) : (
-                      <Button 
-                        variant="outline" 
-                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900/40 border-orange-200 dark:border-orange-900/50 shrink-0 self-start sm:self-auto"
-                        onClick={() => setConfirmReset(true)}
+                      <Button
+                        variant="outline"
+                        className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900/40 border-orange-200 dark:border-orange-900/50 shrink-0"
+                        loading={createResetRequest.isPending}
+                        onClick={async () => {
+                          try {
+                            await createResetRequest.mutateAsync(members.map(m => m.user_id))
+                            alert('Reset request sent to all group members. The data will be reset once all members accept.')
+                          } catch (err: any) {
+                            console.error(err)
+                            alert(err.message || 'Failed to send reset request')
+                          }
+                        }}
                       >
-                        <History className="h-4 w-4" /> Reset Data
+                        <History className="h-4 w-4 mr-1.5" /> Request Reset Data
                       </Button>
                     )}
                   </div>

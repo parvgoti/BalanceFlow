@@ -225,6 +225,32 @@ export function useResetGroupData(groupId: string) {
 
   return useMutation({
     mutationFn: async () => {
+      // 1. If multiple members exist, check that ALL members accepted the reset request
+      const { data: members } = await supabase
+        .from('group_members')
+        .select('user_id')
+        .eq('group_id', groupId)
+
+      if (members && members.length > 1) {
+        const { data: requests } = await supabase
+          .from('group_reset_requests')
+          .select('status, user_id')
+          .eq('group_id', groupId)
+
+        if (!requests || requests.length === 0) {
+          throw new Error('You must send a reset request to all group members first.')
+        }
+        const hasDenied = requests.some((r: any) => r.status === 'denied')
+        if (hasDenied) {
+          throw new Error('Cannot reset group data: A group member denied the request.')
+        }
+        const acceptedCount = requests.filter((r: any) => r.status === 'accepted').length
+        if (acceptedCount < members.length) {
+          throw new Error(`Cannot reset group data: Waiting for member approval (${acceptedCount}/${members.length} accepted).`)
+        }
+      }
+
+      // 2. Execute reset RPC
       const { error } = await supabase.rpc('reset_group_data', {
         group_id_input: groupId,
       })
