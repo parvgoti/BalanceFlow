@@ -230,14 +230,14 @@ export function GroupDetailPage() {
           </div>
           <div className={cn(
             "card p-4 border-l-2",
-            myBalance < 0 ? "border-l-red-400" : myBalance > 0 ? "border-l-emerald-400" : "border-l-gray-200"
+            myBalance < 0 ? "border-l-red-400" : "border-l-emerald-400"
           )}>
             <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-              {myBalance >= 0 ? 'You are owed' : 'You Owe'}
+              {myBalance > 0 ? 'You are owed' : myBalance < 0 ? 'You Owe' : 'All Settled'}
             </p>
             <p className={cn(
               "text-xl sm:text-2xl font-extrabold mt-1",
-              myBalance < 0 ? "text-red-500 dark:text-red-400" : myBalance > 0 ? "text-emerald-600 dark:text-emerald-400" : "text-gray-400"
+              myBalance < 0 ? "text-red-500 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
             )}>
               {formatCurrency(Math.abs(myBalance))}
             </p>

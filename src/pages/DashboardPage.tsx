@@ -73,21 +73,26 @@ export function DashboardPage() {
       ) : (
         <div className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-5 sm:p-6 text-white shadow-glow">
           <p className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">Total Net Balance</p>
-          <p className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          <p className={cn(
+            "text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow",
+            netBalance < 0
+              ? "text-red-400 dark:text-red-400"
+              : "text-emerald-300 dark:text-emerald-300"
+          )}>
             {netBalance >= 0 ? '' : '-'}
             {formatCurrency(Math.abs(netBalance))}
           </p>
           <div className="flex items-center gap-1.5 mt-2">
             {netBalance > 0 ? (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-white/20 text-white px-2.5 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
                 <TrendingUp className="h-3 w-3" /> Net Positive
               </span>
             ) : netBalance < 0 ? (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-white/20 text-white px-2.5 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-red-500/20 text-red-300 border border-red-500/30 px-2.5 py-0.5 rounded-full">
                 <TrendingDown className="h-3 w-3" /> Net Negative
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-white/20 text-white px-2.5 py-0.5 rounded-full">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
                 All settled up ✓
               </span>
             )}
