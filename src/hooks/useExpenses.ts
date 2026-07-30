@@ -64,9 +64,33 @@ export function useActivityFeed() {
       const from = (pageParam as number) * PAGE_SIZE
       const to = from + PAGE_SIZE - 1
 
+      // 1. Get user's active groups to filter activity
+      const { data: activeMemberships, error: groupsError } = await supabase
+        .from('group_members')
+        .select(`
+          group_id,
+          groups (
+            is_archived
+          )
+        `)
+        .eq('user_id', user!.id)
+
+      if (groupsError) throw groupsError
+
+      const userGroupIds = (activeMemberships ?? [])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((gm: any) => gm.groups && !gm.groups.is_archived)
+        .map((gm: any) => gm.group_id)
+
+      if (userGroupIds.length === 0) {
+        return { data: [], page: pageParam as number }
+      }
+
+      // 2. Query activity only for these groups
       const { data, error } = await supabaseView
         .from('activity_feed')
         .select('*')
+        .in('group_id', userGroupIds)
         .range(from, to)
 
       if (error) throw error

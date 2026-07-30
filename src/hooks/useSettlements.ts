@@ -86,14 +86,24 @@ export function useDashboardSummary() {
       if (error) throw error
 
       // Get user's active groups to filter out archived groups
-      const { data: activeGroups, error: groupsError } = await supabase
-        .from('groups')
-        .select('id')
-        .eq('is_archived', false)
+      const { data: activeMemberships, error: groupsError } = await supabase
+        .from('group_members')
+        .select(`
+          group_id,
+          groups (
+            is_archived
+          )
+        `)
+        .eq('user_id', user!.id)
 
       if (groupsError) throw groupsError
 
-      const activeGroupIds = new Set(activeGroups.map(g => g.id))
+      const activeGroupIds = new Set(
+        (activeMemberships ?? [])
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          .filter((gm: any) => gm.groups && !gm.groups.is_archived)
+          .map((gm: any) => gm.group_id)
+      )
       const typedBalances = (balances ?? [])
         .filter(b => activeGroupIds.has(b.group_id)) as Pick<GroupBalance, 'net_balance' | 'group_id'>[]
 
