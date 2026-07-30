@@ -60,6 +60,7 @@ export function GroupDetailPage() {
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [confirmReset, setConfirmReset] = useState(false)
   const [chartRange, setChartRange] = useState<'week' | 'month' | 'year'>('month')
+  const [activeTab, setActiveTab] = useState('expenses')
 
   const addMembers = useAddMembers(groupId)
   const removeMember = useRemoveMember(groupId)
@@ -107,18 +108,25 @@ export function GroupDetailPage() {
   const simplifiedDebts = typedBalances.length ? simplifyDebts(typedBalances) : []
   const myDebts = simplifiedDebts.filter(d => d.from_user_id === user?.id || d.to_user_id === user?.id)
 
-  // Automatically open settle up modal if navigated from dashboard with autoSettle
+  // When navigated from dashboard with autoSettle (?settle=true or openSettleModal),
+  // switch to Members/Balances tab and scroll to Simplified Payments so the user sees whom they pay/settle with.
   const location = useLocation()
   useEffect(() => {
     const state = location.state as { openSettleModal?: boolean } | null
     const queryParams = new URLSearchParams(location.search)
     const shouldOpenSettle = state?.openSettleModal || queryParams.get('settle') === 'true'
 
-    if (shouldOpenSettle && myDebts.length > 0 && !settleDebt) {
+    if (shouldOpenSettle) {
       const timer = setTimeout(() => {
-        setSettleDebt(myDebts[0])
+        setActiveTab('balances')
+        setTimeout(() => {
+          const el = document.getElementById('simplified-payments-section')
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }, 80)
       }, 0)
-      // Clean up URL/state so refresh doesn't reopen modal
+      // Clean up URL/state so refresh doesn't trigger again
       if (queryParams.get('settle') === 'true') {
         queryParams.delete('settle')
         const newSearch = queryParams.toString()
@@ -128,7 +136,7 @@ export function GroupDetailPage() {
       }
       return () => clearTimeout(timer)
     }
-  }, [location.state, location.search, myDebts, settleDebt, groupId, navigate])
+  }, [location.state, location.search, groupId, navigate])
 
   // Settlement progress
   const totalUnsettled = typedBalances.reduce((s, b) => s + Math.abs(b.net_balance), 0)
@@ -384,7 +392,7 @@ export function GroupDetailPage() {
         </Button>
 
         {/* Tabs */}
-        <Tabs defaultValue="expenses">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="expenses">Expenses</TabsTrigger>
             <TabsTrigger value="balances"><Users className="h-4 w-4" />Members</TabsTrigger>
@@ -497,7 +505,7 @@ export function GroupDetailPage() {
 
             {/* Simplified debts */}
             {simplifiedDebts.length > 0 && (
-              <div className="card p-5 mt-4">
+              <div className="card p-5 mt-4 scroll-mt-20" id="simplified-payments-section">
                 <h3 className="font-bold text-gray-900 dark:text-white mb-3">Simplified Payments</h3>
                 <div className="space-y-3">
                   {simplifiedDebts.map((debt, i) => (
