@@ -68,7 +68,7 @@ const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 DialogFooter.displayName = 'DialogFooter'
 
 const DialogBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('px-6 py-4 overflow-y-auto', className)} {...props} />
+  <div className={cn('px-6 py-4 overflow-y-auto flex-1 min-h-0', className)} {...props} />
 )
 
 const DialogTitle = React.forwardRef<

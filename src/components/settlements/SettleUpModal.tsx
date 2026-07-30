@@ -80,7 +80,7 @@ export function SettleUpModal({ groupId, debt, onClose }: SettleUpModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <DialogBody className="space-y-5">
             {/* Debt summary card */}
             <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">

@@ -257,7 +257,7 @@ export function AddExpenseModal() {
 
   return (
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
-      <DialogContent className="max-w-md" id="add-expense-modal">
+      <DialogContent className="max-w-lg" id="add-expense-modal">
         <DialogHeader>
           <DialogTitle className="text-xl">{isEditing ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
           <DialogDescription>
@@ -265,7 +265,7 @@ export function AddExpenseModal() {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <DialogBody className="space-y-5">
             {/* Hero Amount Section — Green Card */}
             <div className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-5 text-white">
