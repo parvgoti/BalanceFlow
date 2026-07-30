@@ -62,6 +62,8 @@ export function AddExpenseModal() {
   const group = groupRaw as any
 
   const members: any[] = group?.group_members ?? []
+  const isAdmin = members.find(m => m.user_id === user?.id)?.role === 'admin'
+  const isReadOnly = isEditing && expenseToEdit.paid_by !== user?.id && !isAdmin
 
   const addExpense = useAddExpense(selectedGroupId)
   const updateExpense = useUpdateExpense(selectedGroupId)
@@ -259,9 +261,15 @@ export function AddExpenseModal() {
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
       <DialogContent className="max-w-lg" id="add-expense-modal">
         <DialogHeader>
-          <DialogTitle className="text-xl">{isEditing ? 'Edit Expense' : 'Add Expense'}</DialogTitle>
+          <DialogTitle className="text-xl">
+            {isReadOnly ? 'Expense Details' : isEditing ? 'Edit Expense' : 'Add Expense'}
+          </DialogTitle>
           <DialogDescription>
-            {isEditing ? 'Update the details for this expense.' : 'Track a new expense and split it with the group.'}
+            {isReadOnly 
+              ? 'View the details and split breakdown for this expense.' 
+              : isEditing 
+                ? 'Update the details for this expense.' 
+                : 'Track a new expense and split it with the group.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -282,22 +290,28 @@ export function AddExpenseModal() {
                   value={amountStr}
                   onChange={handleAmountChange}
                   onFocus={() => {
-                    if (amountStr === '0.00' || amountStr === '0') setAmountStr('')
+                    if (!isReadOnly && (amountStr === '0.00' || amountStr === '0')) setAmountStr('')
                   }}
                   onBlur={() => {
-                    if (!amountStr) setAmountStr('0.00')
+                    if (!isReadOnly && !amountStr) setAmountStr('0.00')
                   }}
-                  className="text-3xl sm:text-4xl font-extrabold w-32 sm:w-36 text-center bg-transparent border-none outline-none text-white placeholder-white/40 focus:outline-none"
+                  disabled={isReadOnly}
+                  className={cn(
+                    "text-3xl sm:text-4xl font-extrabold w-32 sm:w-36 text-center bg-transparent border-none outline-none text-white placeholder-white/40 focus:outline-none",
+                    isReadOnly && "opacity-90 cursor-not-allowed"
+                  )}
                   placeholder="0.00"
                 />
-                <div className="flex flex-col gap-0.5">
-                  <button type="button" onClick={() => adjustAmount(1)} className="text-white/50 hover:text-white">
-                    <ChevronUp className="h-4 w-4" />
-                  </button>
-                  <button type="button" onClick={() => adjustAmount(-1)} className="text-white/50 hover:text-white">
-                    <ChevronDown className="h-4 w-4" />
-                  </button>
-                </div>
+                {!isReadOnly && (
+                  <div className="flex flex-col gap-0.5">
+                    <button type="button" onClick={() => adjustAmount(1)} className="text-white/50 hover:text-white">
+                      <ChevronUp className="h-4 w-4" />
+                    </button>
+                    <button type="button" onClick={() => adjustAmount(-1)} className="text-white/50 hover:text-white">
+                      <ChevronDown className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
               {errors.amount && <p className="text-xs text-red-200 mt-2 text-center">{errors.amount.message}</p>}
             </div>
@@ -307,6 +321,7 @@ export function AddExpenseModal() {
               id="expense-description-input"
               label="Description"
               placeholder="What was this for?"
+              disabled={isReadOnly}
               error={errors.description?.message}
               {...register('description')}
             />
@@ -325,12 +340,14 @@ export function AddExpenseModal() {
                       <button
                         key={key}
                         type="button"
-                        onClick={() => field.onChange(key)}
+                        onClick={() => !isReadOnly && field.onChange(key)}
+                        disabled={isReadOnly}
                         className={cn(
                           'flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-all',
                           field.value === key
                             ? 'bg-brand text-white border-brand shadow-glow'
-                            : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-brand'
+                            : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-brand',
+                          isReadOnly && 'opacity-70 cursor-not-allowed hover:border-gray-200 dark:hover:border-gray-700'
                         )}
                       >
                         <span>{cfg.icon}</span>
@@ -349,7 +366,8 @@ export function AddExpenseModal() {
                   Group
                 </label>
                 <select
-                  className="flex h-11 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-colors"
+                  disabled={isReadOnly}
+                  className="flex h-11 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                   value={selectedGroupId}
                   onChange={(e) => setSelectedGroupId(e.target.value)}
                 >
@@ -369,7 +387,8 @@ export function AddExpenseModal() {
                 </label>
                 <select
                   id="expense-paid-by-select"
-                  className="flex h-11 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  disabled={isReadOnly}
+                  className="flex h-11 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
                   {...register('paid_by')}
                 >
                   {members.map((m: any) => (
@@ -383,6 +402,7 @@ export function AddExpenseModal() {
                 id="expense-date-input"
                 label="Date"
                 type="date"
+                disabled={isReadOnly}
                 {...register('date')}
                 error={errors.date?.message}
               />
@@ -400,14 +420,18 @@ export function AddExpenseModal() {
                     key={type}
                     type="button"
                     onClick={() => {
-                      setSplitType(type)
-                      setValue('split_type', type)
+                      if (!isReadOnly) {
+                        setSplitType(type)
+                        setValue('split_type', type)
+                      }
                     }}
+                    disabled={isReadOnly}
                     className={cn(
                       'flex-1 px-3 py-2.5 transition-all text-center',
                       splitType === type
                         ? 'bg-brand text-white font-semibold'
-                        : 'bg-white dark:bg-gray-900 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800'
+                        : 'bg-white dark:bg-gray-900 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800',
+                      isReadOnly && 'cursor-not-allowed opacity-75'
                     )}
                   >
                     {type === 'equal' ? '= Equal' : type === 'percentage' ? '% Pct' : '$ Exact'}
@@ -451,8 +475,10 @@ export function AddExpenseModal() {
                               placeholder="0"
                               step={splitType === 'percentage' ? '1' : '0.01'}
                               value={splitType === 'percentage' ? (split.percentage || '') : (split.amount || '')}
-                              onFocus={(e) => e.target.select()}
+                              onFocus={(e) => !isReadOnly && e.target.select()}
+                              disabled={isReadOnly}
                               onChange={(e) => {
+                                if (isReadOnly) return
                                 // If input is empty, default to 0, otherwise parse it.
                                 const valStr = e.target.value;
                                 const val = valStr === '' ? 0 : parseFloat(valStr) || 0;
@@ -472,23 +498,26 @@ export function AddExpenseModal() {
                                 })
                                 field.onChange(updated)
                               }}
-                              className="w-20 text-right text-sm font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                              className="w-20 text-right text-sm font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-70 disabled:cursor-not-allowed"
                             />
                           )}
 
                         <button
                           type="button"
                           onClick={() => {
+                            if (isReadOnly) return
                             const updated = field.value.map((s: any, j: number) =>
                               j === i ? { ...s, included: !s.included } : s
                             )
                             field.onChange(updated)
                           }}
+                          disabled={isReadOnly}
                           className={cn(
                             'h-6 w-6 rounded-md flex items-center justify-center transition-colors shrink-0',
                             split.included
                               ? 'bg-brand text-white'
-                              : 'bg-gray-200 dark:bg-gray-700 text-gray-400'
+                              : 'bg-gray-200 dark:bg-gray-700 text-gray-400',
+                            isReadOnly && 'opacity-60 cursor-not-allowed'
                           )}
                         >
                           {split.included && <Check className="h-3 w-3" />}
@@ -530,19 +559,39 @@ export function AddExpenseModal() {
             )}
 
             {/* Receipt upload */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Receipt (optional)
-              </label>
-              <input
-                id="expense-receipt-input"
-                type="file"
-                accept="image/*,.pdf"
-                onChange={(e) => setReceiptFile(e.target.files?.[0])}
-                className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand file:text-white hover:file:bg-brand-light"
-              />
-              {isEditing && !receiptFile && expenseToEdit?.receipt_url && (
-                <div className="text-xs mt-1.5 flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
+            {!isReadOnly ? (
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Receipt (optional)
+                </label>
+                <input
+                  id="expense-receipt-input"
+                  type="file"
+                  accept="image/*,.pdf"
+                  onChange={(e) => setReceiptFile(e.target.files?.[0])}
+                  className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand file:text-white hover:file:bg-brand-light"
+                />
+                {isEditing && !receiptFile && expenseToEdit?.receipt_url && (
+                  <div className="text-xs mt-1.5 flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
+                    <Receipt className="h-3.5 w-3.5 text-gray-400" />
+                    <a 
+                      href={expenseToEdit.receipt_url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-brand hover:underline font-medium"
+                    >
+                      Current receipt attached
+                    </a>
+                    <span className="text-gray-400 text-2xs ml-1">(Upload to replace)</span>
+                  </div>
+                )}
+              </div>
+            ) : expenseToEdit?.receipt_url ? (
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  Receipt
+                </label>
+                <div className="text-xs flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
                   <Receipt className="h-3.5 w-3.5 text-gray-400" />
                   <a 
                     href={expenseToEdit.receipt_url} 
@@ -550,12 +599,11 @@ export function AddExpenseModal() {
                     rel="noopener noreferrer" 
                     className="text-brand hover:underline font-medium"
                   >
-                    Current receipt attached
+                    View attached receipt
                   </a>
-                  <span className="text-gray-400 text-2xs ml-1">(Upload to replace)</span>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : null}
           </DialogBody>
 
           <DialogFooter className="flex-col items-stretch sm:flex-col sm:space-y-0 gap-3">
@@ -565,23 +613,36 @@ export function AddExpenseModal() {
               </div>
             )}
             <div className="flex gap-3 w-full">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={closeModal}
-                className="flex-1 h-12 rounded-xl text-sm font-bold uppercase tracking-wider"
-              >
-                Cancel
-              </Button>
-              <Button
-                id="expense-save-btn"
-                type="submit"
-                loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
-                disabled={!selectedGroupId}
-                className="flex-1 h-12 rounded-xl bg-brand hover:bg-brand-light text-white text-sm font-bold uppercase tracking-wider shadow-glow"
-              >
-                {isEditing ? 'Save Changes' : 'Save Expense'}
-              </Button>
+              {isReadOnly ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={closeModal}
+                  className="w-full h-12 rounded-xl text-sm font-bold uppercase tracking-wider"
+                >
+                  Close
+                </Button>
+              ) : (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={closeModal}
+                    className="flex-1 h-12 rounded-xl text-sm font-bold uppercase tracking-wider"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    id="expense-save-btn"
+                    type="submit"
+                    loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
+                    disabled={!selectedGroupId}
+                    className="flex-1 h-12 rounded-xl bg-brand hover:bg-brand-light text-white text-sm font-bold uppercase tracking-wider shadow-glow"
+                  >
+                    {isEditing ? 'Save Changes' : 'Save Expense'}
+                  </Button>
+                </>
+              )}
             </div>
           </DialogFooter>
         </form>

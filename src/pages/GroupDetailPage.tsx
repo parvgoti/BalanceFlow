@@ -286,8 +286,8 @@ export function GroupDetailPage() {
                 <h4 className={cn(
                   "text-sm font-bold",
                   hasDeniedReset ? "text-red-900 dark:text-red-300"
-                  : allAcceptedReset ? "text-emerald-900 dark:text-emerald-300"
-                  : "text-amber-900 dark:text-amber-300"
+                    : allAcceptedReset ? "text-emerald-900 dark:text-emerald-300"
+                      : "text-amber-900 dark:text-amber-300"
                 )}>
                   {hasDeniedReset && "Group Data Reset Denied"}
                   {allAcceptedReset && "Group Data Reset Approved"}
@@ -296,8 +296,8 @@ export function GroupDetailPage() {
                 <p className={cn(
                   "text-xs mt-0.5",
                   hasDeniedReset ? "text-red-700 dark:text-red-400"
-                  : allAcceptedReset ? "text-emerald-700 dark:text-emerald-400"
-                  : "text-amber-700 dark:text-amber-400"
+                    : allAcceptedReset ? "text-emerald-700 dark:text-emerald-400"
+                      : "text-amber-700 dark:text-amber-400"
                 )}>
                   {hasDeniedReset && "A group member denied the request to reset group data. The admin cannot reset the data."}
                   {allAcceptedReset && "All members accepted! The admin can now reset the group data."}
@@ -439,18 +439,9 @@ export function GroupDetailPage() {
                         key={expense.id}
                         expense={expense as ExpenseWithSplits}
                         onEdit={(e) => {
-                          if (e.paid_by !== user?.id && !isAdmin) {
-                            alert("You can only edit expenses you paid for.")
-                            return
-                          }
                           openModal('add-expense', { groupId, expenseToEdit: e })
                         }}
-                        onDelete={async (id) => {
-                          const e = expense as any;
-                          if (e.paid_by !== user?.id && !isAdmin) {
-                            alert("You can only delete expenses you paid for.")
-                            return
-                          }
+                        onDelete={(expense.paid_by === user?.id || isAdmin) ? async (id) => {
                           if (confirm("Are you sure you want to delete this expense? This action cannot be undone.")) {
                             try {
                               await deleteExpense.mutateAsync(id)
@@ -459,7 +450,7 @@ export function GroupDetailPage() {
                               alert("Failed to delete expense.")
                             }
                           }
-                        }}
+                        } : undefined}
                       />
                     ))}
                   </div>
@@ -540,11 +531,10 @@ export function GroupDetailPage() {
                       <button
                         key={range}
                         onClick={() => setChartRange(range)}
-                        className={`px-3 py-1 text-xs font-medium rounded-md capitalize transition-colors ${
-                          chartRange === range
+                        className={`px-3 py-1 text-xs font-medium rounded-md capitalize transition-colors ${chartRange === range
                             ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                             : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                        }`}
+                          }`}
                       >
                         {range}
                       </button>
@@ -582,7 +572,7 @@ export function GroupDetailPage() {
                           </div>
                           <div>
                             <p className="font-medium text-sm text-gray-900 dark:text-white">
-                              {isCreatorPayerOrPayee 
+                              {isCreatorPayerOrPayee
                                 ? `${payerName} settled with ${payeeName}`
                                 : `${creatorName} settled ${payerName} to ${payeeName}`}
                             </p>
@@ -619,7 +609,7 @@ export function GroupDetailPage() {
                       selectedEmails={selectedEmails}
                       placeholder="Search name or email"
                     />
-                    
+
                     {selectedEmails.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {selectedEmails.map(email => (
@@ -636,7 +626,7 @@ export function GroupDetailPage() {
                       </div>
                     )}
 
-                    <Button 
+                    <Button
                       className="w-full"
                       loading={addMembers.isPending}
                       disabled={selectedEmails.length === 0}
@@ -644,10 +634,10 @@ export function GroupDetailPage() {
                         if (selectedEmails.length > 0) {
                           try {
                             await addMembers.mutateAsync(selectedEmails)
-                            
+
                             const existingUsers = selectedEmails.filter(email => !!memberIdMeta[email])
                             const nonExistingEmails = selectedEmails.filter(email => !memberIdMeta[email])
-                            
+
                             // Send native push notifications for users who already exist
                             for (const email of existingUsers) {
                               const uid = memberIdMeta[email]
@@ -663,7 +653,7 @@ export function GroupDetailPage() {
                                 }).catch(console.error)
                               }
                             }
-                            
+
                             // Send emails for users who don't exist
                             if (nonExistingEmails.length > 0) {
                               const inviteLink = `${window.location.origin}/signup?invite=true`
@@ -672,7 +662,7 @@ export function GroupDetailPage() {
                               const bccList = nonExistingEmails.join(',')
                               window.location.href = `mailto:?bcc=${bccList}&subject=${subject}&body=${emailBody}`
                             }
-                            
+
                             setSelectedEmails([])
                             setMemberMeta({})
                             setMemberIdMeta({})
@@ -705,9 +695,9 @@ export function GroupDetailPage() {
                           </div>
                         </div>
                         {m.user_id !== user?.id && (
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
+                          <Button
+                            variant="outline"
+                            size="sm"
                             className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 border-red-200 dark:border-red-900/50 shrink-0 self-start sm:self-auto"
                             loading={removeMember.isPending}
                             onClick={() => {
@@ -747,14 +737,14 @@ export function GroupDetailPage() {
                     </div>
                     {confirmDelete ? (
                       <div className="flex items-center gap-2 shrink-0">
-                        <Button 
-                          variant="ghost" 
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => setConfirmDelete(false)}
                         >
                           Cancel
                         </Button>
-                        <Button 
+                        <Button
                           variant="default"
                           size="sm"
                           className="bg-red-600 hover:bg-red-700 text-white"
@@ -778,8 +768,8 @@ export function GroupDetailPage() {
                         </Button>
                       </div>
                     ) : (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         disabled={!isGroupSettled}
                         className={cn(
                           "text-red-600 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900/40 border-red-200 dark:border-red-900/50 shrink-0",
@@ -819,14 +809,14 @@ export function GroupDetailPage() {
                     {members.length <= 1 ? (
                       confirmReset ? (
                         <div className="flex items-center gap-2">
-                          <Button 
-                            variant="ghost" 
+                          <Button
+                            variant="ghost"
                             size="sm"
                             onClick={() => setConfirmReset(false)}
                           >
                             Cancel
                           </Button>
-                          <Button 
+                          <Button
                             variant="default"
                             size="sm"
                             className="bg-orange-600 hover:bg-orange-700 text-white"
@@ -847,8 +837,8 @@ export function GroupDetailPage() {
                           </Button>
                         </div>
                       ) : (
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="text-orange-600 hover:text-orange-700 hover:bg-orange-100 dark:hover:bg-orange-900/40 border-orange-200 dark:border-orange-900/50 shrink-0"
                           onClick={() => setConfirmReset(true)}
                         >
@@ -957,7 +947,7 @@ export function GroupDetailPage() {
             {myDebts.map((debt, i) => {
               const iOwe = debt.from_user_id === user?.id
               const otherName = iOwe ? debt.to_user_name : debt.from_user_name
-              
+
               return (
                 <div key={i} className="flex items-center gap-2 text-sm">
                   <UserAvatar name={otherName} size="xs" />

@@ -2,7 +2,7 @@ import { formatDate, formatCurrency, CATEGORY_CONFIG, cn } from '@/lib/utils'
 import { CategoryIcon } from '@/components/shared/CategoryIcon'
 import type { ExpenseWithSplits } from '@/types/database'
 import { useAuthStore } from '@/store/authStore'
-import { Pencil, Trash2, Receipt } from 'lucide-react'
+import { Pencil, Trash2, Receipt, Eye } from 'lucide-react'
 
 interface ExpenseCardProps {
   expense: ExpenseWithSplits
@@ -82,9 +82,13 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
                 <button
                   onClick={() => onEdit(expense)}
                   className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-gray-400 hover:text-brand hover:bg-brand/10 rounded shrink-0"
-                  title="Edit expense"
+                  title={isPayer ? "Edit expense" : "View details"}
                 >
-                  <Pencil className="h-3 w-3" />
+                  {isPayer ? (
+                    <Pencil className="h-3 w-3" />
+                  ) : (
+                    <Eye className="h-3.5 w-3.5" />
+                  )}
                 </button>
               )}
               {onDelete && (
