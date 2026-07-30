@@ -18,6 +18,7 @@ import { useAddExpense, useUpdateExpense } from '@/hooks/useExpenses'
 import { CATEGORY_CONFIG, cn, formatCurrency } from '@/lib/utils'
 import type { ExpenseCategory, SplitType } from '@/types/database'
 import { format } from 'date-fns'
+import { useCurrencyExchange, SUPPORTED_CURRENCIES, convertCurrency } from '@/hooks/useCurrencyExchange'
 
 // Inline schema to avoid resolver generic issues
 const expenseSplitSchema = z.object({
@@ -71,6 +72,34 @@ export function AddExpenseModal() {
   const [splitType, setSplitType] = useState<SplitType>(expenseToEdit?.split_type ?? 'equal')
   const [receiptFile, setReceiptFile] = useState<File | undefined>()
   const [amountStr, setAmountStr] = useState(expenseToEdit?.amount?.toFixed(2) ?? '0.00')
+
+  const [isForeignCurrency, setIsForeignCurrency] = useState(false)
+  const [foreignCurrencyCode, setForeignCurrencyCode] = useState('USD')
+  const [foreignAmountStr, setForeignAmountStr] = useState('')
+
+  const baseCurrency = group?.currency || 'INR'
+  const { data: exchangeRates, isFetching: isFetchingRates } = useCurrencyExchange(baseCurrency)
+
+  const handleForeignAmountChange = (e: React.ChangeEvent<HTMLInputElement>, code: string = foreignCurrencyCode) => {
+    const raw = e.target.value.replace(/[^0-9.]/g, '')
+    setForeignAmountStr(raw)
+    const val = parseFloat(raw)
+    if (!isNaN(val) && exchangeRates?.rates) {
+      const { convertedAmount } = convertCurrency(val, code, baseCurrency, exchangeRates.rates)
+      setAmountStr(convertedAmount.toFixed(2))
+      setValue('amount', convertedAmount, { shouldValidate: true })
+    }
+  }
+
+  const handleForeignCurrencySelect = (code: string) => {
+    setForeignCurrencyCode(code)
+    const val = parseFloat(foreignAmountStr)
+    if (!isNaN(val) && exchangeRates?.rates) {
+      const { convertedAmount } = convertCurrency(val, code, baseCurrency, exchangeRates.rates)
+      setAmountStr(convertedAmount.toFixed(2))
+      setValue('amount', convertedAmount, { shouldValidate: true })
+    }
+  }
 
   const {
     register, handleSubmit, control, watch, setValue,
@@ -257,6 +286,12 @@ export function AddExpenseModal() {
   const totalExpenseAmount = Number(watchedAmount) || 0
   const isExactMatching = Math.abs(exactSplitSum - totalExpenseAmount) <= 0.01 && totalExpenseAmount > 0
 
+  // Percentage split live validation
+  const percentageSplitSum = (watchedSplits || [])
+    .filter((s: any) => s.included)
+    .reduce((acc: number, curr: any) => acc + (Number(curr.percentage) || 0), 0)
+  const isPercentageMatching = Math.abs(percentageSplitSum - 100) <= 0.01 && (watchedSplits || []).some((s: any) => s.included)
+
   return (
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
       <DialogContent className="max-w-lg" id="add-expense-modal">
@@ -314,6 +349,58 @@ export function AddExpenseModal() {
                 )}
               </div>
               {errors.amount && <p className="text-xs text-red-200 mt-2 text-center">{errors.amount.message}</p>}
+
+              {/* Foreign Currency Toggle & Converter */}
+              {!isReadOnly && (
+                <div className="mt-3 pt-3 border-t border-white/20 text-center">
+                  {!isForeignCurrency ? (
+                    <button
+                      type="button"
+                      onClick={() => setIsForeignCurrency(true)}
+                      className="text-xs font-semibold text-white/80 hover:text-white underline transition-colors"
+                    >
+                      🌍 Paid in foreign currency?
+                    </button>
+                  ) : (
+                    <div className="space-y-2 text-left bg-black/10 p-3 rounded-xl">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-white/90">Foreign Currency Converter</span>
+                        <button
+                          type="button"
+                          onClick={() => setIsForeignCurrency(false)}
+                          className="text-xs text-white/60 hover:text-white underline"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={foreignCurrencyCode}
+                          onChange={(e) => handleForeignCurrencySelect(e.target.value)}
+                          className="h-8 rounded-lg px-2 text-xs bg-white text-gray-900 font-semibold focus:outline-none"
+                        >
+                          {SUPPORTED_CURRENCIES.map(c => (
+                            <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
+                          ))}
+                        </select>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={foreignAmountStr}
+                          onChange={handleForeignAmountChange}
+                          placeholder="Amount in foreign curr…"
+                          className="h-8 flex-1 rounded-lg px-2.5 text-xs bg-white/20 text-white placeholder-white/50 focus:outline-none font-medium"
+                        />
+                      </div>
+                      {foreignAmountStr && exchangeRates?.rates && (
+                        <p className="text-[11px] text-white/80 font-medium">
+                          ≈ Converted to <strong>{formatCurrency(parseFloat(amountStr) || 0, baseCurrency)}</strong> (Rate: 1 {foreignCurrencyCode} = {formatCurrency((1 / (exchangeRates.rates[foreignCurrencyCode] || 1)), baseCurrency)})
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Description */}
@@ -553,6 +640,35 @@ export function AddExpenseModal() {
                   </p>
                   <p className="text-sm">
                     SPLIT TOTAL <strong>{exactSplitSum.toFixed(2)}</strong> OUT OF {totalExpenseAmount.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Percentage Split Total Validation Banner */}
+            {splitType === 'percentage' && (
+              <div
+                className={cn(
+                  'flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold transition-all',
+                  isPercentageMatching
+                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                    : 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-400'
+                )}
+              >
+                <span className={cn(
+                  'flex items-center justify-center h-7 w-7 rounded-full shrink-0',
+                  isPercentageMatching
+                    ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600'
+                    : 'bg-amber-100 dark:bg-amber-900/50 text-amber-600'
+                )}>
+                  {isPercentageMatching ? '✓' : '⚠'}
+                </span>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">
+                    {isPercentageMatching ? 'Matched' : 'Unmatched'}
+                  </p>
+                  <p className="text-sm">
+                    CURRENT <strong>{percentageSplitSum.toFixed(2)}%</strong> OUT OF 100%
                   </p>
                 </div>
               </div>

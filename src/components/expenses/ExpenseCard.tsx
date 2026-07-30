@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { formatDate, formatCurrency, CATEGORY_CONFIG, cn } from '@/lib/utils'
 import { CategoryIcon } from '@/components/shared/CategoryIcon'
+import { ReceiptLightbox } from '@/components/ui/ReceiptLightbox'
 import type { ExpenseWithSplits } from '@/types/database'
 import { useAuthStore } from '@/store/authStore'
 import { Pencil, Trash2, Receipt, Eye } from 'lucide-react'
@@ -12,6 +14,7 @@ interface ExpenseCardProps {
 
 export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
   const { user } = useAuthStore()
+  const [showReceipt, setShowReceipt] = useState(false)
 
   const userSplit = expense.expense_splits.find(s => s.user_id === user?.id)
   const isPayer = expense.paid_by === user?.id
@@ -54,6 +57,8 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
     ? 'You'
     : (expense.payer?.full_name ?? 'Someone')
 
+  const catConfig = CATEGORY_CONFIG[expense.category] || CATEGORY_CONFIG.other
+
   return (
     <div className="flex items-start gap-3 sm:gap-4 p-3 sm:p-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 rounded-xl transition-colors group">
       {/* Category icon */}
@@ -68,15 +73,22 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
                 {expense.description}
               </p>
               {expense.receipt_url && (
-                <a
-                  href={expense.receipt_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-1 text-gray-400 hover:text-brand hover:bg-brand/10 rounded transition-colors shrink-0"
-                  title="View receipt"
-                >
-                  <Receipt className="h-3.5 w-3.5" />
-                </a>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowReceipt(true)}
+                    className="p-1 text-gray-400 hover:text-brand hover:bg-brand/10 rounded transition-colors shrink-0"
+                    title="Inspect receipt"
+                  >
+                    <Receipt className="h-3.5 w-3.5" />
+                  </button>
+                  <ReceiptLightbox
+                    url={expense.receipt_url}
+                    description={expense.description}
+                    isOpen={showReceipt}
+                    onClose={() => setShowReceipt(false)}
+                  />
+                </>
               )}
               {onEdit && (
                 <button
@@ -103,6 +115,13 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
             </div>
             <div className="flex items-center gap-1.5 mt-1 flex-wrap">
               <span className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold",
+                catConfig.bg, catConfig.color
+              )}>
+                <span>{catConfig.icon}</span>
+                <span>{catConfig.label}</span>
+              </span>
+              <span className={cn(
                 "inline-flex items-center px-1.5 py-0.5 rounded text-2xs font-semibold",
                 isPayer
                   ? "bg-brand-subtle dark:bg-brand-dark/30 text-brand dark:text-brand-light"
@@ -127,3 +146,4 @@ export function ExpenseCard({ expense, onEdit, onDelete }: ExpenseCardProps) {
     </div>
   )
 }
+

@@ -26,13 +26,14 @@ import { Progress } from '@/components/ui/progress'
 import { ExpenseCard } from '@/components/expenses/ExpenseCard'
 import { SettleUpModal } from '@/components/settlements/SettleUpModal'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
+import { CelebrationBanner } from '@/components/ui/CelebrationBanner'
 import { ExpenseListSkeleton } from '@/components/shared/Skeleton'
 import { SpendingTrendChart, BalanceBarChart } from '@/components/charts/Charts'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
 import { supabase } from '@/lib/supabase'
 import {
-  simplifyDebts, formatCurrency, formatDateGroup, groupBy, cn,
+  simplifyDebts, directDebts, formatCurrency, formatDateGroup, groupBy, cn,
   type SimplifiedDebt,
 } from '@/lib/utils'
 import type { ExpenseWithSplits, GroupBalance } from '@/types/database'
@@ -61,6 +62,7 @@ export function GroupDetailPage() {
   const [confirmReset, setConfirmReset] = useState(false)
   const [chartRange, setChartRange] = useState<'week' | 'month' | 'year'>('month')
   const [activeTab, setActiveTab] = useState('expenses')
+  const [useSimplified, setUseSimplified] = useState(true)
 
   const addMembers = useAddMembers(groupId)
   const removeMember = useRemoveMember(groupId)
@@ -104,9 +106,11 @@ export function GroupDetailPage() {
   const typedBalances = (balances ?? []) as GroupBalance[]
   const myBalance = typedBalances.find(b => b.user_id === user?.id)?.net_balance ?? 0
 
-  // Simplified debts
-  const simplifiedDebts = typedBalances.length ? simplifyDebts(typedBalances) : []
-  const myDebts = simplifiedDebts.filter(d => d.from_user_id === user?.id || d.to_user_id === user?.id)
+  // Debts — toggle between simplified and direct
+  const computedDebts = typedBalances.length
+    ? (useSimplified ? simplifyDebts(typedBalances) : directDebts(typedBalances))
+    : []
+  const myDebts = computedDebts.filter(d => d.from_user_id === user?.id || d.to_user_id === user?.id)
 
   // When navigated from dashboard with autoSettle (?settle=true or openSettleModal),
   // switch to Members/Balances tab and scroll to Simplified Payments so the user sees whom they pay/settle with.
@@ -424,10 +428,24 @@ export function GroupDetailPage() {
             {expensesLoading ? (
               <ExpenseListSkeleton />
             ) : filteredExpenses.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
-                <p className="text-4xl mb-3">🧾</p>
-                <p className="font-medium">No expenses yet</p>
-                <p className="text-sm mt-1">Add the first expense to get started</p>
+              <div className="flex flex-col items-center justify-center text-center py-16 px-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 my-4">
+                <div className="h-16 w-16 rounded-2xl bg-brand/10 dark:bg-brand/20 flex items-center justify-center text-brand text-3xl mb-4 shadow-sm">
+                  🧾
+                </div>
+                <h4 className="text-base font-bold text-gray-900 dark:text-white mb-1">
+                  No expenses yet
+                </h4>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 max-w-sm mb-5">
+                  Start tracking shared bills, restaurants, or groceries with your group.
+                </p>
+                <Button
+                  size="sm"
+                  onClick={() => openModal('add-expense', { groupId })}
+                  className="gap-2 shadow-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  <span>Add First Expense</span>
+                </Button>
               </div>
             ) : (
               <div className="card divide-y divide-gray-50 dark:divide-gray-800">
@@ -472,6 +490,12 @@ export function GroupDetailPage() {
 
           {/* Balances tab */}
           <TabsContent value="balances" className="space-y-3">
+            {Math.abs(myBalance) < 0.01 && typedBalances.length > 1 && (
+              <CelebrationBanner
+                title="All Settled Up! 🎉"
+                message="Your balance in this group is ₹0.00. You don't owe anyone and nobody owes you."
+              />
+            )}
             {typedBalances.map(b => {
               const isMe = b.user_id === user?.id
               return (
@@ -494,12 +518,42 @@ export function GroupDetailPage() {
               )
             })}
 
-            {/* Simplified debts */}
-            {simplifiedDebts.length > 0 && (
+            {/* Computed debts (Simplified or Direct) */}
+            {computedDebts.length > 0 && (
               <div className="card p-5 mt-4 scroll-mt-20" id="simplified-payments-section">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-3">Simplified Payments</h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="font-bold text-gray-900 dark:text-white">
+                    {useSimplified ? 'Simplified Payments' : 'Direct Pairwise Debts'}
+                  </h3>
+                  <div className="flex items-center bg-gray-100 dark:bg-gray-800 p-0.5 rounded-lg border border-gray-200 dark:border-gray-700">
+                    <button
+                      type="button"
+                      onClick={() => setUseSimplified(true)}
+                      className={cn(
+                        'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
+                        useSimplified
+                          ? 'bg-white dark:bg-gray-900 text-brand shadow-sm'
+                          : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                      )}
+                    >
+                      Simplified
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setUseSimplified(false)}
+                      className={cn(
+                        'px-2.5 py-1 text-xs font-semibold rounded-md transition-colors',
+                        !useSimplified
+                          ? 'bg-white dark:bg-gray-900 text-brand shadow-sm'
+                          : 'text-gray-500 hover:text-gray-900 dark:hover:text-white'
+                      )}
+                    >
+                      Direct
+                    </button>
+                  </div>
+                </div>
                 <div className="space-y-3">
-                  {simplifiedDebts.map((debt, i) => (
+                  {computedDebts.map((debt, i) => (
                     <div key={i} className="flex items-center gap-3">
                       <UserAvatar name={debt.from_user_name} size="sm" />
                       <div className="flex-1 text-sm text-gray-600 dark:text-gray-400">

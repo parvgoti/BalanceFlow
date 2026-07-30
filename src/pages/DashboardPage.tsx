@@ -12,6 +12,7 @@ import { CardSkeleton } from '@/components/shared/Skeleton'
 import { TopCategoriesList } from '@/components/charts/Charts'
 import { Button } from '@/components/ui/button'
 import { useUIStore } from '@/store/uiStore'
+import { CelebrationBanner } from '@/components/ui/CelebrationBanner'
 import { formatRelativeTime, CATEGORY_CONFIG, formatCurrency, cn } from '@/lib/utils'
 import type { ExpenseCategory, ActivityItem } from '@/types/database'
 
@@ -100,6 +101,14 @@ export function DashboardPage() {
         </div>
       )}
 
+      {/* ── Celebration Banner when 100% balanced ───────────────────── */}
+      {!summaryLoading && Math.abs(netBalance) < 0.01 && (groupsData?.length ?? 0) > 0 && totalOweMe === 0 && totalIOwe === 0 && (
+        <CelebrationBanner
+          title="All Settled Up! 🎉"
+          message="You have zero outstanding balances across all your active groups."
+        />
+      )}
+
       {/* ── You are Owed / You Owe ─────────────────────────────────── */}
       {!summaryLoading && (
         <div className="grid grid-cols-2 gap-3">
@@ -172,9 +181,24 @@ export function DashboardPage() {
               </div>
             ))
           ) : recentActivity.length === 0 ? (
-            <div className="px-6 py-12 text-center text-gray-400 text-sm">
-              <p className="text-4xl mb-3">📭</p>
-              No recent activity. Add your first expense!
+            <div className="flex flex-col items-center justify-center text-center py-12 px-6">
+              <div className="h-14 w-14 rounded-2xl bg-brand/10 dark:bg-brand/20 flex items-center justify-center text-brand text-2xl mb-3 shadow-sm">
+                📭
+              </div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white mb-1">
+                No recent activity yet
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs mb-4">
+                Add an expense or settle up with friends to see live updates here.
+              </p>
+              <Button
+                size="sm"
+                onClick={() => openModal('add-expense')}
+                className="gap-2 shadow-sm"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Add Expense</span>
+              </Button>
             </div>
           ) : (
             recentActivity.slice(0, 6).map((item: ActivityItem) => (

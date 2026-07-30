@@ -96,6 +96,8 @@ export function useRealtimeApp() {
         { event: 'INSERT', schema: 'public', table: 'group_members', filter: `user_id=eq.${user.id}` },
         () => {
           qc.invalidateQueries({ queryKey: groupKeys.lists() })
+          qc.invalidateQueries({ queryKey: expenseKeys.activity() })
+          qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
         }
       )
       // When this user is removed from a group
@@ -104,6 +106,8 @@ export function useRealtimeApp() {
         { event: 'DELETE', schema: 'public', table: 'group_members', filter: `user_id=eq.${user.id}` },
         () => {
           qc.invalidateQueries({ queryKey: groupKeys.lists() })
+          qc.invalidateQueries({ queryKey: expenseKeys.activity() })
+          qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
         }
       )
       // Any group the user belongs to gets updated (name change, archived, etc.)
@@ -114,24 +118,9 @@ export function useRealtimeApp() {
           qc.invalidateQueries({ queryKey: groupKeys.lists() })
         }
       )
-      // Activity feed refresh (expense added / deleted anywhere)
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'expenses' },
-        () => {
-          qc.invalidateQueries({ queryKey: expenseKeys.activity() })
-          qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
-        }
-      )
-      // Dashboard refresh when any settlement happens
-      .on(
-        'postgres_changes',
-        { event: '*', schema: 'public', table: 'settlements' },
-        () => {
-          qc.invalidateQueries({ queryKey: ['dashboard', 'summary'] })
-          qc.invalidateQueries({ queryKey: expenseKeys.activity() })
-        }
-      )
+      // NOTE: Global expense/settlement listeners were intentionally removed.
+      // Per-group realtime (useRealtimeGroup) handles live updates on group pages.
+      // Dashboard/activity data refreshes via notification listener + staleTime.
       .subscribe()
 
     channelRef.current = channel

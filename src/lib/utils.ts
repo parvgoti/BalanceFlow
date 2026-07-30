@@ -166,6 +166,42 @@ export function simplifyDebts(balances: BalanceEntry[]): SimplifiedDebt[] {
   return transactions
 }
 
+/**
+ * Compute direct (unsimplified) pairwise debts.
+ * Each debtor pays each creditor proportionally based on their
+ * share of the total debt pool. No rerouting through intermediaries.
+ */
+export function directDebts(balances: BalanceEntry[]): SimplifiedDebt[] {
+  const transactions: SimplifiedDebt[] = []
+
+  const creditors = balances.filter(b => b.net_balance > 0.01)
+  const debtors = balances.filter(b => b.net_balance < -0.01)
+
+  const totalDebt = debtors.reduce((sum, d) => sum + Math.abs(d.net_balance), 0)
+  if (totalDebt < 0.01) return transactions
+
+  for (const debtor of debtors) {
+    const debtorOwes = Math.abs(debtor.net_balance)
+    for (const creditor of creditors) {
+      // Each debtor pays each creditor proportionally
+      const creditorShare = creditor.net_balance / creditors.reduce((s, c) => s + c.net_balance, 0)
+      const amount = Math.round(debtorOwes * creditorShare * 100) / 100
+
+      if (amount > 0.01) {
+        transactions.push({
+          from_user_id: debtor.user_id,
+          from_user_name: debtor.full_name,
+          to_user_id: creditor.user_id,
+          to_user_name: creditor.full_name,
+          amount,
+        })
+      }
+    }
+  }
+
+  return transactions
+}
+
 // ── Misc ──────────────────────────────────────────────────────
 export function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))

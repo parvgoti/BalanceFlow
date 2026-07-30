@@ -17,11 +17,17 @@ export function UserSearchInput({
   placeholder = 'Search by name or email…',
 }: UserSearchInputProps) {
   const [inputValue, setInputValue] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  // Debounced query — we send the live value; React Query + staleTime handles caching
-  const { data: results = [], isFetching } = useUserSearch(inputValue)
+  // Debounce search queries — wait 300ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedQuery(inputValue), 300)
+    return () => clearTimeout(timer)
+  }, [inputValue])
+
+  const { data: results = [], isFetching } = useUserSearch(debouncedQuery)
 
   // Close dropdown when clicking outside
   useEffect(() => {
