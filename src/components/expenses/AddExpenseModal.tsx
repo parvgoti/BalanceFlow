@@ -292,6 +292,7 @@ export function AddExpenseModal() {
     .reduce((acc: number, curr: any) => acc + (Number(curr.percentage) || 0), 0)
   const isPercentageMatching = Math.abs(percentageSplitSum - 100) <= 0.01 && (watchedSplits || []).some((s: any) => s.included)
 
+  return (
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
       <DialogContent className="max-w-lg w-full h-[100dvh] sm:h-auto sm:rounded-3xl p-0 flex flex-col overflow-hidden bg-white dark:bg-gray-950 border-0" id="add-expense-modal">
         <DialogHeader className="px-4 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
@@ -381,6 +382,10 @@ export function AddExpenseModal() {
                         </p>
                       )}
                     </div>
+                  )}
+                </div>
+              )}
+            </div>
             {/* End of amount block */}
 
             {/* Description */}
