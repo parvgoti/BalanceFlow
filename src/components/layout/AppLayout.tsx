@@ -16,16 +16,16 @@ export function AppLayout() {
   useRealtimeApp()
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-950 overflow-hidden">
+    <div className="flex h-screen bg-white dark:bg-gray-950 overflow-hidden">
       {/* Sidebar — desktop only */}
       <Sidebar />
 
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
-        <div className="absolute top-0 inset-x-0 z-20">
+        <div className="sticky top-0 z-20">
           <TopBar />
         </div>
-        <main className="flex-1 overflow-y-auto pt-16 pb-20 lg:pb-0">
+        <main className="flex-1 overflow-y-auto pb-20 lg:pb-0 bg-white dark:bg-gray-950">
           <Outlet />
         </main>
       </div>
@@ -43,7 +43,7 @@ export function AppLayout() {
 
 export function AuthLayout() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-subtle via-white to-primary-50 dark:from-gray-950 dark:via-gray-900 dark:to-brand-dark">
+    <div className="min-h-screen bg-gradient-to-br from-brand-subtle via-white to-mint-50 dark:from-gray-950 dark:via-gray-900 dark:to-brand-dark">
       <Outlet />
     </div>
   )

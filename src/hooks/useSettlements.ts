@@ -119,6 +119,8 @@ export function useDashboardSummary() {
         totalOweMe,
         totalIOwe,
         netBalance: totalOweMe - totalIOwe,
+        oweMeCount: typedBalances.filter(b => b.net_balance > 0).length,
+        iOweCount: typedBalances.filter(b => b.net_balance < 0).length,
       }
     },
   })

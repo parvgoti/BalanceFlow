@@ -292,29 +292,22 @@ export function AddExpenseModal() {
     .reduce((acc: number, curr: any) => acc + (Number(curr.percentage) || 0), 0)
   const isPercentageMatching = Math.abs(percentageSplitSum - 100) <= 0.01 && (watchedSplits || []).some((s: any) => s.included)
 
-  return (
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
-      <DialogContent className="max-w-lg" id="add-expense-modal">
-        <DialogHeader>
-          <DialogTitle className="text-xl">
+      <DialogContent className="max-w-lg w-full h-[100dvh] sm:h-auto sm:rounded-3xl p-0 flex flex-col overflow-hidden bg-white dark:bg-gray-950 border-0" id="add-expense-modal">
+        <DialogHeader className="px-4 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
+          <DialogTitle className="text-xl font-bold text-navy dark:text-white text-center">
             {isReadOnly ? 'Expense Details' : isEditing ? 'Edit Expense' : 'Add Expense'}
           </DialogTitle>
-          <DialogDescription>
-            {isReadOnly 
-              ? 'View the details and split breakdown for this expense.' 
-              : isEditing 
-                ? 'Update the details for this expense.' 
-                : 'Track a new expense and split it with the group.'}
-          </DialogDescription>
+          {/* <DialogDescription> is hidden to keep it clean like the reference */}
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <DialogBody className="space-y-5">
-            {/* Hero Amount Section — Green Card */}
-            <div className="rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-5 text-white">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/60 text-center mb-2">Total Amount</p>
+          <DialogBody className="space-y-6 px-4 py-5 sm:px-6 flex-1 overflow-y-auto">
+            {/* Amount Section */}
+            <div className="text-center pb-4 border-b border-gray-100 dark:border-gray-800">
+              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Amount</p>
               <div className="flex items-center justify-center gap-2">
-                <span className="text-3xl font-bold text-white/80">
+                <span className="text-4xl font-semibold text-navy dark:text-white">
                   {new Intl.NumberFormat('en-US', { style: 'currency', currency: group?.currency || 'INR' })
                     .formatToParts(0).find(x => x.type === 'currency')?.value || '₹'}
                 </span>
@@ -332,23 +325,13 @@ export function AddExpenseModal() {
                   }}
                   disabled={isReadOnly}
                   className={cn(
-                    "text-3xl sm:text-4xl font-extrabold w-32 sm:w-36 text-center bg-transparent border-none outline-none text-white placeholder-white/40 focus:outline-none",
+                    "text-4xl sm:text-5xl font-bold w-36 sm:w-48 text-center bg-transparent border-none outline-none text-navy dark:text-white placeholder-gray-300 dark:placeholder-gray-700 focus:outline-none",
                     isReadOnly && "opacity-90 cursor-not-allowed"
                   )}
                   placeholder="0.00"
                 />
-                {!isReadOnly && (
-                  <div className="flex flex-col gap-0.5">
-                    <button type="button" onClick={() => adjustAmount(1)} className="text-white/50 hover:text-white">
-                      <ChevronUp className="h-4 w-4" />
-                    </button>
-                    <button type="button" onClick={() => adjustAmount(-1)} className="text-white/50 hover:text-white">
-                      <ChevronDown className="h-4 w-4" />
-                    </button>
-                  </div>
-                )}
               </div>
-              {errors.amount && <p className="text-xs text-red-200 mt-2 text-center">{errors.amount.message}</p>}
+              {errors.amount && <p className="text-xs text-red-500 mt-2 font-medium">{errors.amount.message}</p>}
 
               {/* Foreign Currency Toggle & Converter */}
               {!isReadOnly && (
@@ -398,10 +381,7 @@ export function AddExpenseModal() {
                         </p>
                       )}
                     </div>
-                  )}
-                </div>
-              )}
-            </div>
+            {/* End of amount block */}
 
             {/* Description */}
             <Input
@@ -722,42 +702,32 @@ export function AddExpenseModal() {
             ) : null}
           </DialogBody>
 
-          <DialogFooter className="flex-col items-stretch sm:flex-col sm:space-y-0 gap-3">
+          <DialogFooter className="px-4 py-4 sm:px-6 sm:py-5 border-t border-gray-100 dark:border-gray-800 shrink-0 flex-col gap-3">
             {formError && (
-              <div className="text-sm font-medium text-red-500 bg-red-50 dark:bg-red-500/10 p-3 rounded-lg border border-red-200 dark:border-red-500/20">
+              <div className="text-sm font-medium text-red-500 bg-red-50 dark:bg-red-500/10 p-3 rounded-lg border border-red-200 dark:border-red-500/20 w-full text-center">
                 {formError}
               </div>
             )}
-            <div className="flex gap-3 w-full">
+            <div className="flex flex-col gap-3 w-full">
               {isReadOnly ? (
                 <Button
                   type="button"
                   variant="outline"
                   onClick={closeModal}
-                  className="w-full h-12 rounded-xl text-sm font-bold uppercase tracking-wider"
+                  className="w-full h-14 rounded-2xl text-sm font-bold uppercase tracking-wider"
                 >
                   Close
                 </Button>
               ) : (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={closeModal}
-                    className="flex-1 h-12 rounded-xl text-sm font-bold uppercase tracking-wider"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    id="expense-save-btn"
-                    type="submit"
-                    loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
-                    disabled={!selectedGroupId}
-                    className="flex-1 h-12 rounded-xl bg-brand hover:bg-brand-light text-white text-sm font-bold uppercase tracking-wider shadow-glow"
-                  >
-                    {isEditing ? 'Save Changes' : 'Save Expense'}
-                  </Button>
-                </>
+                <Button
+                  id="expense-save-btn"
+                  type="submit"
+                  loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
+                  disabled={!selectedGroupId}
+                  className="w-full h-14 rounded-2xl bg-brand hover:bg-brand-light text-white text-sm font-bold uppercase tracking-wider shadow-glow"
+                >
+                  {isEditing ? 'Save Changes' : 'Add Expense'}
+                </Button>
               )}
             </div>
           </DialogFooter>

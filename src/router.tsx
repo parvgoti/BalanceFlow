@@ -8,6 +8,8 @@ import { GroupsPage } from '@/pages/GroupsPage'
 import { GroupDetailPage } from '@/pages/GroupDetailPage'
 import { ActivityPage } from '@/pages/ActivityPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { CalendarPage } from '@/pages/CalendarPage'
+import { NotificationsPage } from '@/pages/NotificationsPage'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotificationStore } from '@/store/notificationStore'
 import { useEffect } from 'react'
@@ -70,6 +72,8 @@ export function AppRouter() {
           <Route path="/groups/:id" element={<GroupDetailPage />} />
           <Route path="/activity" element={<ActivityPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
         </Route>
 
         {/* 404 fallback */}

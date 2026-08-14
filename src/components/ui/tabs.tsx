@@ -11,7 +11,7 @@ const TabsList = React.forwardRef<
   <TabsPrimitive.List
     ref={ref}
     className={cn(
-      'flex items-center border-b border-gray-200 dark:border-gray-800 w-full gap-1 overflow-x-auto scrollbar-hide',
+      'flex items-center border-b border-gray-100 dark:border-gray-800 gap-0',
       className
     )}
     {...props}
@@ -26,13 +26,11 @@ const TabsTrigger = React.forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'inline-flex items-center justify-center whitespace-nowrap shrink-0 gap-2 px-4 py-3 text-sm font-semibold',
-      'text-gray-500 dark:text-gray-400',
-      'border-b-2 border-transparent -mb-px',
-      'hover:text-gray-900 dark:hover:text-white transition-colors',
-      'data-[state=active]:text-brand data-[state=active]:border-brand',
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500',
-      'disabled:pointer-events-none disabled:opacity-50',
+      'relative px-4 py-2.5 text-xs font-semibold text-gray-400 dark:text-gray-500 transition-colors',
+      'hover:text-gray-600 dark:hover:text-gray-300',
+      'data-[state=active]:text-brand dark:data-[state=active]:text-brand-light',
+      'data-[state=active]:after:content-[""] data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-[2px] data-[state=active]:after:bg-brand data-[state=active]:after:rounded-full',
+      'focus-visible:outline-none',
       className
     )}
     {...props}

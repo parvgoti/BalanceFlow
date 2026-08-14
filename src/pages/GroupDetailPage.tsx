@@ -224,52 +224,48 @@ export function GroupDetailPage() {
   const groupName = (group as any).name as string
 
   return (
-    <div className="flex flex-col lg:flex-row h-full">
-      {/* Main content */}
-      <div className="flex-1 p-4 sm:p-6 space-y-4 sm:space-y-6 overflow-y-auto pb-24 lg:pb-6">
-        {/* Back + Group Name Header */}
-        <div>
-          <Link to="/groups" className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-brand mb-3 transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline">Groups</span>
-          </Link>
-          <div className="flex items-start justify-between gap-3">
+    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
+      <div className="flex-1 p-4 sm:p-6 space-y-5 overflow-y-auto pb-24 lg:pb-6 max-w-2xl mx-auto w-full">
+        {/* ── Header: Back, Group Info, Invite ──────────────────── */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <Link to="/groups" className="p-2 -ml-2 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 rounded-full transition-colors shrink-0">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white">{groupName}</h1>
-              <div className="flex items-center gap-2 mt-1.5">
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-800 text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  {(group as any)?.currency ?? 'INR'} {new Intl.NumberFormat('en-US', { style: 'currency', currency: (group as any)?.currency || 'INR' }).formatToParts(0).find(x => x.type === 'currency')?.value || '₹'}
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-navy dark:text-white leading-none">{groupName}</h1>
+                <span className="text-xl leading-none">
+                  {['🏖️', '🏠', '🎉', '✈️', '🍕', '🏔️', '🚗', '🎮'][((group as any)?.name?.charCodeAt(0) ?? 0) % 8]}
                 </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">{members.length} members</p>
+              
+              <div className="flex items-center gap-2 mt-3">
+                <AvatarGroup
+                  users={members.map(m => ({
+                    id: m.user_id,
+                    full_name: m.profiles?.full_name ?? '?',
+                    avatar_url: m.profiles?.avatar_url,
+                  }))}
+                  max={4}
+                />
+                {isAdmin && (
+                  <button
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-800 text-xs font-semibold text-navy dark:text-white hover:bg-gray-50 transition-colors ml-1"
+                    onClick={() => openModal('add-member' as any, { groupId })}
+                  >
+                    <UserPlus className="h-3.5 w-3.5" />
+                    Invite
+                  </button>
+                )}
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Member Avatars + Invite */}
-        <div className="flex items-center gap-3">
-          <AvatarGroup
-            users={members.map(m => ({
-              id: m.user_id,
-              full_name: m.profiles?.full_name ?? '?',
-              avatar_url: m.profiles?.avatar_url,
-            }))}
-            max={3}
-          />
-          {members.length > 3 && (
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">+{members.length - 3}</span>
-          )}
-          {isAdmin && (
-            <button
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 dark:border-gray-700 text-sm font-medium text-gray-600 dark:text-gray-400 hover:border-brand hover:text-brand transition-colors"
-              onClick={() => {
-                const tabsTrigger = document.querySelector('[data-value="settings"]') as HTMLButtonElement
-                tabsTrigger?.click()
-              }}
-            >
-              <UserPlus className="h-3.5 w-3.5" />
-              Invite
-            </button>
-          )}
+          
+          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+            <Settings className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Reset Request Banner */}
@@ -361,68 +357,60 @@ export function GroupDetailPage() {
           </div>
         )}
 
-        {/* Total Group Spend + You Owe Cards */}
+        {/* ── Summary Cards ─────────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="card p-4">
-            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Total Group Spend</p>
-            <p className="text-xl sm:text-2xl font-extrabold text-gray-900 dark:text-white mt-1">
+          <div className="card-flat p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
+              Total Group Spend
+            </p>
+            <p className="text-xl font-extrabold text-navy dark:text-white">
               {formatCurrency(allExpenses.reduce((s, e) => s + ((e as any).amount ?? 0), 0))}
             </p>
           </div>
-          <div className={cn(
-            "card p-4 border-l-2",
-            myBalance < 0 ? "border-l-red-400" : "border-l-emerald-400"
-          )}>
-            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+          <div className="card-flat p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
+            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
               {myBalance > 0 ? 'You are owed' : myBalance < 0 ? 'You Owe' : 'All Settled'}
             </p>
             <p className={cn(
-              "text-xl sm:text-2xl font-extrabold mt-1",
-              myBalance < 0 ? "text-red-500 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
+              "text-xl font-extrabold",
+              myBalance < 0 ? "text-red-500" : myBalance > 0 ? "text-brand" : "text-gray-500"
             )}>
               {formatCurrency(Math.abs(myBalance))}
             </p>
           </div>
         </div>
 
-        {/* Full-width Add Expense CTA */}
+        {/* ── Add Expense CTA ───────────────────────────────────── */}
         <Button
-          className="w-full bg-brand hover:bg-brand-light text-white font-semibold shadow-glow h-12 rounded-xl text-sm"
+          className="w-full h-12 rounded-xl text-sm font-semibold"
           id={`group-add-expense-cta-${groupId}`}
           onClick={() => openModal('add-expense', { groupId })}
         >
-          <Plus className="h-5 w-5 mr-1.5" />
+          <Plus className="h-4 w-4 mr-1.5" />
           Add Expense
         </Button>
 
-        {/* Tabs */}
+        {/* ── Tabs ──────────────────────────────────────────────── */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value="expenses">Expenses</TabsTrigger>
-            <TabsTrigger value="balances"><Users className="h-4 w-4" />Members</TabsTrigger>
-            <TabsTrigger value="settlements"><History className="h-4 w-4" />Settlements</TabsTrigger>
-            <TabsTrigger value="charts"><BarChart2 className="h-4 w-4" />Analytics</TabsTrigger>
-            {isAdmin && <TabsTrigger value="settings"><Settings className="h-4 w-4" />Settings</TabsTrigger>}
+          <TabsList className="w-full overflow-x-auto scrollbar-hide pb-0">
+            <TabsTrigger value="expenses" className="flex-1">Expenses</TabsTrigger>
+            <TabsTrigger value="balances" className="flex-1">Members</TabsTrigger>
+            <TabsTrigger value="settlements" className="flex-1">Settlements</TabsTrigger>
+            <TabsTrigger value="charts" className="flex-1">Analytics</TabsTrigger>
           </TabsList>
 
           {/* Expenses tab */}
           <TabsContent value="expenses" className="space-y-4">
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  id="expense-search-input"
-                  type="text"
-                  placeholder="Search expenses…"
-                  value={searchQuery}
-                  onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full h-10 pl-9 pr-4 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-              <Button variant="secondary" size="sm" id="expense-filter-btn">
-                <Filter className="h-4 w-4" />
-                <span className="hidden sm:inline">Filter</span>
-              </Button>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <input
+                id="expense-search-input"
+                type="text"
+                placeholder="Search expenses..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full h-10 pl-9 pr-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-400 shadow-sm transition-shadow"
+              />
             </div>
 
             {expensesLoading ? (

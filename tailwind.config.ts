@@ -6,32 +6,44 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Brand greens
+        // Brand greens — matched to reference
         primary: {
           50:  '#f0fdf4',
           100: '#dcfce7',
           200: '#bbf7d0',
           300: '#86efac',
           400: '#4ade80',
-          500: '#22c55e',
+          500: '#1B8A4A',
           600: '#16a34a',
           700: '#15803d',
           800: '#166534',
           900: '#14532d',
           950: '#052e16',
         },
-        // Custom brand
+        // Custom brand — emerald green
         brand: {
-          DEFAULT: '#1A5C38',
-          light:   '#2D9D5C',
-          subtle:  '#F0F7F2',
-          dark:    '#0F2E1C',
+          DEFAULT: '#1B8A4A',
+          light:   '#22A85A',
+          subtle:  '#E8F5E9',
+          dark:    '#145C32',
+        },
+        // Navy text
+        navy: {
+          DEFAULT: '#1A1D26',
+          light:   '#2D3142',
+          muted:   '#6B7280',
+        },
+        // Mint backgrounds
+        mint: {
+          50:  '#F0FFF4',
+          100: '#E8F5E9',
+          200: '#C8E6C9',
         },
         // Sidebar
         sidebar: {
-          bg:       '#1A5C38',
-          hover:    '#1F6E43',
-          active:   '#2D9D5C',
+          bg:       '#1B8A4A',
+          hover:    '#1F9E55',
+          active:   '#22A85A',
           text:     '#D1FAE5',
           muted:    '#6EE7B7',
         },
@@ -43,14 +55,14 @@ const config: Config = {
         // Neutrals for backgrounds
         surface: {
           DEFAULT:  '#ffffff',
-          raised:   '#f9fafb',
+          raised:   '#F8F9FA',
           overlay:  '#f3f4f6',
           dark:     '#111827',
           'dark-raised': '#1f2937',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'monospace'],
         serif: ['"Playfair Display"', 'Georgia', 'serif'],
       },
@@ -60,13 +72,16 @@ const config: Config = {
       borderRadius: {
         'xl':  '0.75rem',
         '2xl': '1rem',
-        '3xl': '1.5rem',
+        '3xl': '1.25rem',
+        '4xl': '1.5rem',
       },
       boxShadow: {
-        card:   '0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
-        'card-hover': '0 4px 12px 0 rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06)',
-        modal:  '0 25px 50px -12px rgb(0 0 0 / 0.25)',
-        glow:   '0 0 20px -5px rgb(45 157 92 / 0.4)',
+        card:       '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.03)',
+        'card-hover': '0 4px 12px 0 rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04)',
+        'card-lg':  '0 2px 8px 0 rgba(0, 0, 0, 0.06)',
+        modal:      '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+        glow:       '0 0 20px -5px rgba(27, 138, 74, 0.3)',
+        nav:        '0 -1px 3px 0 rgba(0, 0, 0, 0.05)',
       },
       animation: {
         'slide-in':       'slideIn 0.2s ease-out',
@@ -77,6 +92,7 @@ const config: Config = {
         'shimmer':        'shimmer 1.5s infinite',
         'bounce-slow':    'bounceSlow 2s ease-in-out infinite',
         'fade-in-up':     'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+        'spin-slow':      'spin 3s linear infinite',
       },
       keyframes: {
         slideIn:  { from: { transform: 'translateX(-100%)' }, to: { transform: 'translateX(0)' } },
