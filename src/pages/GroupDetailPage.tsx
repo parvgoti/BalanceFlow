@@ -6,7 +6,7 @@ import {
 } from 'date-fns'
 import {
   ArrowLeft, Download, Users, DollarSign, BarChart2,
-  Search, Filter, Settings, UserMinus, UserPlus, History, Trash2, X, Plus
+  Search, Filter, Settings, UserMinus, UserPlus, History, Trash2, X, Plus, TrendingUp
 } from 'lucide-react'
 import { UserSearchInput } from '@/components/ui/UserSearchInput'
 import { useGroup, useGroupBalances, useAddMembers, useRemoveMember, useDeleteGroup, useResetGroupData } from '@/hooks/useGroups'
