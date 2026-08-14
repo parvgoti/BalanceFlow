@@ -35,51 +35,60 @@ export function GroupCard({ group }: GroupCardProps) {
       className="card-hover block p-4 space-y-3"
     >
       {/* Header row */}
-      <div className="flex items-start gap-3">
-        <div className="h-11 w-11 rounded-2xl bg-brand-subtle flex items-center justify-center text-xl shrink-0">
-          {emoji}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h3 className="font-bold text-navy dark:text-white text-sm truncate">{group.name}</h3>
-          <div className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
-            <Users className="h-3 w-3" />
-            <span>{members.length} member{members.length !== 1 ? 's' : ''}</span>
+      <div className="flex items-start justify-between">
+        <div className="flex items-start gap-3">
+          <div className="h-12 w-12 rounded-full bg-orange-50/50 flex items-center justify-center text-2xl shrink-0">
+            {emoji}
+          </div>
+          <div>
+            <h3 className="font-bold text-navy dark:text-white text-[15px]">{group.name}</h3>
+            <p className="text-xs text-gray-500 mt-0.5 mb-2">{members.length} member{members.length !== 1 ? 's' : ''}</p>
+            <AvatarGroup
+              users={members.slice(0, 4).map((m: any) => ({
+                id: m.user_id,
+                full_name: m.profiles?.full_name ?? '?',
+                avatar_url: m.profiles?.avatar_url,
+              }))}
+              max={4}
+              size="sm"
+            />
           </div>
         </div>
-        <AvatarGroup
-          users={members.slice(0, 4).map((m: any) => ({
-            id: m.user_id,
-            full_name: m.profiles?.full_name ?? '?',
-            avatar_url: m.profiles?.avatar_url,
-          }))}
-          max={3}
-          size="xs"
-        />
+        <div className="text-gray-300">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </div>
       </div>
 
+      <div className="h-px bg-gray-100 dark:bg-gray-800 my-3" />
+
       {/* Balance */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-end justify-between">
         <div>
-          <p className="text-[11px] text-gray-400 font-medium mb-0.5">Your balance</p>
+          <p className="text-xs text-gray-400 font-medium mb-0.5">Your balance</p>
           <p className={cn(
-            'text-lg font-bold',
-            myBalance > 0.01 ? 'text-brand' : myBalance < -0.01 ? 'text-red-500' : 'text-gray-400'
+            'text-[17px] font-bold tracking-tight',
+            myBalance > 0.01 ? 'text-[#107C41]' : myBalance < -0.01 ? 'text-red-500' : 'text-navy dark:text-white'
           )}>
             {myBalance > 0 ? '+' : ''}{formatCurrency(myBalance)}
           </p>
         </div>
-        {totalBalance > 0 && (
+        {totalBalance > 0 ? (
           <div className="text-right">
-            <p className="text-[11px] text-gray-400 font-medium mb-0.5">Settlement progress</p>
-            <p className="text-sm font-bold text-navy dark:text-white">{Math.round(settledPct)}%</p>
+            <p className="text-xs text-gray-400 font-medium mb-0.5">Settlement progress</p>
+            <p className="text-[15px] font-bold text-navy dark:text-white">{Math.round(settledPct)}%</p>
+          </div>
+        ) : (
+          <div className="text-right">
+            <p className="text-xs text-gray-400 font-medium mb-0.5">Settlement progress</p>
+            <p className="text-[15px] font-bold text-navy dark:text-white">100%</p>
           </div>
         )}
       </div>
 
       {/* Progress bar */}
-      {totalBalance > 0 && (
-        <Progress value={settledPct} className="h-1" />
-      )}
+      <Progress value={settledPct === 0 && totalBalance === 0 ? 100 : settledPct} className="h-1.5 bg-gray-100 dark:bg-gray-800" indicatorClassName="bg-[#107C41]" />
     </Link>
   )
 }

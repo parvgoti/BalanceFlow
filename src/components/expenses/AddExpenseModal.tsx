@@ -460,7 +460,7 @@ export function AddExpenseModal() {
                 <select
                   id="expense-paid-by-select"
                   disabled={isReadOnly}
-                  className="flex h-11 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex h-[46px] w-full rounded-[14px] border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#107C41]/30 focus:border-[#107C41] disabled:cursor-not-allowed disabled:opacity-50 transition-colors shadow-sm"
                   {...register('paid_by')}
                 >
                   {members.map((m: any) => (
@@ -485,8 +485,7 @@ export function AddExpenseModal() {
 
             {/* Split Method */}
             <div className="space-y-3">
-              <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">Split Method</p>
-              <div className="flex rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden text-sm font-medium">
+              <div className="flex rounded-full bg-gray-50 dark:bg-gray-800/50 p-1 mt-2">
                 {(['equal', 'percentage', 'exact'] as SplitType[]).map((type) => (
                   <button
                     key={type}
@@ -499,14 +498,14 @@ export function AddExpenseModal() {
                     }}
                     disabled={isReadOnly}
                     className={cn(
-                      'flex-1 px-3 py-2.5 transition-all text-center',
+                      'flex-1 px-3 py-1.5 text-[13px] font-bold transition-all rounded-full',
                       splitType === type
-                        ? 'bg-brand text-white font-semibold'
-                        : 'bg-white dark:bg-gray-900 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-800',
+                        ? 'bg-[#107C41] text-white shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
                       isReadOnly && 'cursor-not-allowed opacity-75'
                     )}
                   >
-                    {type === 'equal' ? '= Equal' : type === 'percentage' ? '% Pct' : '$ Exact'}
+                    {type === 'equal' ? 'Equally' : type === 'percentage' ? 'Percentages' : 'Exact'}
                   </button>
                 ))}
               </div>
@@ -719,7 +718,7 @@ export function AddExpenseModal() {
                   type="button"
                   variant="outline"
                   onClick={closeModal}
-                  className="w-full h-14 rounded-2xl text-sm font-bold uppercase tracking-wider"
+                  className="w-full h-[46px] rounded-[14px] text-sm font-semibold border-gray-200 dark:border-gray-800"
                 >
                   Close
                 </Button>
@@ -729,7 +728,7 @@ export function AddExpenseModal() {
                   type="submit"
                   loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
                   disabled={!selectedGroupId}
-                  className="w-full h-14 rounded-2xl bg-brand hover:bg-brand-light text-white text-sm font-bold uppercase tracking-wider shadow-glow"
+                  className="w-full h-[46px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-white text-[15px] font-semibold shadow-sm"
                 >
                   {isEditing ? 'Save Changes' : 'Add Expense'}
                 </Button>

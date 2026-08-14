@@ -13,7 +13,7 @@ const config: Config = {
           200: '#bbf7d0',
           300: '#86efac',
           400: '#4ade80',
-          500: '#1B8A4A',
+          500: '#107C41',
           600: '#16a34a',
           700: '#15803d',
           800: '#166534',
@@ -22,7 +22,7 @@ const config: Config = {
         },
         // Custom brand — emerald green
         brand: {
-          DEFAULT: '#1B8A4A',
+          DEFAULT: '#107C41',
           light:   '#22A85A',
           subtle:  '#E8F5E9',
           dark:    '#145C32',

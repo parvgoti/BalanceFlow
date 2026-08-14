@@ -359,21 +359,23 @@ export function GroupDetailPage() {
 
         {/* ── Summary Cards ─────────────────────────────────────── */}
         <div className="grid grid-cols-2 gap-3">
-          <div className="card-flat p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[16px] p-4 flex flex-col justify-center">
             <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
               Total Group Spend
             </p>
-            <p className="text-xl font-extrabold text-navy dark:text-white">
+            <p className="text-[22px] font-extrabold text-navy dark:text-white leading-none">
               {formatCurrency(allExpenses.reduce((s, e) => s + ((e as any).amount ?? 0), 0))}
             </p>
           </div>
-          <div className="card-flat p-4 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl shadow-sm">
-            <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[16px] p-4 flex flex-col justify-center">
+            <p className={cn("text-[10px] font-bold uppercase tracking-widest mb-1", 
+              myBalance > 0 ? "text-[#15803D]" : myBalance < 0 ? "text-[#B91C1C]" : "text-gray-400"
+            )}>
               {myBalance > 0 ? 'You are owed' : myBalance < 0 ? 'You Owe' : 'All Settled'}
             </p>
             <p className={cn(
-              "text-xl font-extrabold",
-              myBalance < 0 ? "text-red-500" : myBalance > 0 ? "text-brand" : "text-gray-500"
+              "text-[22px] font-extrabold leading-none",
+              myBalance < 0 ? "text-[#B91C1C]" : myBalance > 0 ? "text-[#15803D]" : "text-gray-500"
             )}>
               {formatCurrency(Math.abs(myBalance))}
             </p>
@@ -382,11 +384,11 @@ export function GroupDetailPage() {
 
         {/* ── Add Expense CTA ───────────────────────────────────── */}
         <Button
-          className="w-full h-12 rounded-xl text-sm font-semibold"
+          className="w-full h-[46px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-white text-sm font-semibold shadow-sm"
           id={`group-add-expense-cta-${groupId}`}
           onClick={() => openModal('add-expense', { groupId })}
         >
-          <Plus className="h-4 w-4 mr-1.5" />
+          <Plus className="h-[18px] w-[18px] mr-1.5" />
           Add Expense
         </Button>
 
@@ -401,16 +403,23 @@ export function GroupDetailPage() {
 
           {/* Expenses tab */}
           <TabsContent value="expenses" className="space-y-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <input
-                id="expense-search-input"
-                type="text"
-                placeholder="Search expenses..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full h-10 pl-9 pr-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand focus:border-transparent placeholder:text-gray-400 shadow-sm transition-shadow"
-              />
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-[18px] w-[18px] text-gray-400" />
+                <input
+                  id="expense-search-input"
+                  type="text"
+                  placeholder="Search expenses..."
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full h-11 pl-[38px] pr-4 rounded-full border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#107C41]/30 focus:border-[#107C41] placeholder:text-gray-400 transition-colors shadow-sm"
+                />
+              </div>
+              <button className="h-11 w-11 rounded-full border border-gray-200 dark:border-gray-800 flex items-center justify-center text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors shrink-0 shadow-sm">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z"/>
+                </svg>
+              </button>
             </div>
 
             {expensesLoading ? (
@@ -565,16 +574,25 @@ export function GroupDetailPage() {
           {/* Charts tab */}
           <TabsContent value="charts" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="card p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-gray-900 dark:text-white">Spending Trend</h3>
-                  <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+              <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
+                <div className="flex items-start justify-between mb-6">
+                  <div>
+                    <h3 className="font-bold text-navy dark:text-white text-[15px] mb-1">Spending Trend</h3>
+                    <p className="text-xs text-gray-500 font-medium">Total spent</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <p className="text-[22px] font-extrabold tracking-tight">₹2,974.00</p>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-[#F0FDF4] text-[#15803D] px-2 py-0.5 rounded-full">
+                        <TrendingUp className="h-3 w-3" /> 12.5% vs last month
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex bg-gray-50 dark:bg-gray-800 p-1 rounded-[10px]">
                     {(['week', 'month', 'year'] as const).map(range => (
                       <button
                         key={range}
                         onClick={() => setChartRange(range)}
-                        className={`px-3 py-1 text-xs font-medium rounded-md capitalize transition-colors ${chartRange === range
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                        className={`px-3 py-1.5 text-[11px] font-bold rounded-[6px] capitalize transition-colors ${chartRange === range
+                            ? 'bg-[#107C41] text-white shadow-sm'
                             : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                           }`}
                       >

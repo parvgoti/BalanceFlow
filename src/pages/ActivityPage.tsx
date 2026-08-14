@@ -74,72 +74,37 @@ export function ActivityPage() {
           {Object.entries(groupedByDate).map(([date, items]) => (
             <div key={date}>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 px-1">{date}</p>
-              <div className="card divide-y divide-gray-50 dark:divide-gray-800">
-                {(items as ActivityItem[]).map((item) => {
-                  // Determine avatar color based on type
-                  const avatarColors: Record<string, string> = {
-                    expense: 'bg-brand',
-                    settlement: 'bg-blue-500',
-                    deleted_expense: 'bg-red-500',
-                  }
-                  const avatarColor = avatarColors[item.type] ?? 'bg-gray-400'
-
-                  // Description text
-                  let description = ''
-                  if (item.type === 'expense') {
-                    description = `You added an expense`
-                  } else if (item.type === 'settlement') {
-                    description = `${item.actor_name} settled`
-                  } else if (item.type === 'deleted_expense') {
-                    description = `Expense deleted`
-                  }
-
-                  return (
-                    <div key={`${item.type}-${item.id}`} className={cn(
-                      "flex items-start gap-3 px-4 py-3",
-                      item.type === 'deleted_expense' && "opacity-60"
-                    )}>
-                      {/* Avatar circle */}
-                      <div className={cn(
-                        'h-9 w-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0',
-                        avatarColor
+              <div className="space-y-1">
+                {(items as ActivityItem[]).map((item) => (
+                  <div key={`${item.type}-${item.id}`} className={cn(
+                    "flex items-center gap-3 px-4 py-3 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors",
+                    item.type === 'deleted_expense' && "opacity-60 grayscale"
+                  )}>
+                    <CategoryIcon category={item.category as ExpenseCategory} size="sm" />
+                    
+                    <div className="flex-1 min-w-0">
+                      <p className={cn(
+                        "text-[15px] font-semibold truncate tracking-tight",
+                        item.type === 'deleted_expense' ? "text-gray-400 line-through" : "text-navy dark:text-white"
                       )}>
-                        {item.actor_name?.charAt(0)?.toUpperCase() ?? '?'}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-500">{description}</p>
-                        <p className={cn(
-                          "text-sm font-semibold mt-0.5",
-                          item.type === 'deleted_expense' ? "text-gray-400 line-through" : "text-navy dark:text-white"
-                        )}>
-                          {item.title}
-                        </p>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <span className={cn('category-pill',
-                            item.type === 'settlement' ? 'bg-blue-50 text-blue-700' :
-                            item.type === 'deleted_expense' ? 'bg-red-50 text-red-600' :
-                            'bg-orange-50 text-orange-700'
-                          )}>
-                            {item.type === 'settlement' ? 'Settled' : item.type === 'deleted_expense' ? 'Deleted' : (CATEGORY_CONFIG[item.category as ExpenseCategory]?.label ?? 'Other')}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <p className="text-[11px] text-gray-400">
-                          {new Date(item.created_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                        </p>
-                        <p className={cn(
-                          "text-sm font-bold mt-0.5",
-                          item.type === 'deleted_expense' ? "text-gray-400 line-through" : "text-navy dark:text-white"
-                        )}>
-                          {formatCurrency(item.amount)}
-                        </p>
-                      </div>
+                        {item.title}
+                      </p>
+                      <p className="text-[11px] text-gray-400 mt-0.5 font-medium">
+                        {item.group_name} · {formatRelativeTime(item.created_at)}
+                      </p>
                     </div>
-                  )
-                })}
+
+                    <div className="text-right shrink-0">
+                      <p className={cn(
+                        "text-[15px] font-bold tracking-tight mb-1",
+                        item.type === 'deleted_expense' ? "text-gray-400 line-through" : "text-navy dark:text-white"
+                      )}>
+                        {formatCurrency(item.amount)}
+                      </p>
+                      <StatusBadge status={item.type === 'settlement' ? 'settled' : 'split'} />
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           ))}

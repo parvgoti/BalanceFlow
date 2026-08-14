@@ -45,62 +45,44 @@ function GroupSettleRow({
   return (
     <div
       onClick={() => onSelect(group.id, myBalance !== 0)}
-      className={cn(
-        "group relative flex items-center justify-between p-4 rounded-xl border transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md",
-        myBalance < 0
-          ? "border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/30 hover:border-red-300 dark:hover:border-red-800/80"
-          : myBalance > 0
-            ? "border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/30 hover:border-emerald-300 dark:hover:border-emerald-800/80"
-            : "border-gray-200 dark:border-slate-800/80 bg-gray-50/50 dark:bg-slate-800/40 hover:border-gray-300 dark:hover:border-slate-700"
-      )}
+      className="flex flex-col p-4 rounded-[16px] border border-gray-200 bg-white shadow-sm mb-3"
     >
       <div className="flex items-center gap-3.5 min-w-0 pr-2">
-        <div className={cn(
-          "w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-sm border",
-          myBalance < 0
-            ? "bg-red-100 dark:bg-red-900/40 border-red-200 dark:border-red-800/60"
-            : myBalance > 0
-              ? "bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800/60"
-              : "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
-        )}>
+        <div className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 bg-orange-100 border border-orange-200">
           {emoji}
         </div>
         <div className="min-w-0">
-          <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-            {group.name}
-          </h4>
           <p className={cn(
-            "text-xs font-semibold mt-0.5 flex items-center gap-1 truncate",
-            myBalance < 0
-              ? "text-red-600 dark:text-red-400"
-              : myBalance > 0
-                ? "text-emerald-600 dark:text-emerald-400"
-                : "text-gray-400 dark:text-gray-500"
+            "text-[15px] font-bold tracking-tight",
+            myBalance < 0 ? "text-red-500" : myBalance > 0 ? "text-emerald-500" : "text-gray-900 dark:text-white"
           )}>
-            {myBalance < 0 && `You owe ${formatCurrency(Math.abs(myBalance))}`}
-            {myBalance > 0 && `You are owed ${formatCurrency(myBalance)}`}
-            {myBalance === 0 && 'All settled up ✓'}
+            {myBalance < 0 && `You pay ${group.name} ${formatCurrency(Math.abs(myBalance))}`}
+            {myBalance > 0 && `${group.name} pays you ${formatCurrency(myBalance)}`}
+            {myBalance === 0 && 'All settled up'}
           </p>
         </div>
       </div>
 
-      <div className="shrink-0 ml-2">
+      <div className="flex flex-col items-center gap-2 mt-4">
         <Button
           size="sm"
-          variant={myBalance !== 0 ? "default" : "outline"}
+          variant="outline"
+          className="w-full rounded-full border-gray-200 text-gray-600 font-bold"
+        >
+          Cash
+        </Button>
+        <Button
+          size="sm"
           className={cn(
-            "h-9 px-3.5 rounded-lg text-xs font-bold transition-all shadow-sm",
-            myBalance < 0 && "bg-red-600 hover:bg-red-700 text-white shadow-red-500/20",
-            myBalance > 0 && "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-500/20",
-            myBalance === 0 && "text-gray-600 dark:text-gray-300 border-gray-200 dark:border-slate-700 hover:bg-gray-100 dark:hover:bg-slate-800"
+            "w-full rounded-full text-white font-bold h-10",
+            myBalance < 0 ? "bg-[#107C41] hover:bg-[#15803D]" : "bg-gray-200 text-gray-500"
           )}
           onClick={(e) => {
             e.stopPropagation()
             onSelect(group.id, myBalance !== 0)
           }}
         >
-          <span>{myBalance === 0 ? 'View' : 'Settle'}</span>
-          <ArrowRight className="h-3.5 w-3.5 ml-1 transition-transform group-hover:translate-x-0.5" />
+          Record payment
         </Button>
       </div>
     </div>
@@ -125,19 +107,23 @@ export function DashboardSettleUpModal() {
         className="w-[92vw] max-w-lg p-0 overflow-hidden bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-2xl" 
         id="dashboard-settle-modal"
       >
-        <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-100 dark:border-slate-800/80 bg-gray-50/60 dark:bg-slate-900/60">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-xl bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand-light flex items-center justify-center shrink-0 shadow-sm border border-brand/20 dark:border-brand-light/20">
-              <Wallet className="h-5 w-5" />
-            </div>
-            <div>
-              <DialogTitle className="text-lg font-bold text-gray-900 dark:text-white">
-                Settle Up Debts
-              </DialogTitle>
-              <DialogDescription className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                Select a group below to view balances and record payments.
-              </DialogDescription>
-            </div>
+        <DialogHeader className="px-5 pt-5 pb-4 border-b border-gray-100 dark:border-slate-800/80 bg-white dark:bg-slate-900">
+          <div className="flex items-center justify-between mb-4">
+            <DialogTitle className="text-[22px] font-extrabold text-navy dark:text-white tracking-tight">
+              Settle up
+            </DialogTitle>
+            <button onClick={() => closeModal()} className="text-[13px] font-bold text-gray-400 hover:text-gray-600">
+              Cancel
+            </button>
+          </div>
+          
+          <div className="flex gap-2">
+            <button className="px-4 py-1.5 rounded-full bg-[#107C41] text-white text-[13px] font-bold shadow-sm">
+              My settlements
+            </button>
+            <button className="px-4 py-1.5 rounded-full bg-white border border-gray-200 text-gray-500 text-[13px] font-bold">
+              Pending
+            </button>
           </div>
         </DialogHeader>
 
