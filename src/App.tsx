@@ -7,13 +7,15 @@ import { SpeedInsights } from '@vercel/speed-insights/react'
 
 export default function App() {
   return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <AppRouter />
-        </BrowserRouter>
-      </QueryClientProvider>
+    <>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <AppRouter />
+          </BrowserRouter>
+        </QueryClientProvider>
+      </ErrorBoundary>
       <SpeedInsights />
-    </ErrorBoundary>
+    </>
   )
 }
