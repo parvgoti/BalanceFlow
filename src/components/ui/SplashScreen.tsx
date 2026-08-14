@@ -38,7 +38,7 @@ export function SplashScreen({ isLoading }: { isLoading: boolean }) {
 
         {/* Text */}
         <div className="text-center space-y-2 opacity-0 animate-fade-in-up" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
-          <h1 className="text-3xl font-bold text-white tracking-tight">BalanceFlow</h1>
+          <h1 className="text-3xl font-serif font-bold text-white tracking-wide">BalanceFlow</h1>
           <p className="text-gray-400 font-medium">Smart Expense Sharing</p>
         </div>
       </div>
