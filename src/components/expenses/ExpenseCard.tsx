@@ -134,7 +134,7 @@ export function ExpenseCard({ expense, onEdit, onDelete, compact = false }: Expe
               {isPayer ? <Pencil className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
             </button>
           )}
-          {onDelete && (
+          {onDelete && isPayer && (
             <button
               onClick={() => onDelete(expense.id)}
               className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
