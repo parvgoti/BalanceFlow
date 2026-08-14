@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/react'
 import { queryClient } from '@/lib/queryClient'
 import { AppRouter } from '@/router'
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary'
+import { SpeedInsights } from '@vercel/speed-insights/react'
 
 export default function App() {
   return (
@@ -15,5 +16,15 @@ export default function App() {
       </QueryClientProvider>
       <Analytics />
     </ErrorBoundary>
+    <>
+      <ErrorBoundary>
+        <QueryClientProvider client={queryClient}>
+          <BrowserRouter>
+            <AppRouter />
+          </BrowserRouter>
+        </QueryClientProvider>
+      </ErrorBoundary>
+      <SpeedInsights />
+    </>
   )
 }
