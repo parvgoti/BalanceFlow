@@ -28,7 +28,7 @@ import { SettleUpModal } from '@/components/settlements/SettleUpModal'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import { CelebrationBanner } from '@/components/ui/CelebrationBanner'
 import { ExpenseListSkeleton } from '@/components/shared/Skeleton'
-import { SpendingTrendChart, BalanceBarChart } from '@/components/charts/Charts'
+import { SpendingTrendChart, BalanceBarChart, CategoryPieChart } from '@/components/charts/Charts'
 import { useAuthStore } from '@/store/authStore'
 import { useUIStore } from '@/store/uiStore'
 import { supabase } from '@/lib/supabase'
@@ -198,6 +198,30 @@ export function GroupDetailPage() {
         amount: expenses.reduce((s, e) => s + ((e as any).amount ?? 0), 0)
       }
     })
+  }, [allExpenses, chartRange])
+
+  const categoryData = useMemo(() => {
+    const now = new Date()
+    let interval: { start: Date; end: Date }
+
+    if (chartRange === 'week') {
+      interval = { start: startOfWeek(now, { weekStartsOn: 1 }), end: endOfWeek(now, { weekStartsOn: 1 }) }
+    } else if (chartRange === 'month') {
+      interval = { start: startOfMonth(now), end: endOfMonth(now) }
+    } else {
+      interval = { start: startOfYear(now), end: endOfYear(now) }
+    }
+
+    const expensesInInterval = allExpenses.filter((e: any) => {
+      if (!e.date) return false
+      return isWithinInterval(parseISO(e.date), interval)
+    })
+
+    const grouped = groupBy(expensesInInterval as any[], (e: any) => e.category || 'other')
+    return Object.entries(grouped).map(([category, expenses]) => ({
+      category: category as any,
+      total: expenses.reduce((s, e) => s + ((e as any).amount ?? 0), 0)
+    })).filter(d => d.total > 0).sort((a, b) => b.total - a.total)
   }, [allExpenses, chartRange])
 
   const balanceBarData = typedBalances.map(b => ({
@@ -573,39 +597,77 @@ export function GroupDetailPage() {
 
           {/* Charts tab */}
           <TabsContent value="charts" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-xl mb-4">
+              {(['week', 'month', 'year'] as const).map(range => (
+                <button
+                  key={range}
+                  onClick={() => setChartRange(range)}
+                  className={`flex-1 py-1.5 text-xs font-bold rounded-lg capitalize transition-colors ${chartRange === range
+                      ? 'bg-[#107C41] text-white shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                    }`}
+                >
+                  {range}
+                </button>
+              ))}
+            </div>
+
+            <div className="space-y-4">
               <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
-                <div className="flex items-start justify-between mb-6">
-                  <div>
-                    <h3 className="font-bold text-navy dark:text-white text-[15px] mb-1">Spending Trend</h3>
-                    <p className="text-xs text-gray-500 font-medium">Total spent</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <p className="text-[22px] font-extrabold tracking-tight">₹2,974.00</p>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-[#F0FDF4] text-[#15803D] px-2 py-0.5 rounded-full">
-                        <TrendingUp className="h-3 w-3" /> 12.5% vs last month
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex bg-gray-50 dark:bg-gray-800 p-1 rounded-[10px]">
-                    {(['week', 'month', 'year'] as const).map(range => (
-                      <button
-                        key={range}
-                        onClick={() => setChartRange(range)}
-                        className={`px-3 py-1.5 text-[11px] font-bold rounded-[6px] capitalize transition-colors ${chartRange === range
-                            ? 'bg-[#107C41] text-white shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                          }`}
-                      >
-                        {range}
-                      </button>
-                    ))}
+                <div className="mb-6">
+                  <h3 className="font-extrabold text-navy dark:text-white text-[15px] mb-1">Spending Trend</h3>
+                  <p className="text-xs text-gray-500 font-medium">Total spent</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <CurrencyDisplay
+                      amount={trendData.reduce((sum, item) => sum + item.amount, 0)}
+                      currency={group.currency}
+                      className="text-[22px] font-black tracking-tight text-navy dark:text-white"
+                    />
+                    <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-[#F0FDF4] text-[#15803D] px-2 py-0.5 rounded-full">
+                      <TrendingUp className="h-3 w-3" /> 12.5% vs last month
+                    </span>
                   </div>
                 </div>
                 <SpendingTrendChart data={trendData} currency={group.currency} />
               </div>
-              <div className="card p-6">
-                <h3 className="font-bold text-gray-900 dark:text-white mb-4">Balance per Member</h3>
-                <BalanceBarChart data={balanceBarData} currency={group.currency} />
+
+              <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
+                <h3 className="font-extrabold text-navy dark:text-white text-[15px] mb-4">Spending by Category</h3>
+                {categoryData.length > 0 ? (
+                  <div className="flex items-center gap-4">
+                    <div className="w-[140px] shrink-0 relative">
+                      <CategoryPieChart data={categoryData} />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                        <CurrencyDisplay
+                          amount={categoryData.reduce((sum, item) => sum + item.total, 0)}
+                          currency={group.currency}
+                          className="text-[13px] font-black text-navy dark:text-white leading-none"
+                        />
+                        <span className="text-[10px] text-gray-500 font-medium mt-0.5">Total</span>
+                      </div>
+                    </div>
+                    <div className="flex-1 space-y-3">
+                      {categoryData.slice(0, 5).map((d, i) => {
+                        const colors = ['#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#22c55e']
+                        const percent = Math.round((d.total / categoryData.reduce((sum, item) => sum + item.total, 0)) * 100)
+                        return (
+                          <div key={d.category} className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colors[i % colors.length] }} />
+                              <span className="text-gray-600 dark:text-gray-300 font-medium capitalize">{d.category.replace('_', ' ')}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-gray-400 font-medium">{percent}%</span>
+                              <span className="text-navy dark:text-white font-bold">{formatCurrency(d.total, group.currency)}</span>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-gray-500 text-center py-4">No spending data in this period.</p>
+                )}
               </div>
             </div>
           </TabsContent>

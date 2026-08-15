@@ -131,154 +131,126 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950 px-4 py-5 max-w-lg mx-auto w-full">
-      {/* Header */}
-      <div className="flex items-center gap-4 mb-6">
-        <div className="relative">
-          <UserAvatar
-            name={profile?.full_name ?? 'User'}
-            avatarUrl={profile?.avatar_url}
-            userId={profile?.id ?? ''}
-            className="h-16 w-16 text-xl"
-          />
-          <label
-            htmlFor="avatar-upload"
-            className="absolute bottom-0 right-0 h-6 w-6 rounded-full bg-brand text-white flex items-center justify-center cursor-pointer shadow-md"
-          >
-            {avatarLoading ? (
-              <div className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
-            ) : (
-              <Camera className="h-3 w-3" />
-            )}
-            <input
-              id="avatar-upload"
-              type="file"
-              accept="image/*"
-              className="sr-only"
-              onChange={handleAvatarUpload}
-            />
-          </label>
-        </div>
-        <div>
-          <h2 className="text-xl font-bold text-navy dark:text-white leading-none">{profile?.full_name}</h2>
-          <p className="text-sm text-gray-500 mt-1">{profile?.email}</p>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
-        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[16px] p-4 flex flex-col justify-center shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
-            Total settled
-          </p>
-          <p className="text-xl font-extrabold text-navy dark:text-white leading-none">
-            ₹46.00
-          </p>
-        </div>
-        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[16px] p-4 flex flex-col justify-center shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
-            Groups joined
-          </p>
-          <p className="text-xl font-extrabold text-navy dark:text-white leading-none">
-            1
-          </p>
-        </div>
-      </div>
-
-      {/* Premium Banner */}
-      <div className="bg-navy dark:bg-gray-900 rounded-[20px] p-5 text-white flex flex-col items-start mb-6 shadow-lg">
-        <h3 className="font-bold text-lg mb-1 flex items-center gap-1.5">
-          <span className="text-xl leading-none">🌟</span> Upgrade to Premium
-        </h3>
-        <p className="text-xs text-white/70 mb-4">
-          Unlock unlimited groups and advanced analytics
-        </p>
-        <button className="bg-[#107C41] hover:bg-[#15803D] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors">
-          Upgrade now
+    <div className="flex flex-col h-[100dvh] bg-[#F7F9FC] dark:bg-gray-950 px-4 pt-12 pb-24 max-w-lg mx-auto w-full">
+      <div className="flex items-center gap-3 mb-6 px-1">
+        <button className="text-navy dark:text-white shrink-0 hover:bg-gray-200 dark:hover:bg-gray-800 p-1.5 rounded-full transition-colors">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
         </button>
+        <h1 className="text-[22px] font-extrabold text-navy dark:text-white">More</h1>
       </div>
 
-      {/* Menu List */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
+      <div className="bg-white dark:bg-gray-900 rounded-[20px] shadow-sm border border-gray-100 dark:border-gray-800 p-2 space-y-1">
         
-        {/* Quick Settings Form */}
-        <div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-2 mb-3">Preferences</p>
-          <div className="card divide-y divide-gray-50 dark:divide-gray-800">
-            <div className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-navy dark:text-white">Push Notifications</p>
-                <p className="text-[11px] text-gray-400">Receive alerts on your device</p>
-              </div>
-              <Switch
-                id="push-notifications-toggle"
-                checked={pushNotifications}
-                onCheckedChange={async (v) => {
-                  setValue('push_notifications', v, { shouldDirty: true })
-                  await handleSubmit(onSubmit)()
-                }}
-              />
+        {/* Profile */}
+        <button className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500">
+              <User className="h-5 w-5" />
             </div>
-            <div className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-navy dark:text-white">Default Currency</p>
-                <p className="text-[11px] text-gray-400">Your primary tracking currency</p>
-              </div>
-              <select
-                id="settings-currency-select"
-                className="h-8 rounded-lg bg-gray-50 dark:bg-gray-800 text-xs font-medium text-navy dark:text-white px-2 border-none outline-none focus:ring-2 focus:ring-brand"
-                {...register('currency')}
-                onChange={async (e) => {
-                  setValue('currency', e.target.value, { shouldDirty: true })
-                  await handleSubmit(onSubmit)()
-                }}
-              >
-                {CURRENCIES.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+            <div className="text-left">
+              <p className="text-[15px] font-bold text-navy dark:text-white leading-tight">Profile</p>
+              <p className="text-[13px] text-gray-500 font-medium">Manage your account</p>
             </div>
           </div>
-        </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+
+        {/* Settings */}
+        <button className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div className="text-left">
+              <p className="text-[15px] font-bold text-navy dark:text-white leading-tight">Settings</p>
+              <p className="text-[13px] text-gray-500 font-medium">App preferences</p>
+            </div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+
+        {/* Invite Friends */}
+        <button className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg>
+            </div>
+            <div className="text-left">
+              <p className="text-[15px] font-bold text-navy dark:text-white leading-tight">Invite Friends</p>
+              <p className="text-[13px] text-gray-500 font-medium">Add friends to BalanceFlow</p>
+            </div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+
+        {/* Help & Support */}
+        <button className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            </div>
+            <div className="text-left">
+              <p className="text-[15px] font-bold text-navy dark:text-white leading-tight">Help & Support</p>
+              <p className="text-[13px] text-gray-500 font-medium">Get help and contact us</p>
+            </div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+
+        {/* Change Currency */}
+        <button className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" x2="22" y1="12" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            </div>
+            <div className="text-left">
+              <p className="text-[15px] font-bold text-navy dark:text-white leading-tight">Change Currency</p>
+              <p className="text-[13px] text-gray-500 font-medium">Currency: INR (₹)</p>
+            </div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+
+        {/* Data & Export */}
+        <button className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+            </div>
+            <div className="text-left">
+              <p className="text-[15px] font-bold text-navy dark:text-white leading-tight">Data & Export</p>
+              <p className="text-[13px] text-gray-500 font-medium">Export your data</p>
+            </div>
+          </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
 
         {/* Appearance */}
-        <div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest px-2 mb-3">Appearance</p>
-          <div className="card p-3">
-            <div className="flex bg-gray-50 dark:bg-gray-800/50 p-1 rounded-xl">
-              {THEMES.map(t => (
-                <button
-                  key={t.value}
-                  type="button"
-                  onClick={() => setTheme(t.value)}
-                  className={cn(
-                    "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all",
-                    theme === t.value
-                      ? "bg-white dark:bg-gray-900 text-brand shadow-sm"
-                      : "text-gray-500 hover:text-navy dark:hover:text-white"
-                  )}
-                >
-                  <t.icon className="h-3.5 w-3.5" />
-                  {t.label}
-                </button>
-              ))}
+        <button className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-gray-200 dark:border-gray-700 text-gray-500">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            </div>
+            <div className="text-left">
+              <p className="text-[15px] font-bold text-navy dark:text-white leading-tight">Appearance</p>
+              <p className="text-[13px] text-gray-500 font-medium">Light / Dark / System</p>
             </div>
           </div>
-        </div>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
 
-        {/* Account Actions */}
-        <div className="mt-6">
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center justify-center py-3.5 rounded-[14px] bg-red-50 dark:bg-red-950 hover:bg-red-100 transition-colors"
-          >
-            <span className="text-[13px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Log Out</span>
-          </button>
-        </div>
-        
-        {saveError && (
-          <p className="text-xs text-red-500 text-center font-medium px-4">{saveError}</p>
-        )}
+        {/* Sign Out */}
+        <button onClick={handleSignOut} className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors mt-2 bg-[#FCF8F8] dark:bg-gray-800/30">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 flex items-center justify-center rounded-full border border-red-200 dark:border-red-900/30 text-red-500 bg-white dark:bg-gray-900 shadow-sm">
+              <LogOut className="h-4 w-4 ml-0.5" />
+            </div>
+            <div className="text-left">
+              <p className="text-[15px] font-bold text-[#E53E3E] leading-tight tracking-wide">Sign Out</p>
+            </div>
+          </div>
+        </button>
+
       </div>
     </div>
   )

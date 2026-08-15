@@ -1,12 +1,12 @@
 import { NavLink, useLocation } from 'react-router-dom'
-import { Home, Users, Clock, User } from 'lucide-react'
+import { Home, Users, Activity, MoreHorizontal } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
   { to: '/',         label: 'Home',     icon: Home },
   { to: '/groups',   label: 'Groups',   icon: Users },
-  { to: '/activity', label: 'Activity', icon: Clock },
-  { to: '/settings', label: 'Profile',  icon: User },
+  { to: '/activity', label: 'Activity', icon: Activity },
+  { to: '/settings', label: 'More',     icon: MoreHorizontal },
 ]
 
 export function BottomNav() {
