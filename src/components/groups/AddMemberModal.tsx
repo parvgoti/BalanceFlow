@@ -49,7 +49,7 @@ export function AddMemberModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center bg-black/40 backdrop-blur-sm sm:p-4">
       <div 
-        className="w-full max-w-md bg-white dark:bg-gray-900 rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom flex flex-col max-h-[90dvh]"
+        className="w-full max-w-md bg-white dark:bg-gray-900 rounded-t-[32px] sm:rounded-[32px] overflow-hidden shadow-2xl animate-in slide-in-from-bottom flex flex-col h-[85dvh] sm:h-auto sm:max-h-[90dvh]"
       >
         {/* Header */}
         <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between shrink-0">
