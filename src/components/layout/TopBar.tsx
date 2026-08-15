@@ -20,14 +20,6 @@ export function TopBar() {
 
       {/* Right side icons */}
       <NotificationsDropdown />
-
-      <button
-        onClick={() => navigate('/settings')}
-        className="p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-        aria-label="Settings"
-      >
-        <Settings className="h-5 w-5" />
-      </button>
     </header>
   )
 }
