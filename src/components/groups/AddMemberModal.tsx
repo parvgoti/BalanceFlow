@@ -74,8 +74,8 @@ export function AddMemberModal() {
         <div className="p-6 overflow-y-auto">
           <div className="space-y-4">
             <UserSearchInput
-              groupId={groupId}
-              onSelectUser={(email, name) => handleAddInvite(email, name)}
+              selectedEmails={selectedEmails}
+              onAdd={(email: string, name?: string) => handleAddInvite(email, name)}
             />
 
             {selectedEmails.length > 0 && (
