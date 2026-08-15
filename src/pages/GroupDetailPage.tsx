@@ -646,19 +646,19 @@ export function GroupDetailPage() {
                         <span className="text-[10px] text-gray-500 font-medium mt-0.5">Total</span>
                       </div>
                     </div>
-                    <div className="flex-1 space-y-3">
+                    <div className="flex-1 space-y-3 min-w-0">
                       {categoryData.slice(0, 5).map((d, i) => {
-                        const colors = ['#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#22c55e']
+                        const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316']
                         const percent = Math.round((d.total / categoryData.reduce((sum, item) => sum + item.total, 0)) * 100)
                         return (
-                          <div key={d.category} className="flex items-center justify-between text-xs">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colors[i % colors.length] }} />
-                              <span className="text-gray-600 dark:text-gray-300 font-medium capitalize">{d.category.replace('_', ' ')}</span>
+                          <div key={d.category} className="flex items-center justify-between text-xs gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
+                              <span className="text-gray-600 dark:text-gray-300 font-medium capitalize truncate">{d.category.replace('_', ' ')}</span>
                             </div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-gray-400 font-medium">{percent}%</span>
-                              <span className="text-navy dark:text-white font-bold">{formatCurrency(d.total, group.currency)}</span>
+                            <div className="flex items-center gap-3 shrink-0">
+                              <span className="text-gray-400 font-medium w-8 text-right">{percent}%</span>
+                              <span className="text-navy dark:text-white font-bold w-[72px] text-right">{formatCurrency(d.total, group.currency)}</span>
                             </div>
                           </div>
                         )
