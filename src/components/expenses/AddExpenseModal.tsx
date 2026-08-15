@@ -294,93 +294,77 @@ export function AddExpenseModal() {
 
   return (
     <Dialog open onOpenChange={(v) => !v && closeModal()}>
-      <DialogContent className="max-w-lg w-full h-[100dvh] sm:h-auto sm:rounded-3xl p-0 flex flex-col overflow-hidden bg-white dark:bg-gray-950 border-0" id="add-expense-modal">
-        <DialogHeader className="px-4 py-4 sm:px-6 sm:py-5 border-b border-gray-100 dark:border-gray-800 shrink-0">
-          <DialogTitle className="text-xl font-bold text-navy dark:text-white text-center">
-            {isReadOnly ? 'Expense Details' : isEditing ? 'Edit Expense' : 'Add Expense'}
+      <DialogContent id="add-expense-modal" className="sm:max-w-md p-0 overflow-hidden bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-800 rounded-2xl shadow-2xl h-[100dvh] sm:h-auto sm:max-h-[85vh] flex flex-col">
+
+        {/* Header - White background */}
+        <DialogHeader className="flex flex-row items-center justify-between px-4 pt-4 pb-2 border-b-0">
+          <button type="button" onClick={() => closeModal()} className="p-2 -ml-2 text-navy dark:text-white rounded-full hover:bg-gray-50 transition-colors">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <DialogTitle className="text-[19px] font-extrabold tracking-tight text-navy dark:text-white mb-0">
+            {isEditing ? (isReadOnly ? 'Expense Details' : 'Edit Expense') : 'Add Expense'}
           </DialogTitle>
-          {/* <DialogDescription> is hidden to keep it clean like the reference */}
+          <button type="button" className="p-2 -mr-2 text-navy dark:text-white rounded-full hover:bg-gray-50 transition-colors">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+            </svg>
+          </button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-          <DialogBody className="space-y-6 px-4 py-5 sm:px-6 flex-1 overflow-y-auto">
-            {/* Amount Section */}
-            <div className="text-center pb-4 border-b border-gray-100 dark:border-gray-800">
-              <p className="text-[11px] font-bold uppercase tracking-widest text-gray-400 mb-2">Amount</p>
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-4xl font-semibold text-navy dark:text-white">
-                  {new Intl.NumberFormat('en-US', { style: 'currency', currency: group?.currency || 'INR' })
-                    .formatToParts(0).find(x => x.type === 'currency')?.value || '₹'}
-                </span>
-                <input
-                  id="expense-amount-input"
-                  type="text"
-                  inputMode="decimal"
-                  value={amountStr}
-                  onChange={handleAmountChange}
-                  onFocus={() => {
-                    if (!isReadOnly && (amountStr === '0.00' || amountStr === '0')) setAmountStr('')
-                  }}
-                  onBlur={() => {
-                    if (!isReadOnly && !amountStr) setAmountStr('0.00')
-                  }}
-                  disabled={isReadOnly}
-                  className={cn(
-                    "text-4xl sm:text-5xl font-bold w-36 sm:w-48 text-center bg-transparent border-none outline-none text-navy dark:text-white placeholder-gray-300 dark:placeholder-gray-700 focus:outline-none",
-                    isReadOnly && "opacity-90 cursor-not-allowed"
-                  )}
-                  placeholder="0.00"
-                />
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-y-auto px-4 pb-6 space-y-5">
+          {/* Group Card */}
+          <div className="flex items-center justify-between p-3 rounded-[16px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm mt-2">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-orange-50/50 flex items-center justify-center text-xl shrink-0">
+                {group?.name ? ['🏖️', '🏠', '🎉', '✈️', '🍕', '🏔️', '🚗', '🎮'][group.name.charCodeAt(0) % 8] : '🏠'}
               </div>
-              {errors.amount && <p className="text-xs text-red-500 mt-2 font-medium">{errors.amount.message}</p>}
+              <div>
+                <p className="font-extrabold text-[15px] text-navy dark:text-white">{group?.name || 'Group'}</p>
+                <p className="text-xs text-gray-500 font-medium">{members.length} members</p>
+              </div>
+            </div>
+            <ChevronDown className="h-5 w-5 text-gray-400 -rotate-90" />
+          </div>
 
-              {/* Foreign Currency Toggle & Converter */}
-              {!isReadOnly && (
-                <div className="mt-3 pt-3 border-t border-white/20 text-center">
-                  {!isForeignCurrency ? (
-                    <button
-                      type="button"
-                      onClick={() => setIsForeignCurrency(true)}
-                      className="text-xs font-semibold text-white/80 hover:text-white underline transition-colors"
-                    >
-                      🌍 Paid in foreign currency?
-                    </button>
-                  ) : (
-                    <div className="space-y-2 text-left bg-black/10 p-3 rounded-xl">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-white/90">Foreign Currency Converter</span>
-                        <button
-                          type="button"
-                          onClick={() => setIsForeignCurrency(false)}
-                          className="text-xs text-white/60 hover:text-white underline"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <select
-                          value={foreignCurrencyCode}
-                          onChange={(e) => handleForeignCurrencySelect(e.target.value)}
-                          className="h-8 rounded-lg px-2 text-xs bg-white text-gray-900 font-semibold focus:outline-none"
-                        >
-                          {SUPPORTED_CURRENCIES.map(c => (
-                            <option key={c.code} value={c.code}>{c.code} — {c.name}</option>
-                          ))}
-                        </select>
-                        <input
-                          type="text"
-                          inputMode="decimal"
-                          value={foreignAmountStr}
-                          onChange={handleForeignAmountChange}
-                          placeholder="Amount in foreign curr…"
-                          className="h-8 flex-1 rounded-lg px-2.5 text-xs bg-white/20 text-white placeholder-white/50 focus:outline-none font-medium"
-                        />
-                      </div>
-                      {foreignAmountStr && exchangeRates?.rates && (
-                        <p className="text-[11px] text-white/80 font-medium">
-                          ≈ Converted to <strong>{formatCurrency(parseFloat(amountStr) || 0, baseCurrency)}</strong> (Rate: 1 {foreignCurrencyCode} = {formatCurrency((1 / (exchangeRates.rates[foreignCurrencyCode] || 1)), baseCurrency)})
-                        </p>
-                      )}
+          {/* Split Type Pills */}
+          <div className="flex rounded-xl bg-gray-50 dark:bg-gray-800/50 p-1">
+            {(['equal', 'exact', 'percentage'] as SplitType[]).map((type) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => {
+                  if (!isReadOnly) {
+                    setSplitType(type)
+                    setValue('split_type', type)
+                  }
+                }}
+                disabled={isReadOnly}
+                className={cn(
+                  'flex-1 px-3 py-2 text-[13px] font-bold transition-all rounded-[10px] capitalize',
+                  splitType === type
+                    ? 'bg-[#107C41] text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
+                  isReadOnly && 'cursor-not-allowed opacity-75'
+                )}
+              >
+                {type}
+              </button>
+            ))}
+          </div>
+
+          {/* Total Amount */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-gray-500">Total Amount</label>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[17px] font-bold text-navy dark:text-white">₹</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  placeholder="0.00"
                   disabled={isReadOnly}
                   className="w-full h-12 pl-[28px] pr-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[17px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
                   {...register('amount', { valueAsNumber: true })}
@@ -388,7 +372,7 @@ export function AddExpenseModal() {
               </div>
               <div className="relative">
                 <select 
-                  className="appearance-none h-12 pl-4 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[13px] font-bold focus:outline-none focus:border-[#107C41] transition-colors shadow-sm"
+                  className="appearance-none h-12 pl-4 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[13px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
                   value={isForeignCurrency ? foreignCurrencyCode : baseCurrency}
                   onChange={(e) => {
                     const code = e.target.value
@@ -408,6 +392,7 @@ export function AddExpenseModal() {
                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
               </div>
             </div>
+            {errors.amount && <p className="text-xs text-red-500">{errors.amount.message}</p>}
           </div>
 
           {/* Expense Title */}
@@ -420,23 +405,24 @@ export function AddExpenseModal() {
               className="w-full h-12 px-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-semibold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm placeholder:text-gray-400 placeholder:font-medium"
               {...register('description')}
             />
+            {errors.description && <p className="text-xs text-red-500">{errors.description.message}</p>}
           </div>
 
           {/* Category */}
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-gray-500">Category</label>
             <div className="relative">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
               <select
                 disabled={isReadOnly}
-                className="appearance-none w-full h-12 pl-12 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
+                className="appearance-none w-full h-12 pl-12 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold text-navy dark:text-white focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
                 {...register('category')}
               >
                 {CATEGORIES.map(([key, cfg]) => (
                   <option key={key} value={key}>{cfg.icon} {cfg.label}</option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             </div>
           </div>
 
@@ -444,10 +430,10 @@ export function AddExpenseModal() {
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-gray-500">Paid By</label>
             <div className="relative">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
               <select
                 disabled={isReadOnly}
-                className="appearance-none w-full h-12 pl-12 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
+                className="appearance-none w-full h-12 pl-12 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold text-navy dark:text-white focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
                 {...register('paid_by')}
               >
                 {members.map((m: any) => (
@@ -456,7 +442,7 @@ export function AddExpenseModal() {
                   </option>
                 ))}
               </select>
-              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
             </div>
           </div>
 
@@ -464,11 +450,11 @@ export function AddExpenseModal() {
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-gray-500">Date</label>
             <div className="relative">
-              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 z-10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
               <input
                 type="date"
                 disabled={isReadOnly}
-                className="w-full h-12 pl-12 pr-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
+                className="w-full h-12 pl-[42px] pr-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold text-navy dark:text-white focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
                 {...register('date')}
               />
             </div>
@@ -484,12 +470,12 @@ export function AddExpenseModal() {
               </div>
               <div className="flex items-center gap-1">
                 <span className="text-[13px] font-bold text-navy dark:text-white">{watch('splits')?.filter(s => s.included).length || 0} selected</span>
-                <ChevronRight className="h-4 w-4 text-navy dark:text-white" />
+                <ChevronDown className="h-4 w-4 text-navy dark:text-white -rotate-90" />
               </div>
             </div>
           </div>
 
-          {/* Split rows inside a collapsible or inline if needed, for now inline to be functional */}
+          {/* Split rows inline */}
           <div className="bg-gray-50 dark:bg-gray-800/50 rounded-[12px] p-3 space-y-2">
             <Controller
               name="splits"
@@ -568,134 +554,33 @@ export function AddExpenseModal() {
                       >
                         {split.included && <Check className="h-3 w-3" />}
                       </button>
-                    : 'bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400'
-                )}
-              >
-                <span className={cn(
-                  'flex items-center justify-center h-7 w-7 rounded-full shrink-0',
-                  isExactMatching
-                    ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600'
-                    : 'bg-red-100 dark:bg-red-900/50 text-red-500'
-                )}>
-                  {isExactMatching ? '✓' : '⚠'}
-                </span>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">
-                    {isExactMatching ? 'Matched' : 'Unmatched'}
-                  </p>
-                  <p className="text-sm">
-                    SPLIT TOTAL <strong>{exactSplitSum.toFixed(2)}</strong> OUT OF {totalExpenseAmount.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Percentage Split Total Validation Banner */}
-            {splitType === 'percentage' && (
-              <div
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold transition-all',
-                  isPercentageMatching
-                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
-                    : 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-400'
-                )}
-              >
-                <span className={cn(
-                  'flex items-center justify-center h-7 w-7 rounded-full shrink-0',
-                  isPercentageMatching
-                    ? 'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600'
-                    : 'bg-amber-100 dark:bg-amber-900/50 text-amber-600'
-                )}>
-                  {isPercentageMatching ? '✓' : '⚠'}
-                </span>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">
-                    {isPercentageMatching ? 'Matched' : 'Unmatched'}
-                  </p>
-                  <p className="text-sm">
-                    CURRENT <strong>{percentageSplitSum.toFixed(2)}%</strong> OUT OF 100%
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Receipt upload */}
-            {!isReadOnly ? (
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Receipt (optional)
-                </label>
-                <input
-                  id="expense-receipt-input"
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => setReceiptFile(e.target.files?.[0])}
-                  className="text-sm text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-brand file:text-white hover:file:bg-brand-light"
-                />
-                {isEditing && !receiptFile && expenseToEdit?.receipt_url && (
-                  <div className="text-xs mt-1.5 flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
-                    <Receipt className="h-3.5 w-3.5 text-gray-400" />
-                    <a 
-                      href={expenseToEdit.receipt_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
-                      className="text-brand hover:underline font-medium"
-                    >
-                      Current receipt attached
-                    </a>
-                    <span className="text-gray-400 text-2xs ml-1">(Upload to replace)</span>
-                  </div>
-                )}
-              </div>
-            ) : expenseToEdit?.receipt_url ? (
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Receipt
-                </label>
-                <div className="text-xs flex items-center gap-1.5 bg-gray-50 dark:bg-gray-800 p-2 rounded-md">
-                  <Receipt className="h-3.5 w-3.5 text-gray-400" />
-                  <a 
-                    href={expenseToEdit.receipt_url} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="text-brand hover:underline font-medium"
-                  >
-                    View attached receipt
-                  </a>
-                </div>
-              </div>
-            ) : null}
-          </DialogBody>
-
-          <DialogFooter className="px-4 py-4 sm:px-6 sm:py-5 border-t border-gray-100 dark:border-gray-800 shrink-0 flex-col gap-3">
-            {formError && (
-              <div className="text-sm font-medium text-red-500 bg-red-50 dark:bg-red-500/10 p-3 rounded-lg border border-red-200 dark:border-red-500/20 w-full text-center">
-                {formError}
-              </div>
-            )}
-            <div className="flex flex-col gap-3 w-full">
-              {isReadOnly ? (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={closeModal}
-                  className="w-full h-[46px] rounded-[14px] text-sm font-semibold border-gray-200 dark:border-gray-800"
-                >
-                  Close
-                </Button>
-              ) : (
-                <Button
-                  id="expense-save-btn"
-                  type="submit"
-                  loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
-                  disabled={!selectedGroupId}
-                  className="w-full h-[46px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-white text-[15px] font-semibold shadow-sm"
-                >
-                  {isEditing ? 'Save Changes' : 'Add Expense'}
-                </Button>
+                    </div>
+                  ))}
+                </>
               )}
+            />
+          </div>
+
+          <button type="button" className="text-[#107C41] text-[13px] font-bold flex items-center gap-1.5 self-start pt-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Add note (optional)
+          </button>
+
+          {formError && (
+            <div className="text-sm font-medium text-red-500 bg-red-50 dark:bg-red-500/10 p-3 rounded-lg border border-red-200 dark:border-red-500/20 w-full text-center">
+              {formError}
             </div>
-          </DialogFooter>
+          )}
+
+          <Button
+            id="submit-expense-btn"
+            type="submit"
+            className="w-full h-[48px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-white text-[15px] font-semibold shadow-sm mt-4 shrink-0"
+            loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
+            disabled={isReadOnly || !selectedGroupId}
+          >
+            {isEditing ? 'Save Changes' : 'Add Expense'}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
