@@ -314,18 +314,34 @@ export function AddExpenseModal() {
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0 overflow-y-auto px-4 pb-6 space-y-5">
-          {/* Group Card */}
-          <div className="flex items-center justify-between p-3 rounded-[16px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm mt-2">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-orange-50/50 flex items-center justify-center text-xl shrink-0">
-                {group?.name ? ['🏖️', '🏠', '🎉', '✈️', '🍕', '🏔️', '🚗', '🎮'][group.name.charCodeAt(0) % 8] : '🏠'}
+          {/* Group Card / Selector */}
+          <div className="relative">
+            <div className="flex items-center justify-between p-3 rounded-[16px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm mt-2">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-orange-50/50 flex items-center justify-center text-xl shrink-0">
+                  {group?.name ? ['🏖️', '🏠', '🎉', '✈️', '🍕', '🏔️', '🚗', '🎮'][group.name.charCodeAt(0) % 8] : '🏠'}
+                </div>
+                <div>
+                  <p className="font-extrabold text-[15px] text-navy dark:text-white">{group?.name || 'Select a Group'}</p>
+                  <p className="text-xs text-gray-500 font-medium">{group ? `${members.length} members` : 'Required'}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-extrabold text-[15px] text-navy dark:text-white">{group?.name || 'Group'}</p>
-                <p className="text-xs text-gray-500 font-medium">{members.length} members</p>
-              </div>
+              {!isOpenedFromGroupPage && !isReadOnly && (
+                <ChevronDown className="h-5 w-5 text-gray-400" />
+              )}
             </div>
-            <ChevronDown className="h-5 w-5 text-gray-400 -rotate-90" />
+            {!isOpenedFromGroupPage && !isReadOnly && (
+              <select
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                value={selectedGroupId}
+                onChange={(e) => setSelectedGroupId(e.target.value)}
+              >
+                {!selectedGroupId && <option value="" disabled>Select a group...</option>}
+                {groups?.map((g: any) => (
+                  <option key={g.id} value={g.id}>{g.name}</option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Split Type Pills */}
