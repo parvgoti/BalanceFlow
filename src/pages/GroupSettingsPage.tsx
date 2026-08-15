@@ -3,11 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { ArrowLeft, Trash2, ShieldAlert, Users, Settings, Plus, X } from 'lucide-react'
+import { ArrowLeft, Trash2, ShieldAlert, Users, Settings, Plus, X, Bell } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { UserSearchInput } from '@/components/ui/UserSearchInput'
 import { UserAvatar } from '@/components/ui/avatar'
+import { Switch } from '@/components/ui/switch'
 import { useAuthStore } from '@/store/authStore'
 import {
   useGroup,
@@ -252,10 +253,9 @@ export function GroupSettingsPage() {
                   {(isAdmin || isSelf) && (
                     <button
                       onClick={() => handleRemoveMember(m.user_id, isSelf)}
-                      className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
-                      title={isSelf ? 'Leave Group' : 'Remove Member'}
+                      className="px-3 py-1.5 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                     >
-                      {isSelf ? <ArrowLeft className="h-4 w-4" /> : <X className="h-4 w-4" />}
+                      {isSelf ? 'Leave' : 'Remove'}
                     </button>
                   )}
                 </div>
@@ -271,6 +271,25 @@ export function GroupSettingsPage() {
               selectedEmails={members.map((m: any) => m.profiles?.email)}
               onAdd={handleAddInvite}
               placeholder="Enter name or email..."
+            />
+          </div>
+        </div>
+
+        {/* SECTION: Notifications */}
+        <div className="bg-white dark:bg-gray-900 rounded-[20px] shadow-sm border border-gray-100 dark:border-gray-800 p-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <Bell className="h-4 w-4" />
+              </div>
+              <div>
+                <h2 className="text-[15px] font-bold text-navy dark:text-white leading-tight">Push Notifications</h2>
+                <p className="text-[12px] text-gray-500 mt-0.5">Enable browser notifications for this group</p>
+              </div>
+            </div>
+            <Switch
+              checked={user?.user_metadata?.push_notifications ?? false}
+              onCheckedChange={() => alert('Push notifications configuration should be handled in the global settings.')}
             />
           </div>
         </div>
@@ -428,7 +447,7 @@ export function GroupSettingsPage() {
           {!isGroupSettled && (
             <div className="mb-4 ml-11 p-3 rounded-xl bg-red-50 border border-red-100 text-[13px] font-bold text-red-600 flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 shrink-0" />
-              You must settle all group balances before deleting.
+              You must settle group balances before deleting.
             </div>
           )}
 
