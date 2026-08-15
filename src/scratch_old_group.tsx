@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+﻿import { useState, useMemo, useEffect } from 'react'
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
 import {
   startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear,
@@ -45,7 +45,7 @@ export function GroupDetailPage() {
 
   const deleteExpense = useDeleteExpense(groupId)
 
-  // ── 1. Fetching ────────────────────────────────────────────────
+  // ΓöÇΓöÇ 1. Fetching ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
   const navigate = useNavigate()
 
   const { data: group, isLoading: groupLoading } = useGroup(groupId)
@@ -106,7 +106,7 @@ export function GroupDetailPage() {
   const typedBalances = (balances ?? []) as GroupBalance[]
   const myBalance = typedBalances.find(b => b.user_id === user?.id)?.net_balance ?? 0
 
-  // Debts — toggle between simplified and direct
+  // Debts ΓÇö toggle between simplified and direct
   const computedDebts = typedBalances.length
     ? (useSimplified ? simplifyDebts(typedBalances) : directDebts(typedBalances))
     : []
@@ -250,7 +250,7 @@ export function GroupDetailPage() {
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-950">
       <div className="flex-1 p-4 sm:p-6 space-y-5 overflow-y-auto pb-24 lg:pb-6 max-w-2xl mx-auto w-full">
-        {/* ── Header: Back, Group Info, Invite ──────────────────── */}
+        {/* ΓöÇΓöÇ Header: Back, Group Info, Invite ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-3">
             <Link to="/groups" className="p-2 -ml-2 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 rounded-full transition-colors shrink-0">
@@ -260,7 +260,7 @@ export function GroupDetailPage() {
               <div className="flex items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-bold text-navy dark:text-white leading-none">{groupName}</h1>
                 <span className="text-xl leading-none">
-                  {['🏖️', '🏠', '🎉', '✈️', '🍕', '🏔️', '🚗', '🎮'][((group as any)?.name?.charCodeAt(0) ?? 0) % 8]}
+                  {['≡ƒÅû∩╕Å', '≡ƒÅá', '≡ƒÄë', 'Γ£ê∩╕Å', '≡ƒìò', '≡ƒÅö∩╕Å', '≡ƒÜù', '≡ƒÄ«'][((group as any)?.name?.charCodeAt(0) ?? 0) % 8]}
                 </span>
               </div>
               <p className="text-xs text-gray-500 mt-1">{members.length} members</p>
@@ -287,14 +287,9 @@ export function GroupDetailPage() {
             </div>
           </div>
           
-          {isAdmin && (
-            <button 
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              onClick={() => navigate(`/groups/${groupId}/settings`)}
-            >
-              <Settings className="h-5 w-5" />
-            </button>
-          )}
+          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
+            <Settings className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Reset Request Banner */}
@@ -309,7 +304,7 @@ export function GroupDetailPage() {
           )}>
             <div className="flex items-start gap-3">
               <span className="text-2xl shrink-0">
-                {hasDeniedReset ? '❌' : allAcceptedReset ? '✅' : '⚠️'}
+                {hasDeniedReset ? 'Γ¥î' : allAcceptedReset ? 'Γ£à' : 'ΓÜá∩╕Å'}
               </span>
               <div>
                 <h4 className={cn(
@@ -359,7 +354,7 @@ export function GroupDetailPage() {
                     loading={respondResetRequest.isPending}
                     onClick={() => respondResetRequest.mutate({ status: 'accepted' })}
                   >
-                    Accept ✓
+                    Accept Γ£ô
                   </Button>
                   <Button
                     size="sm"
@@ -368,7 +363,7 @@ export function GroupDetailPage() {
                     loading={respondResetRequest.isPending}
                     onClick={() => respondResetRequest.mutate({ status: 'denied' })}
                   >
-                    Deny ✕
+                    Deny Γ£ò
                   </Button>
                 </>
               )}
@@ -386,7 +381,7 @@ export function GroupDetailPage() {
           </div>
         )}
 
-        {/* ── Summary Cards ─────────────────────────────────────── */}
+        {/* ΓöÇΓöÇ Summary Cards ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-[16px] p-4 flex flex-col justify-center">
             <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">
@@ -411,7 +406,7 @@ export function GroupDetailPage() {
           </div>
         </div>
 
-        {/* ── Add Expense CTA ───────────────────────────────────── */}
+        {/* ΓöÇΓöÇ Add Expense CTA ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <Button
           className="w-full h-[46px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-white text-sm font-semibold shadow-sm"
           id={`group-add-expense-cta-${groupId}`}
@@ -421,7 +416,7 @@ export function GroupDetailPage() {
           Add Expense
         </Button>
 
-        {/* ── Tabs ──────────────────────────────────────────────── */}
+        {/* ΓöÇΓöÇ Tabs ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="w-full overflow-x-auto scrollbar-hide pb-0">
             <TabsTrigger value="expenses" className="flex-1">Expenses</TabsTrigger>
@@ -456,7 +451,7 @@ export function GroupDetailPage() {
             ) : filteredExpenses.length === 0 ? (
               <div className="flex flex-col items-center justify-center text-center py-16 px-4 bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl border border-dashed border-gray-200 dark:border-gray-700 my-4">
                 <div className="h-16 w-16 rounded-2xl bg-brand/10 dark:bg-brand/20 flex items-center justify-center text-brand text-3xl mb-4 shadow-sm">
-                  🧾
+                  ≡ƒº╛
                 </div>
                 <h4 className="text-base font-bold text-gray-900 dark:text-white mb-1">
                   No expenses yet
@@ -518,8 +513,8 @@ export function GroupDetailPage() {
           <TabsContent value="balances" className="space-y-3">
             {Math.abs(myBalance) < 0.01 && typedBalances.length > 1 && (
               <CelebrationBanner
-                title="All Settled Up! 🎉"
-                message="Your balance in this group is ₹0.00. You don't owe anyone and nobody owes you."
+                title="All Settled Up! ≡ƒÄë"
+                message="Your balance in this group is Γé╣0.00. You don't owe anyone and nobody owes you."
               />
             )}
             {typedBalances.map(b => {
@@ -639,31 +634,31 @@ export function GroupDetailPage() {
               <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
                 <h3 className="font-extrabold text-navy dark:text-white text-[15px] mb-4">Spending by Category</h3>
                 {categoryData.length > 0 ? (
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div className="w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] shrink-0 relative">
+                  <div className="flex items-center gap-4">
+                    <div className="w-[140px] h-[140px] shrink-0 relative">
                       <CategoryPieChart data={categoryData} />
                       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <CurrencyDisplay
                           amount={categoryData.reduce((sum, item) => sum + item.total, 0)}
                           currency={group.currency}
-                          className="text-[12px] sm:text-[13px] font-black text-navy dark:text-white leading-none"
+                          className="text-[13px] font-black text-navy dark:text-white leading-none"
                         />
-                        <span className="text-[9px] sm:text-[10px] text-gray-500 font-medium mt-0.5">Total</span>
+                        <span className="text-[10px] text-gray-500 font-medium mt-0.5">Total</span>
                       </div>
                     </div>
-                    <div className="flex-1 space-y-2.5 sm:space-y-3 min-w-0">
+                    <div className="flex-1 space-y-3">
                       {categoryData.slice(0, 5).map((d, i) => {
-                        const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316']
+                        const colors = ['#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#14b8a6', '#f97316', '#22c55e']
                         const percent = Math.round((d.total / categoryData.reduce((sum, item) => sum + item.total, 0)) * 100)
                         return (
-                          <div key={d.category} className="flex items-center justify-between text-[11px] sm:text-xs gap-1.5 sm:gap-2">
-                            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
-                              <span className="text-gray-600 dark:text-gray-300 font-medium capitalize truncate">{d.category.replace('_', ' ')}</span>
+                          <div key={d.category} className="flex items-center justify-between text-xs">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: colors[i % colors.length] }} />
+                              <span className="text-gray-600 dark:text-gray-300 font-medium capitalize">{d.category.replace('_', ' ')}</span>
                             </div>
-                            <div className="flex items-center gap-2 sm:gap-3 shrink-0 tabular-nums">
-                              <span className="text-gray-400 font-medium text-right w-6 sm:w-8">{percent}%</span>
-                              <span className="text-navy dark:text-white font-bold text-right">{formatCurrency(d.total, group.currency)}</span>
+                            <div className="flex items-center gap-3">
+                              <span className="text-gray-400 font-medium">{percent}%</span>
+                              <span className="text-navy dark:text-white font-bold">{formatCurrency(d.total, group.currency)}</span>
                             </div>
                           </div>
                         )
@@ -695,7 +690,7 @@ export function GroupDetailPage() {
                       <div key={s.id} className="flex items-center justify-between py-3 border-b border-gray-100 dark:border-gray-800 last:border-0">
                         <div className="flex items-center gap-3">
                           <div className="h-10 w-10 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
-                            💸
+                            ≡ƒÆ╕
                           </div>
                           <div>
                             <p className="font-medium text-sm text-gray-900 dark:text-white">
@@ -704,7 +699,7 @@ export function GroupDetailPage() {
                                 : `${creatorName} settled ${payerName} to ${payeeName}`}
                             </p>
                             <p className="text-xs text-gray-500 capitalize">
-                              {new Date(s.settled_at).toLocaleDateString()} • {s.payment_method.replace('_', ' ')}
+                              {new Date(s.settled_at).toLocaleDateString()} ΓÇó {s.payment_method.replace('_', ' ')}
                             </p>
                           </div>
                         </div>
@@ -855,7 +850,7 @@ export function GroupDetailPage() {
                       </div>
                       {!isGroupSettled && (
                         <div className="text-xs font-semibold text-amber-800 dark:text-amber-300 bg-amber-100/80 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-800/80 p-2.5 rounded-lg flex items-center gap-2">
-                          <span>⚠️</span>
+                          <span>ΓÜá∩╕Å</span>
                           <span>
                             Cannot delete group: All group splits must be settled up first ({formatCurrency(totalUnsettled / 2)} remaining to settle).
                           </span>
@@ -923,12 +918,12 @@ export function GroupDetailPage() {
                       </p>
                       {members.length > 1 && hasDeniedReset && (
                         <p className="text-xs font-semibold text-red-700 dark:text-red-400">
-                          ❌ Request denied by a group member.
+                          Γ¥î Request denied by a group member.
                         </p>
                       )}
                       {members.length > 1 && hasPendingReset && !hasDeniedReset && !allAcceptedReset && (
                         <p className="text-xs font-semibold text-amber-700 dark:text-amber-400">
-                          ⏳ Waiting for all group members to accept ({resetRequests.filter(r => r.status === 'accepted').length}/{members.length} accepted).
+                          ΓÅ│ Waiting for all group members to accept ({resetRequests.filter(r => r.status === 'accepted').length}/{members.length} accepted).
                         </p>
                       )}
                     </div>
@@ -1051,7 +1046,7 @@ export function GroupDetailPage() {
         </Tabs>
       </div>
 
-      {/* Right sidebar — only on large screens */}
+      {/* Right sidebar ΓÇö only on large screens */}
       <div className="hidden lg:flex flex-col w-72 shrink-0 border-l border-gray-100 dark:border-gray-800 p-6 gap-5 overflow-y-auto">
         {/* My balance */}
         <div className="card p-5 space-y-3">

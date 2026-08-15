@@ -4,7 +4,6 @@ import { TopBar } from './TopBar'
 import { BottomNav } from './BottomNav'
 import { AddExpenseModal } from '@/components/expenses/AddExpenseModal'
 import { CreateGroupModal } from '@/components/groups/CreateGroupModal'
-import { EditGroupModal } from '@/components/groups/EditGroupModal'
 import { DashboardSettleUpModal } from '@/components/settlements/DashboardSettleUpModal'
 import { useUIStore } from '@/store/uiStore'
 import { useRealtimeNotifications, useRealtimeApp } from '@/hooks/useRealtime'
@@ -37,7 +36,6 @@ export function AppLayout() {
       {/* Global Modals */}
       {activeModal === 'add-expense' && <AddExpenseModal />}
       {activeModal === 'create-group' && <CreateGroupModal />}
-      {activeModal === 'edit-group' && <EditGroupModal />}
       {activeModal === 'settle-up' && <DashboardSettleUpModal />}
     </div>
   )

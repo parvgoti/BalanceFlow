@@ -10,6 +10,7 @@ import { ActivityPage } from '@/pages/ActivityPage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { CalendarPage } from '@/pages/CalendarPage'
 import { NotificationsPage } from '@/pages/NotificationsPage'
+import { GroupSettingsPage } from '@/pages/GroupSettingsPage'
 import { useAuth } from '@/hooks/useAuth'
 import { useNotificationStore } from '@/store/notificationStore'
 import { useEffect } from 'react'
@@ -70,6 +71,7 @@ export function AppRouter() {
           <Route index element={<DashboardPage />} />
           <Route path="/groups" element={<GroupsPage />} />
           <Route path="/groups/:id" element={<GroupDetailPage />} />
+          <Route path="/groups/:id/settings" element={<GroupSettingsPage />} />
           <Route path="/activity" element={<ActivityPage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/calendar" element={<CalendarPage />} />

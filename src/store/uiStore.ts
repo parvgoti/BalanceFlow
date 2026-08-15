@@ -8,7 +8,6 @@ type ActiveModal =
   | 'settle-up'
   | 'add-member'
   | 'edit-expense'
-  | 'edit-group'
   | null
 
 interface UIState {
