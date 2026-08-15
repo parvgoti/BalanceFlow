@@ -634,31 +634,31 @@ export function GroupDetailPage() {
               <div className="bg-white dark:bg-gray-900 rounded-[16px] border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
                 <h3 className="font-extrabold text-navy dark:text-white text-[15px] mb-4">Spending by Category</h3>
                 {categoryData.length > 0 ? (
-                  <div className="flex items-center gap-4">
-                    <div className="w-[140px] h-[140px] shrink-0 relative">
+                  <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="w-[110px] h-[110px] sm:w-[130px] sm:h-[130px] shrink-0 relative">
                       <CategoryPieChart data={categoryData} />
                       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <CurrencyDisplay
                           amount={categoryData.reduce((sum, item) => sum + item.total, 0)}
                           currency={group.currency}
-                          className="text-[13px] font-black text-navy dark:text-white leading-none"
+                          className="text-[12px] sm:text-[13px] font-black text-navy dark:text-white leading-none"
                         />
-                        <span className="text-[10px] text-gray-500 font-medium mt-0.5">Total</span>
+                        <span className="text-[9px] sm:text-[10px] text-gray-500 font-medium mt-0.5">Total</span>
                       </div>
                     </div>
-                    <div className="flex-1 space-y-3 min-w-0">
+                    <div className="flex-1 space-y-2.5 sm:space-y-3 min-w-0">
                       {categoryData.slice(0, 5).map((d, i) => {
                         const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316']
                         const percent = Math.round((d.total / categoryData.reduce((sum, item) => sum + item.total, 0)) * 100)
                         return (
-                          <div key={d.category} className="flex items-center justify-between text-xs gap-2">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
+                          <div key={d.category} className="flex items-center justify-between text-[11px] sm:text-xs gap-1.5 sm:gap-2">
+                            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+                              <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full shrink-0" style={{ backgroundColor: colors[i % colors.length] }} />
                               <span className="text-gray-600 dark:text-gray-300 font-medium capitalize truncate">{d.category.replace('_', ' ')}</span>
                             </div>
-                            <div className="flex items-center gap-3 shrink-0">
-                              <span className="text-gray-400 font-medium w-8 text-right">{percent}%</span>
-                              <span className="text-navy dark:text-white font-bold w-[72px] text-right">{formatCurrency(d.total, group.currency)}</span>
+                            <div className="flex items-center gap-2 sm:gap-3 shrink-0 tabular-nums">
+                              <span className="text-gray-400 font-medium text-right w-6 sm:w-8">{percent}%</span>
+                              <span className="text-navy dark:text-white font-bold text-right">{formatCurrency(d.total, group.currency)}</span>
                             </div>
                           </div>
                         )

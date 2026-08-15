@@ -40,14 +40,14 @@ export function CategoryPieChart({ data }: { data: CategoryData[] }) {
   }))
 
   return (
-    <ResponsiveContainer width="100%" height={140}>
+    <ResponsiveContainer width="100%" height={110}>
       <PieChart>
         <Pie
           data={chartData}
           cx="50%"
           cy="50%"
-          innerRadius={45}
-          outerRadius={65}
+          innerRadius={35}
+          outerRadius={50}
           paddingAngle={3}
           dataKey="value"
         >
