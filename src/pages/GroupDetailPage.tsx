@@ -635,7 +635,7 @@ export function GroupDetailPage() {
                 <h3 className="font-extrabold text-navy dark:text-white text-[15px] mb-4">Spending by Category</h3>
                 {categoryData.length > 0 ? (
                   <div className="flex items-center gap-4">
-                    <div className="w-[140px] shrink-0 relative">
+                    <div className="w-[140px] h-[140px] shrink-0 relative">
                       <CategoryPieChart data={categoryData} />
                       <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
                         <CurrencyDisplay
