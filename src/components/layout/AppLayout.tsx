@@ -5,6 +5,7 @@ import { BottomNav } from './BottomNav'
 import { AddExpenseModal } from '@/components/expenses/AddExpenseModal'
 import { CreateGroupModal } from '@/components/groups/CreateGroupModal'
 import { DashboardSettleUpModal } from '@/components/settlements/DashboardSettleUpModal'
+import { AddMemberModal } from '@/components/groups/AddMemberModal'
 import { useUIStore } from '@/store/uiStore'
 import { useRealtimeNotifications, useRealtimeApp } from '@/hooks/useRealtime'
 
@@ -37,6 +38,7 @@ export function AppLayout() {
       {activeModal === 'add-expense' && <AddExpenseModal />}
       {activeModal === 'create-group' && <CreateGroupModal />}
       {activeModal === 'settle-up' && <DashboardSettleUpModal />}
+      {activeModal === 'add-member' && <AddMemberModal />}
     </div>
   )
 }

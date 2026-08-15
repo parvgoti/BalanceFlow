@@ -274,15 +274,14 @@ export function GroupDetailPage() {
                   }))}
                   max={4}
                 />
-                {isAdmin && (
-                  <button
-                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-800 text-xs font-semibold text-navy dark:text-white hover:bg-gray-50 transition-colors ml-1"
-                    onClick={() => openModal('add-member' as any, { groupId })}
-                  >
-                    <UserPlus className="h-3.5 w-3.5" />
-                    Invite
-                  </button>
-                )}
+                {/* Allow any member to invite */}
+                <button
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-800 text-xs font-semibold text-navy dark:text-white hover:bg-gray-50 transition-colors ml-1"
+                  onClick={() => openModal('add-member' as any, { groupId })}
+                >
+                  <UserPlus className="h-3.5 w-3.5" />
+                  Invite
+                </button>
               </div>
             </div>
           </div>
