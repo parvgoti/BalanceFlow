@@ -265,6 +265,26 @@ export function useResetGroupData(groupId: string) {
       qc.invalidateQueries({ queryKey: ['settlements', 'group', groupId] })
       qc.invalidateQueries({ queryKey: ['expenses', 'activity'] })
     },
+    },
   })
 }
 
+// ── Update Group mutation ─────────────────────────────────────
+export function useUpdateGroup() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, updates }: { id: string, updates: any }) => {
+      const { error } = await supabase
+        .from('groups')
+        .update(updates)
+        .eq('id', id)
+
+      if (error) throw error
+    },
+    onSuccess: (_, variables) => {
+      qc.invalidateQueries({ queryKey: groupKeys.lists() })
+      qc.invalidateQueries({ queryKey: groupKeys.detail(variables.id) })
+    },
+  })
+}

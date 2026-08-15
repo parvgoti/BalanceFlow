@@ -287,9 +287,14 @@ export function GroupDetailPage() {
             </div>
           </div>
           
-          <button className="p-2 text-gray-400 hover:text-gray-600 transition-colors">
-            <Settings className="h-5 w-5" />
-          </button>
+          {isAdmin && (
+            <button 
+              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              onClick={() => openModal('edit-group', { group })}
+            >
+              <Settings className="h-5 w-5" />
+            </button>
+          )}
         </div>
 
         {/* Reset Request Banner */}
