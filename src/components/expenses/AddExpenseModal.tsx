@@ -381,232 +381,193 @@ export function AddExpenseModal() {
                           ≈ Converted to <strong>{formatCurrency(parseFloat(amountStr) || 0, baseCurrency)}</strong> (Rate: 1 {foreignCurrencyCode} = {formatCurrency((1 / (exchangeRates.rates[foreignCurrencyCode] || 1)), baseCurrency)})
                         </p>
                       )}
-                    </div>
-                  )}
-                </div>
-              )}
+                  disabled={isReadOnly}
+                  className="w-full h-12 pl-[28px] pr-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[17px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
+                  {...register('amount', { valueAsNumber: true })}
+                />
+              </div>
+              <div className="relative">
+                <select 
+                  className="appearance-none h-12 pl-4 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[13px] font-bold focus:outline-none focus:border-[#107C41] transition-colors shadow-sm"
+                  value={isForeignCurrency ? foreignCurrencyCode : baseCurrency}
+                  onChange={(e) => {
+                    const code = e.target.value
+                    if (code !== baseCurrency) {
+                      setIsForeignCurrency(true)
+                      handleForeignCurrencySelect(code)
+                    } else {
+                      setIsForeignCurrency(false)
+                    }
+                  }}
+                  disabled={isReadOnly}
+                >
+                  {SUPPORTED_CURRENCIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+              </div>
             </div>
-            {/* End of amount block */}
+          </div>
 
-            {/* Description */}
-            <Input
-              id="expense-description-input"
-              label="Description"
-              placeholder="What was this for?"
+          {/* Expense Title */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-gray-500">Expense Title</label>
+            <input
+              type="text"
+              placeholder="What was this expense for?"
               disabled={isReadOnly}
-              error={errors.description?.message}
+              className="w-full h-12 px-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-semibold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm placeholder:text-gray-400 placeholder:font-medium"
               {...register('description')}
             />
+          </div>
 
-            {/* Category */}
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Category
-              </label>
-              <Controller
-                name="category"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex flex-wrap gap-2">
-                    {CATEGORIES.slice(0, 6).map(([key, cfg]) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => !isReadOnly && field.onChange(key)}
-                        disabled={isReadOnly}
-                        className={cn(
-                          'flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-sm font-medium transition-all',
-                          field.value === key
-                            ? 'bg-brand text-white border-brand shadow-glow'
-                            : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-brand',
-                          isReadOnly && 'opacity-70 cursor-not-allowed hover:border-gray-200 dark:hover:border-gray-700'
-                        )}
-                      >
-                        <span>{cfg.icon}</span>
-                        <span>{cfg.label.split(' ')[0]}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              />
+          {/* Category */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-gray-500">Category</label>
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <select
+                disabled={isReadOnly}
+                className="appearance-none w-full h-12 pl-12 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
+                {...register('category')}
+              >
+                {CATEGORIES.map(([key, cfg]) => (
+                  <option key={key} value={key}>{cfg.icon} {cfg.label}</option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
             </div>
+          </div>
 
-            {/* Group Selection */}
-            {!isOpenedFromGroupPage && (
-              <div className="space-y-1.5 mb-4">
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Group
-                </label>
-                <select
-                  disabled={isReadOnly}
-                  className="flex h-11 w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                  value={selectedGroupId}
-                  onChange={(e) => setSelectedGroupId(e.target.value)}
-                >
-                  {!selectedGroupId && <option value="" disabled>Select a group...</option>}
-                  {groups?.map((g: any) => (
-                    <option key={g.id} value={g.id}>{g.name}</option>
-                  ))}
-                </select>
-              </div>
-            )}
+          {/* Paid By */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-gray-500">Paid By</label>
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <select
+                disabled={isReadOnly}
+                className="appearance-none w-full h-12 pl-12 pr-10 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
+                {...register('paid_by')}
+              >
+                {members.map((m: any) => (
+                  <option key={m.user_id} value={m.user_id}>
+                    {m.user_id === user?.id ? 'You' : m.profiles?.full_name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+            </div>
+          </div>
 
-            {/* Paid by + Date row */}
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Paid by
-                </label>
-                <select
-                  id="expense-paid-by-select"
-                  disabled={isReadOnly}
-                  className="flex h-[46px] w-full rounded-[14px] border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#107C41]/30 focus:border-[#107C41] disabled:cursor-not-allowed disabled:opacity-50 transition-colors shadow-sm"
-                  {...register('paid_by')}
-                >
-                  {members.map((m: any) => (
-                    <option key={m.user_id} value={m.user_id}>
-                      {m.user_id === user?.id ? 'You' : m.profiles?.full_name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <Input
-                id="expense-date-input"
-                label="Date"
+          {/* Date */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-gray-500">Date</label>
+            <div className="relative">
+              <svg className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+              <input
                 type="date"
                 disabled={isReadOnly}
+                className="w-full h-12 pl-12 pr-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[14px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
                 {...register('date')}
-                error={errors.date?.message}
               />
             </div>
+          </div>
 
-            {/* Divider */}
-            <div className="border-t border-gray-100 dark:border-gray-800" />
-
-            {/* Split Method */}
-            <div className="space-y-3">
-              <div className="flex rounded-full bg-gray-50 dark:bg-gray-800/50 p-1 mt-2">
-                {(['equal', 'percentage', 'exact'] as SplitType[]).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => {
-                      if (!isReadOnly) {
-                        setSplitType(type)
-                        setValue('split_type', type)
-                      }
-                    }}
-                    disabled={isReadOnly}
-                    className={cn(
-                      'flex-1 px-3 py-1.5 text-[13px] font-bold transition-all rounded-full',
-                      splitType === type
-                        ? 'bg-[#107C41] text-white shadow-sm'
-                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300',
-                      isReadOnly && 'cursor-not-allowed opacity-75'
-                    )}
-                  >
-                    {type === 'equal' ? 'Equally' : type === 'percentage' ? 'Percentages' : 'Exact'}
-                  </button>
-                ))}
+          {/* Split with */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-gray-500">Split with</label>
+            <div className="relative flex items-center justify-between h-12 px-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm cursor-pointer hover:border-gray-200 transition-colors">
+              <div className="flex items-center gap-3">
+                <svg className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span className="text-[14px] font-medium text-gray-400">Select members</span>
               </div>
+              <div className="flex items-center gap-1">
+                <span className="text-[13px] font-bold text-navy dark:text-white">{watch('splits')?.filter(s => s.included).length || 0} selected</span>
+                <ChevronRight className="h-4 w-4 text-navy dark:text-white" />
+              </div>
+            </div>
+          </div>
 
-              {/* Split rows */}
-              <Controller
-                name="splits"
-                control={control}
-                render={({ field }) => (
-                  <div className="space-y-2">
-                    {field.value.map((split: any, i: number) => (
-                      <div key={split.user_id} className="flex items-center gap-3 py-2 px-3 rounded-xl bg-gray-50 dark:bg-gray-800/50">
-                        <UserAvatar
-                          name={split.full_name}
-                          avatarUrl={split.avatar_url}
-                          userId={split.user_id}
-                          size="sm"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-white">
-                            {split.user_id === user?.id ? 'You' : split.full_name}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            Paying {formatCurrency(split.amount)}
-                          </p>
-                        </div>
+          {/* Split rows inside a collapsible or inline if needed, for now inline to be functional */}
+          <div className="bg-gray-50 dark:bg-gray-800/50 rounded-[12px] p-3 space-y-2">
+            <Controller
+              name="splits"
+              control={control}
+              render={({ field }) => (
+                <>
+                  {field.value.map((split: any, i: number) => (
+                    <div key={split.user_id} className="flex items-center gap-3 bg-white dark:bg-gray-900 rounded-[10px] p-2 border border-gray-100 dark:border-gray-800 shadow-sm">
+                      <UserAvatar
+                        name={split.full_name}
+                        avatarUrl={split.avatar_url}
+                        userId={split.user_id}
+                        size="sm"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-bold text-navy dark:text-white">
+                          {split.user_id === user?.id ? 'You' : split.full_name}
+                        </p>
+                      </div>
 
-                        {splitType === 'equal' && (
-                          <span className="text-sm font-semibold text-brand">
-                            1/{field.value.filter((s: any) => s.included).length}
-                          </span>
-                        )}
+                      {splitType === 'equal' && (
+                        <span className="text-xs font-semibold text-[#107C41]">
+                          1/{field.value.filter((s: any) => s.included).length}
+                        </span>
+                      )}
 
-                        {splitType !== 'equal' && (
-                            <input
-                              type="number"
-                              min="0"
-                              placeholder="0"
-                              step={splitType === 'percentage' ? '1' : '0.01'}
-                              value={splitType === 'percentage' ? (split.percentage || '') : (split.amount || '')}
-                              onFocus={(e) => !isReadOnly && e.target.select()}
-                              disabled={isReadOnly}
-                              onChange={(e) => {
-                                if (isReadOnly) return
-                                // If input is empty, default to 0, otherwise parse it.
-                                const valStr = e.target.value;
-                                const val = valStr === '' ? 0 : parseFloat(valStr) || 0;
-                                const updated = field.value.map((s: any, j: number) => {
-                                  if (j === i) {
-                                    if (splitType === 'percentage') {
-                                      return {
-                                        ...s,
-                                        percentage: val,
-                                        amount: Math.round((val / 100) * watchedAmount * 100) / 100
-                                      }
-                                    } else {
-                                      return { ...s, amount: val }
-                                    }
-                                  }
-                                  return s
-                                })
-                                field.onChange(updated)
-                              }}
-                              className="w-20 text-right text-sm font-semibold rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-2 py-1 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-70 disabled:cursor-not-allowed"
-                            />
-                          )}
-
-                        <button
-                          type="button"
-                          onClick={() => {
+                      {splitType !== 'equal' && (
+                        <input
+                          type="number"
+                          min="0"
+                          placeholder="0"
+                          step={splitType === 'percentage' ? '1' : '0.01'}
+                          value={splitType === 'percentage' ? (split.percentage || '') : (split.amount || '')}
+                          disabled={isReadOnly}
+                          onChange={(e) => {
                             if (isReadOnly) return
-                            const updated = field.value.map((s: any, j: number) =>
-                              j === i ? { ...s, included: !s.included } : s
-                            )
+                            const valStr = e.target.value;
+                            const val = valStr === '' ? 0 : parseFloat(valStr) || 0;
+                            const updated = field.value.map((s: any, j: number) => {
+                              if (j === i) {
+                                if (splitType === 'percentage') {
+                                  return {
+                                    ...s,
+                                    percentage: val,
+                                    amount: Math.round((val / 100) * (watch('amount') || 0) * 100) / 100
+                                  }
+                                } else {
+                                  return { ...s, amount: val }
+                                }
+                              }
+                              return s
+                            })
                             field.onChange(updated)
                           }}
-                          disabled={isReadOnly}
-                          className={cn(
-                            'h-6 w-6 rounded-md flex items-center justify-center transition-colors shrink-0',
-                            split.included
-                              ? 'bg-brand text-white'
-                              : 'bg-gray-200 dark:bg-gray-700 text-gray-400',
-                            isReadOnly && 'opacity-60 cursor-not-allowed'
-                          )}
-                        >
-                          {split.included && <Check className="h-3 w-3" />}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              />
-            </div>
+                          className="w-16 text-right text-[13px] font-bold rounded-md bg-gray-50 dark:bg-gray-800 border-none px-2 py-1 focus:outline-none focus:ring-1 focus:ring-[#107C41]"
+                        />
+                      )}
 
-            {/* Exact Split Total Validation Banner */}
-            {splitType === 'exact' && (
-              <div
-                className={cn(
-                  'flex items-center gap-3 px-4 py-3 rounded-xl border text-sm font-semibold transition-all',
-                  isExactMatching
-                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400'
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isReadOnly) return
+                          const updated = field.value.map((s: any, j: number) =>
+                            j === i ? { ...s, included: !s.included } : s
+                          )
+                          field.onChange(updated)
+                        }}
+                        disabled={isReadOnly}
+                        className={cn(
+                          'h-6 w-6 rounded-md flex items-center justify-center transition-colors shrink-0',
+                          split.included
+                            ? 'bg-[#107C41] text-white'
+                            : 'bg-gray-200 dark:bg-gray-700 text-gray-400',
+                          isReadOnly && 'opacity-60 cursor-not-allowed'
+                        )}
+                      >
+                        {split.included && <Check className="h-3 w-3" />}
+                      </button>
                     : 'bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-800 text-red-600 dark:text-red-400'
                 )}
               >
