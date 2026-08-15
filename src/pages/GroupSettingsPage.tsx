@@ -400,7 +400,7 @@ export function GroupSettingsPage() {
                         navigate(`/groups/${groupId}`)
                       }
                     } else {
-                      await createResetRequest.mutateAsync()
+                      await createResetRequest.mutateAsync(members.map((m: any) => m.user_id))
                     }
                   } catch (err: any) {
                     alert(err?.message || 'Failed to initiate reset')
