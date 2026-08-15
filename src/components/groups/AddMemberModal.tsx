@@ -71,7 +71,7 @@ export function AddMemberModal() {
         </div>
 
         {/* Content */}
-        <div className="p-6 overflow-y-auto">
+        <div className="flex-1 p-6 overflow-y-auto">
           <div className="space-y-4">
             <UserSearchInput
               selectedEmails={selectedEmails}
