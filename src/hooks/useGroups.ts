@@ -265,7 +265,6 @@ export function useResetGroupData(groupId: string) {
       qc.invalidateQueries({ queryKey: ['settlements', 'group', groupId] })
       qc.invalidateQueries({ queryKey: ['expenses', 'activity'] })
     },
-    },
   })
 }
 
