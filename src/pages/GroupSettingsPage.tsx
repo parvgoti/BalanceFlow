@@ -25,6 +25,8 @@ import {
   useRespondResetRequest,
   useCancelResetRequest,
 } from '@/hooks/useGroupResetRequests'
+import { subscribeToPushNotifications, unsubscribeFromPushNotifications } from '@/lib/pushNotifications'
+import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 
 const CURRENCIES = ['USD', 'EUR', 'GBP', 'INR', 'JPY', 'AUD', 'CAD', 'SGD']
@@ -40,7 +42,7 @@ type EditGroupFormData = z.infer<typeof editGroupSchema>
 export function GroupSettingsPage() {
   const { id: groupId = '' } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { user } = useAuthStore()
+  const { user, profile, setProfile } = useAuthStore()
 
   // Queries
   const { data: group, isLoading } = useGroup(groupId)
@@ -288,8 +290,27 @@ export function GroupSettingsPage() {
               </div>
             </div>
             <Switch
-              checked={user?.user_metadata?.push_notifications ?? false}
-              onCheckedChange={() => alert('Push notifications configuration should be handled in the global settings.')}
+              checked={profile?.push_notifications ?? false}
+              onCheckedChange={async (enabled) => {
+                if (!profile) return
+                try {
+                  if (enabled) {
+                    const subscribed = await subscribeToPushNotifications(profile.id)
+                    if (subscribed) {
+                      await supabase.from('profiles').update({ push_notifications: true } as any).eq('id', profile.id)
+                      setProfile({ ...profile, push_notifications: true } as any)
+                    } else {
+                      alert('Failed to enable push notifications. Please check browser permissions.')
+                    }
+                  } else {
+                    await unsubscribeFromPushNotifications(profile.id)
+                    await supabase.from('profiles').update({ push_notifications: false } as any).eq('id', profile.id)
+                    setProfile({ ...profile, push_notifications: false } as any)
+                  }
+                } catch (err: any) {
+                  alert(err.message || 'Error updating notification settings')
+                }
+              }}
             />
           </div>
         </div>
