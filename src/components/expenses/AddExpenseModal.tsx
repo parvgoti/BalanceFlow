@@ -377,13 +377,20 @@ export function AddExpenseModal() {
               <div className="flex-1 relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[17px] font-bold text-navy dark:text-white">₹</span>
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  placeholder="0.00"
+                  id="expense-amount-input"
+                  type="text"
+                  inputMode="decimal"
+                  value={amountStr}
+                  onChange={handleAmountChange}
+                  onFocus={() => {
+                    if (!isReadOnly && (amountStr === '0.00' || amountStr === '0')) setAmountStr('')
+                  }}
+                  onBlur={() => {
+                    if (!isReadOnly && !amountStr) setAmountStr('0.00')
+                  }}
                   disabled={isReadOnly}
                   className="w-full h-12 pl-[28px] pr-4 rounded-[12px] border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 text-[17px] font-bold focus:outline-none focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] transition-colors shadow-sm"
-                  {...register('amount', { valueAsNumber: true })}
+                  placeholder="0.00"
                 />
               </div>
               <div className="relative">
