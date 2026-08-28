@@ -148,7 +148,7 @@ export function GroupSettingsPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-[#F7F9FC] dark:bg-gray-950 px-4 pt-12 pb-24 max-w-lg mx-auto w-full">
+    <div className="flex flex-col bg-[#F7F9FC] dark:bg-gray-950 px-4 pt-12 pb-24 max-w-3xl mx-auto w-full">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6 px-1">
         <button

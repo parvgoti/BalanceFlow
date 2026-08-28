@@ -17,7 +17,7 @@ export function GroupsPage() {
   )
 
   return (
-    <div className="px-4 py-5 space-y-4 max-w-lg mx-auto">
+    <div className="px-4 py-5 space-y-4 max-w-5xl mx-auto w-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -71,7 +71,7 @@ export function GroupsPage() {
           />
         )
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((group: any) => group && (
             <GroupCard
               key={group.id}

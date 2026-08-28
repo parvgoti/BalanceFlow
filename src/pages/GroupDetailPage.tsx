@@ -249,7 +249,7 @@ export function GroupDetailPage() {
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-950">
-      <div className="flex-1 p-4 sm:p-6 space-y-5 overflow-y-auto pb-24 lg:pb-6 max-w-2xl mx-auto w-full">
+      <div className="flex-1 p-4 sm:p-6 space-y-5 pb-24 lg:pb-6 max-w-4xl mx-auto w-full">
         {/* ── Header: Back, Group Info, Invite ──────────────────── */}
         <div className="flex flex-col gap-4 mb-2">
           <div className="flex items-center justify-between">

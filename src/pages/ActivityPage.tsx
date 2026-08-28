@@ -34,7 +34,7 @@ export function ActivityPage() {
   })
 
   return (
-    <div className="px-4 py-5 space-y-4 max-w-lg mx-auto">
+    <div className="px-4 py-5 space-y-4 max-w-3xl mx-auto w-full">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-navy dark:text-white">Activity Feed</h1>

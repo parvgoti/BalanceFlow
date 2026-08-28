@@ -17,7 +17,7 @@ export function NotificationsPage() {
   })
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-[#F7F9FC] dark:bg-gray-950 px-4 pt-12 pb-24 max-w-lg mx-auto w-full">
+    <div className="flex flex-col bg-[#F7F9FC] dark:bg-gray-950 px-4 pt-12 pb-24 max-w-3xl mx-auto w-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-6 px-1">
         <Link to="/" className="text-navy dark:text-white shrink-0 hover:bg-gray-200 dark:hover:bg-gray-800 p-1.5 rounded-full transition-colors -ml-1.5">
@@ -48,7 +48,7 @@ export function NotificationsPage() {
       </div>
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto space-y-1 pb-4">
+      <div className="flex-1 space-y-1 pb-4">
         {filteredNotifications.length === 0 ? (
           <div className="p-8 text-center text-gray-500">
             <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" />

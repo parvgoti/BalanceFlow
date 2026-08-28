@@ -40,115 +40,146 @@ export function DashboardPage() {
   const totalIOwe = summary?.totalIOwe ?? 0
 
   return (
-    <div className="px-4 py-5 space-y-5 max-w-lg mx-auto">
+    <div className="px-4 py-6 space-y-6 max-w-5xl xl:max-w-6xl mx-auto w-full">
       {/* ── Greeting ──────────────────────────────────── */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold text-navy dark:text-white mt-0.5 tracking-tight flex items-center gap-1.5">
-            Good evening, <br/> {firstName} 👋
+            {greeting} <br className="lg:hidden" /> {firstName} 👋
           </h1>
           <p className="text-xs text-gray-500 mt-1 font-medium">Better money habits. A brighter tomorrow.</p>
         </div>
       </div>
 
-      {/* ── Hero Balance Card ─────────────────────────── */}
-      {summaryLoading ? (
-        <CardSkeleton />
-      ) : (
-        <div className="relative overflow-hidden rounded-[20px] bg-[#107C41] p-5 shadow-lg shadow-[#107C41]/30 text-white min-h-[140px] flex flex-col justify-between">
-          <div className="flex justify-between items-start z-10 relative">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-white/80 mb-1">
-                Total Net Balance
-              </p>
-              <p className="text-[32px] font-extrabold tracking-tight leading-none mt-1">
-                ₹{Math.abs(netBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-              </p>
+      <div className="lg:grid lg:grid-cols-12 lg:gap-8 lg:space-y-0 space-y-6 items-start">
+        {/* ── Left Column ───────────────────────────────── */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* ── Hero Balance Card ─────────────────────────── */}
+          {summaryLoading ? (
+            <CardSkeleton />
+          ) : (
+            <div className="relative overflow-hidden rounded-[20px] bg-[#107C41] p-5 shadow-lg shadow-[#107C41]/30 text-white min-h-[140px] flex flex-col justify-between">
+              <div className="flex justify-between items-start z-10 relative">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/80 mb-1">
+                    Total Net Balance
+                  </p>
+                  <p className="text-[32px] font-extrabold tracking-tight leading-none mt-1">
+                    ₹{Math.abs(netBalance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </p>
+                </div>
+                <button className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full transition-colors backdrop-blur-sm">
+                  <Eye className="h-4 w-4 text-white" />
+                </button>
+              </div>
+              
+              <div className="z-10 relative mt-4">
+                {netBalance > 0 ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full">
+                    <TrendingUp className="h-3 w-3" /> 12.5% vs last month
+                  </span>
+                ) : netBalance < 0 ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full">
+                    <TrendingDown className="h-3 w-3" /> Net Negative
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full">
+                    All settled up ✓
+                  </span>
+                )}
+              </div>
+
+              {/* Wavy Graph SVG Background */}
+              <div className="absolute bottom-0 left-0 right-0 top-1/2 pointer-events-none opacity-50">
+                <svg viewBox="0 0 400 100" className="w-full h-full preserve-3d" preserveAspectRatio="none">
+                  <path d="M0,50 C50,20 100,80 150,50 C200,20 250,90 300,50 C350,10 380,40 400,60 L400,100 L0,100 Z" fill="rgba(255,255,255,0.1)" />
+                  <path d="M0,50 C50,20 100,80 150,50 C200,20 250,90 300,50 C350,10 380,40 400,60" fill="none" stroke="white" strokeWidth="2" />
+                  <circle cx="350" cy="27" r="4" fill="white" />
+                  <circle cx="350" cy="27" r="8" fill="white" opacity="0.3" />
+                </svg>
+              </div>
             </div>
-            <button className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full transition-colors backdrop-blur-sm">
-              <Eye className="h-4 w-4 text-white" />
-            </button>
-          </div>
-          
-          <div className="z-10 relative mt-4">
-            {netBalance > 0 ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full">
-                <TrendingUp className="h-3 w-3" /> 12.5% vs last month
-              </span>
-            ) : netBalance < 0 ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full">
-                <TrendingDown className="h-3 w-3" /> Net Negative
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full">
-                All settled up ✓
-              </span>
-            )}
-          </div>
+          )}
 
-          {/* Wavy Graph SVG Background */}
-          <div className="absolute bottom-0 left-0 right-0 top-1/2 pointer-events-none opacity-50">
-            <svg viewBox="0 0 400 100" className="w-full h-full preserve-3d" preserveAspectRatio="none">
-              <path d="M0,50 C50,20 100,80 150,50 C200,20 250,90 300,50 C350,10 380,40 400,60 L400,100 L0,100 Z" fill="rgba(255,255,255,0.1)" />
-              <path d="M0,50 C50,20 100,80 150,50 C200,20 250,90 300,50 C350,10 380,40 400,60" fill="none" stroke="white" strokeWidth="2" />
-              <circle cx="350" cy="27" r="4" fill="white" />
-              <circle cx="350" cy="27" r="8" fill="white" opacity="0.3" />
-            </svg>
+          {/* ── Owed / Owe Cards ──────────────────────────── */}
+          {!summaryLoading && (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-[#F0FDF4] border border-[#DCFCE7] dark:bg-[#052E16] dark:border-[#14532D] rounded-[16px] p-4 flex flex-col justify-center">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#15803D] mb-1">
+                  You are owed
+                </p>
+                <p className="text-[22px] font-extrabold text-[#15803D] leading-none mb-1">
+                  ₹{totalOweMe.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-[11px] text-[#16A34A] font-medium">
+                  by {summary?.oweMeCount ?? 0} people
+                </p>
+              </div>
+              <div className="bg-[#FEF2F2] border border-[#FEE2E2] dark:bg-[#450A0A] dark:border-[#7F1D1D] rounded-[16px] p-4 flex flex-col justify-center">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#B91C1C] mb-1">
+                  You owe
+                </p>
+                <p className="text-[22px] font-extrabold text-[#B91C1C] leading-none mb-1">
+                  ₹{totalIOwe.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-[11px] text-[#EF4444] font-medium">
+                  to {summary?.iOweCount ?? 0} people
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* ── Action Buttons ────────────────────────────── */}
+          <div className="grid grid-cols-2 gap-3">
+            <Button
+              id="dashboard-add-expense-btn"
+              onClick={() => openModal('add-expense')}
+              className="h-[46px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-sm font-semibold gap-2 shadow-sm"
+            >
+              <Plus className="h-[18px] w-[18px]" />
+              Add Expense
+            </Button>
+            <Button
+              variant="outline"
+              className="h-[46px] rounded-[14px] text-sm gap-2 font-semibold border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-navy dark:text-white shadow-sm"
+              onClick={() => openModal('settle-up')}
+            >
+              <HandCoins className="h-[18px] w-[18px]" />
+              Settle Up
+            </Button>
           </div>
+          {/* ── Your Groups (Quick Access) ────────────────── */}
+          {(groupsData?.length ?? 0) > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-base font-bold text-navy dark:text-white">Your Groups</h2>
+                <Link to="/groups" className="text-xs text-brand font-semibold flex items-center gap-0.5">
+                  View All <ArrowUpRight className="h-3 w-3" />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                {groupsData?.slice(0, 4).map((group: any) => group && (
+                  <Link
+                    key={group.id}
+                    to={`/groups/${group.id}`}
+                    className="card-hover p-3.5 space-y-1.5"
+                  >
+                    <p className="text-xl">
+                      {['🏖️', '🏠', '🎉', '✈️'][group.name.charCodeAt(0) % 4]}
+                    </p>
+                    <p className="font-semibold text-sm text-navy dark:text-white truncate">{group.name}</p>
+                    <p className="text-[11px] text-gray-400">{group.group_members?.length ?? 0} members</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
 
-      {/* ── Owed / Owe Cards ──────────────────────────── */}
-      {!summaryLoading && (
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-[#F0FDF4] border border-[#DCFCE7] dark:bg-[#052E16] dark:border-[#14532D] rounded-[16px] p-4 flex flex-col justify-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#15803D] mb-1">
-              You are owed
-            </p>
-            <p className="text-[22px] font-extrabold text-[#15803D] leading-none mb-1">
-              ₹{totalOweMe.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-[11px] text-[#16A34A] font-medium">
-              by {summary?.oweMeCount ?? 0} people
-            </p>
-          </div>
-          <div className="bg-[#FEF2F2] border border-[#FEE2E2] dark:bg-[#450A0A] dark:border-[#7F1D1D] rounded-[16px] p-4 flex flex-col justify-center">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#B91C1C] mb-1">
-              You owe
-            </p>
-            <p className="text-[22px] font-extrabold text-[#B91C1C] leading-none mb-1">
-              ₹{totalIOwe.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
-            </p>
-            <p className="text-[11px] text-[#EF4444] font-medium">
-              to {summary?.iOweCount ?? 0} people
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* ── Action Buttons ────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          id="dashboard-add-expense-btn"
-          onClick={() => openModal('add-expense')}
-          className="h-[46px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-sm font-semibold gap-2 shadow-sm"
-        >
-          <Plus className="h-[18px] w-[18px]" />
-          Add Expense
-        </Button>
-        <Button
-          variant="outline"
-          className="h-[46px] rounded-[14px] text-sm gap-2 font-semibold border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 text-navy dark:text-white shadow-sm"
-          onClick={() => openModal('settle-up')}
-        >
-          <HandCoins className="h-[18px] w-[18px]" />
-          Settle Up
-        </Button>
-      </div>
-
-      {/* ── Recent Activity ───────────────────────────── */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
+        {/* ── Right Column ──────────────────────────────── */}
+        <div className="lg:col-span-5 bg-gray-50/50 dark:bg-gray-900/20 rounded-[24px] lg:p-5 lg:border lg:border-gray-100 lg:dark:border-gray-800">
+          <div className="flex items-center justify-between mb-4 px-1 lg:px-0">
           <h2 className="text-base font-bold text-navy dark:text-white">Recent Activity</h2>
           <Link to="/activity" className="text-xs text-brand font-semibold flex items-center gap-0.5">
             See all <ArrowRight className="h-3 w-3" />
@@ -221,33 +252,8 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* ── Your Groups (Quick Access) ────────────────── */}
-      {(groupsData?.length ?? 0) > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-base font-bold text-navy dark:text-white">Your Groups</h2>
-            <Link to="/groups" className="text-xs text-brand font-semibold flex items-center gap-0.5">
-              View All <ArrowUpRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-            {groupsData?.slice(0, 4).map((group: any) => group && (
-              <Link
-                key={group.id}
-                to={`/groups/${group.id}`}
-                className="card-hover p-3.5 space-y-1.5"
-              >
-                <p className="text-xl">
-                  {['🏖️', '🏠', '🎉', '✈️'][group.name.charCodeAt(0) % 4]}
-                </p>
-                <p className="font-semibold text-sm text-navy dark:text-white truncate">{group.name}</p>
-                <p className="text-[11px] text-gray-400">{group.group_members?.length ?? 0} members</p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      )}
+      </div>
+    </div>
     </div>
   )
 }
