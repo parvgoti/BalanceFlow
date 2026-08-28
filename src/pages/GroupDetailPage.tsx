@@ -251,49 +251,51 @@ export function GroupDetailPage() {
     <div className="flex flex-col h-full bg-white dark:bg-gray-950">
       <div className="flex-1 p-4 sm:p-6 space-y-5 overflow-y-auto pb-24 lg:pb-6 max-w-2xl mx-auto w-full">
         {/* ── Header: Back, Group Info, Invite ──────────────────── */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <Link to="/groups" className="p-2 -ml-2 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-900 rounded-full transition-colors shrink-0">
-              <ArrowLeft className="h-5 w-5" />
+        <div className="flex flex-col gap-4 mb-2">
+          <div className="flex items-center justify-between">
+            <Link to="/groups" className="p-2 -ml-2 text-gray-900 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors shrink-0">
+              <ArrowLeft className="h-6 w-6" />
             </Link>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-bold text-navy dark:text-white leading-none">{groupName}</h1>
-                <span className="text-xl leading-none">
-                  {['🏖️', '🏠', '🎉', '✈️', '🍕', '🏔️', '🚗', '🎮'][((group as any)?.name?.charCodeAt(0) ?? 0) % 8]}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">{members.length} members</p>
-              
-              <div className="flex items-center gap-2 mt-3">
-                <AvatarGroup
-                  users={members.map(m => ({
-                    id: m.user_id,
-                    full_name: m.profiles?.full_name ?? '?',
-                    avatar_url: m.profiles?.avatar_url,
-                  }))}
-                  max={4}
-                />
-                {/* Allow any member to invite */}
-                <button
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-gray-200 dark:border-gray-800 text-xs font-semibold text-navy dark:text-white hover:bg-gray-50 transition-colors ml-1"
-                  onClick={() => openModal('add-member' as any, { groupId })}
-                >
-                  <UserPlus className="h-3.5 w-3.5" />
-                  Invite
-                </button>
-              </div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-extrabold text-navy dark:text-white leading-none">{groupName}</h1>
+              <span className="text-xl leading-none">
+                {['🏖️', '🏠', '🎉', '✈️', '🍕', '🏔️', '🚗', '🎮'][((group as any)?.name?.charCodeAt(0) ?? 0) % 8]}
+              </span>
             </div>
+            {isAdmin ? (
+              <button 
+                className="p-2 -mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                onClick={() => navigate(`/groups/${groupId}/settings`)}
+              >
+                <Settings className="h-5 w-5" />
+              </button>
+            ) : (
+              <div className="w-9 h-9" />
+            )}
           </div>
-          
-          {isAdmin && (
-            <button 
-              className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              onClick={() => navigate(`/groups/${groupId}/settings`)}
+
+          <div className="flex items-center justify-center gap-3">
+            <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-900/50 px-3 py-2 rounded-full border border-gray-100 dark:border-gray-800">
+              <AvatarGroup
+                users={members.map(m => ({
+                  id: m.user_id,
+                  full_name: m.profiles?.full_name ?? '?',
+                  avatar_url: m.profiles?.avatar_url,
+                }))}
+                max={4}
+              />
+              <div className="w-px h-5 bg-gray-200 dark:bg-gray-700" />
+              <span className="text-[13px] font-bold text-gray-500 pr-1">{members.length} members</span>
+            </div>
+            
+            <button
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-brand/10 dark:bg-brand/20 text-brand dark:text-brand-light text-[13px] font-bold hover:bg-brand/20 transition-colors"
+              onClick={() => openModal('add-member' as any, { groupId })}
             >
-              <Settings className="h-5 w-5" />
+              <UserPlus className="h-4 w-4" />
+              Invite
             </button>
-          )}
+          </div>
         </div>
 
         {/* Reset Request Banner */}
