@@ -14,7 +14,7 @@ import { UserAvatar } from '@/components/ui/avatar'
 import { useUIStore } from '@/store/uiStore'
 import { useAuthStore } from '@/store/authStore'
 import { useGroup, useGroups } from '@/hooks/useGroups'
-import { useAddExpense, useUpdateExpense } from '@/hooks/useExpenses'
+import { useAddExpense, useUpdateExpense, useDeleteExpense } from '@/hooks/useExpenses'
 import { CATEGORY_CONFIG, cn, formatCurrency } from '@/lib/utils'
 import type { ExpenseCategory, SplitType } from '@/types/database'
 import { format } from 'date-fns'
@@ -68,6 +68,7 @@ export function AddExpenseModal() {
 
   const addExpense = useAddExpense(selectedGroupId)
   const updateExpense = useUpdateExpense(selectedGroupId)
+  const deleteExpense = useDeleteExpense(selectedGroupId)
 
   const [splitType, setSplitType] = useState<SplitType>(expenseToEdit?.split_type ?? 'equal')
   const [receiptFile, setReceiptFile] = useState<File | undefined>()
@@ -595,10 +596,32 @@ export function AddExpenseModal() {
             </div>
           )}
 
+          {isEditing && !isReadOnly && (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full h-[48px] rounded-[14px] text-red-600 border-red-200 dark:border-red-900/30 hover:bg-red-50 dark:hover:bg-red-950/30 font-semibold shadow-sm mt-3 shrink-0"
+              loading={deleteExpense.isPending}
+              onClick={async () => {
+                if (confirm("Are you sure you want to delete this expense? This action cannot be undone.")) {
+                  try {
+                    await deleteExpense.mutateAsync(expenseToEdit.id)
+                    closeModal()
+                  } catch (err) {
+                    console.error(err)
+                    alert("Failed to delete expense.")
+                  }
+                }
+              }}
+            >
+              Delete Expense
+            </Button>
+          )}
+
           <Button
             id="submit-expense-btn"
             type="submit"
-            className="w-full h-[48px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-white text-[15px] font-semibold shadow-sm mt-4 shrink-0"
+            className="w-full h-[48px] rounded-[14px] bg-[#107C41] hover:bg-[#15803D] text-white text-[15px] font-semibold shadow-sm mt-3 shrink-0"
             loading={isSubmitting || addExpense.isPending || updateExpense.isPending}
             disabled={isReadOnly || !selectedGroupId}
           >

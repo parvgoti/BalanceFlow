@@ -63,7 +63,10 @@ export function ExpenseCard({ expense, onEdit, onDelete, compact = false }: Expe
   )
 
   return (
-    <div className="flex items-start gap-3 py-3 px-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group">
+    <div 
+      className="relative flex items-start gap-3 py-3 px-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 transition-colors group cursor-pointer"
+      onClick={() => onEdit?.(expense)}
+    >
       {/* Category icon — circular */}
       <div className={cn(
         'h-10 w-10 rounded-full flex items-center justify-center shrink-0 text-base',
@@ -73,13 +76,13 @@ export function ExpenseCard({ expense, onEdit, onDelete, compact = false }: Expe
       </div>
 
       {/* Info */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 pr-1">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0 flex-1">
-            <p className="font-semibold text-navy dark:text-white text-sm truncate">
+            <p className="font-semibold text-navy dark:text-white text-[15px] truncate leading-tight">
               {expense.description}
             </p>
-            <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+            <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
               {/* Category pill */}
               <span className={cn('category-pill', catConfig.bg, catConfig.color)}>
                 {catConfig.label}
@@ -88,34 +91,34 @@ export function ExpenseCard({ expense, onEdit, onDelete, compact = false }: Expe
               {statusBadge}
             </div>
             {!compact && (
-              <p className="text-[11px] text-gray-400 mt-1">
-                {isPayer ? 'Paid by You' : `Paid by ${payerName}`} · Split equally · {formatDate(expense.date)}
+              <p className="text-[11px] text-gray-400 mt-1.5">
+                {isPayer ? 'Paid by You' : `Paid by ${payerName}`} · Split equally
               </p>
             )}
           </div>
 
           {/* Right: amount + balance */}
           <div className="text-right shrink-0">
-            <p className="text-sm font-bold text-navy dark:text-white">
+            <p className="text-[15px] font-bold text-navy dark:text-white leading-tight">
               {formatCurrency(expense.amount)}
             </p>
-            <div className="mt-0.5">{balanceLabel}</div>
+            <div className="mt-1">{balanceLabel}</div>
           </div>
         </div>
       </div>
 
-      {/* Action buttons — visible on hover */}
+      {/* Action buttons — visible on hover (Absolute) */}
       {(onEdit || onDelete || expense.receipt_url) && (
-        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 self-center">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity bg-white/95 dark:bg-gray-900/95 shadow-md border border-gray-100 dark:border-gray-800 rounded-lg p-1 backdrop-blur-md z-10 hidden sm:flex">
           {expense.receipt_url && (
             <>
               <button
                 type="button"
-                onClick={() => setShowReceipt(true)}
-                className="p-1.5 text-gray-400 hover:text-brand hover:bg-brand/10 rounded-lg transition-colors"
+                onClick={(e) => { e.stopPropagation(); setShowReceipt(true); }}
+                className="p-1.5 text-gray-500 hover:text-brand hover:bg-brand/10 rounded-md transition-colors"
                 title="View receipt"
               >
-                <Receipt className="h-3.5 w-3.5" />
+                <Receipt className="h-4 w-4" />
               </button>
               <ReceiptLightbox
                 url={expense.receipt_url}
@@ -127,20 +130,20 @@ export function ExpenseCard({ expense, onEdit, onDelete, compact = false }: Expe
           )}
           {onEdit && (
             <button
-              onClick={() => onEdit(expense)}
-              className="p-1.5 text-gray-400 hover:text-brand hover:bg-brand/10 rounded-lg transition-colors"
+              onClick={(e) => { e.stopPropagation(); onEdit(expense); }}
+              className="p-1.5 text-gray-500 hover:text-brand hover:bg-brand/10 rounded-md transition-colors"
               title={isPayer ? "Edit" : "View"}
             >
-              {isPayer ? <Pencil className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+              {isPayer ? <Pencil className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           )}
           {onDelete && isPayer && (
             <button
-              onClick={() => onDelete(expense.id)}
-              className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              onClick={(e) => { e.stopPropagation(); onDelete(expense.id); }}
+              className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md transition-colors"
               title="Delete"
             >
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-4 w-4" />
             </button>
           )}
         </div>
