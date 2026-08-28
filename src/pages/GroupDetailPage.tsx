@@ -475,37 +475,39 @@ export function GroupDetailPage() {
                 </Button>
               </div>
             ) : (
-              <div className="card divide-y divide-gray-50 dark:divide-gray-800">
+              <div className="space-y-6 pb-4">
                 {Object.entries(expensesByDate).map(([date, expenses]) => (
                   <div key={date}>
-                    <p className="px-4 py-2 text-xs font-bold text-gray-400 tracking-widest">{date}</p>
-                    {(expenses as any[]).map(expense => (
-                      <ExpenseCard
-                        key={expense.id}
-                        expense={expense as ExpenseWithSplits}
-                        onEdit={(e) => {
-                          openModal('add-expense', { groupId, expenseToEdit: e })
-                        }}
-                        onDelete={(expense.paid_by === user?.id || isAdmin) ? async (id) => {
-                          if (confirm("Are you sure you want to delete this expense? This action cannot be undone.")) {
-                            try {
-                              await deleteExpense.mutateAsync(id)
-                            } catch (err) {
-                              console.error(err)
-                              alert("Failed to delete expense.")
+                    <p className="px-2 py-2 text-[11px] font-bold text-gray-500 uppercase tracking-widest">{date}</p>
+                    <div className="card divide-y divide-gray-50 dark:divide-gray-800">
+                      {(expenses as any[]).map(expense => (
+                        <ExpenseCard
+                          key={expense.id}
+                          expense={expense as ExpenseWithSplits}
+                          onEdit={(e) => {
+                            openModal('add-expense', { groupId, expenseToEdit: e })
+                          }}
+                          onDelete={(expense.paid_by === user?.id || isAdmin) ? async (id) => {
+                            if (confirm("Are you sure you want to delete this expense? This action cannot be undone.")) {
+                              try {
+                                await deleteExpense.mutateAsync(id)
+                              } catch (err) {
+                                console.error(err)
+                                alert("Failed to delete expense.")
+                              }
                             }
-                          }
-                        } : undefined}
-                      />
-                    ))}
+                          } : undefined}
+                        />
+                      ))}
+                    </div>
                   </div>
                 ))}
 
                 {hasNextPage && (
-                  <div className="p-4 text-center">
+                  <div className="text-center pt-2">
                     <button
                       onClick={() => fetchNextPage()}
-                      className="text-sm text-brand font-medium hover:underline"
+                      className="text-[13px] text-brand font-bold hover:underline"
                     >
                       Load Previous Expenses
                     </button>
