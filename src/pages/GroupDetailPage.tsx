@@ -248,8 +248,8 @@ export function GroupDetailPage() {
   const groupName = (group as any).name as string
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-950">
-      <div className="flex-1 p-4 sm:p-6 space-y-5 pb-24 lg:pb-6 max-w-4xl mx-auto w-full">
+    <div className="flex flex-col lg:flex-row min-h-full bg-white dark:bg-gray-950 items-start">
+      <div className="flex-1 p-4 sm:p-6 space-y-5 pb-24 lg:pb-6 max-w-4xl mx-auto w-full min-w-0">
         {/* ── Header: Back, Group Info, Invite ──────────────────── */}
         <div className="flex flex-col gap-4 mb-2">
           <div className="flex items-center justify-between">
@@ -1055,7 +1055,7 @@ export function GroupDetailPage() {
       </div>
 
       {/* Right sidebar — only on large screens */}
-      <div className="hidden lg:flex flex-col w-72 shrink-0 border-l border-gray-100 dark:border-gray-800 p-6 gap-5 overflow-y-auto">
+      <div className="hidden lg:flex flex-col w-72 shrink-0 border-l border-gray-100 dark:border-gray-800 p-6 gap-5 sticky top-0 h-max">
         {/* My balance */}
         <div className="card p-5 space-y-3">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
