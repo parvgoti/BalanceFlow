@@ -49,7 +49,16 @@ export function AuthCallbackPage() {
 
 export function ResetPasswordPage() {
   const navigate = useNavigate()
-  const [step, setStep] = useState<'email' | 'otp' | 'password'>('email')
+  const [step, setStep] = useState<'email' | 'otp' | 'password'>(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash
+      const search = window.location.search
+      if (hash.includes('type=recovery') || search.includes('type=recovery')) {
+        return 'password'
+      }
+    }
+    return 'email'
+  })
   
   const [email, setEmail] = useState('')
   const [otpToken, setOtpToken] = useState('')
@@ -63,16 +72,8 @@ export function ResetPasswordPage() {
   const [error, setError] = useState<string | null>(null)
   const [resendCooldown, setResendCooldown] = useState(0)
 
-  // Listen for recovery state or direct link click from email
+  // Listen for recovery state change from Supabase
   useEffect(() => {
-    const hash = window.location.hash
-    const search = window.location.search
-
-    // Check if user landed here via an email recovery link
-    if (hash.includes('type=recovery') || search.includes('type=recovery')) {
-      setStep('password')
-    }
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setStep('password')
