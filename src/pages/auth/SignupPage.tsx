@@ -38,7 +38,9 @@ export function SignupPage() {
     })
     if (error && error.message.includes('already registered')) {
       // It might be a ghost account from an invite
-      const { error: reqError } = await supabase.auth.resetPasswordForEmail(data.email)
+      const { error: reqError } = await supabase.auth.resetPasswordForEmail(data.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      })
       if (!reqError) {
         setSignupEmail(data.email)
         setSuccess(true)

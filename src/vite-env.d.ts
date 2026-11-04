@@ -11,3 +11,7 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+declare module '@vercel/speed-insights/react' {
+  export const SpeedInsights: React.ComponentType<any>
+}
