@@ -116,7 +116,7 @@ export function ResetPasswordPage() {
       const msg = reqError.message || ''
       if (msg.toLowerCase().includes('recovery email') || reqError.status === 500) {
         setError(
-          'Supabase email service could not send the recovery email. This usually happens when the built-in email rate limit (3/hr) is exceeded or Custom SMTP credentials are not configured in your Supabase project settings. Please wait a few minutes or verify your SMTP settings in the Supabase Dashboard.'
+          'Supabase email server connection failed or timed out. In your Supabase Dashboard → Authentication → SMTP Settings: ensure the SMTP Port is set to 587 (Port 465 / SSL hangs in Supabase GoTrue) and your credentials/sender domain are verified.'
         )
       } else {
         setError(msg)
